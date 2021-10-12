@@ -1,10 +1,7 @@
 """ Dataset and functions"""
 import logging
 import os
-from concurrent import futures
-from dataclasses import dataclass
-from numbers import Number
-from typing import List, Tuple, Callable, Union, Optional
+from typing import List, Tuple, Union, Optional
 
 import boto3
 import gcsfs
@@ -13,7 +10,6 @@ import pandas as pd
 import torch
 import xarray as xr
 
-from nowcasting_dataset import data_sources
 from nowcasting_dataset import utils as nd_utils
 from nowcasting_dataset.filesystem.utils import download_to_local, delete_all_files_in_temp_path
 from nowcasting_dataset.config.model import Configuration
