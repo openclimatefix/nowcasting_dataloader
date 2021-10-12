@@ -3,7 +3,9 @@
 
 name: Test against Nowcasting Dataset
 
-on: [repository_dispatch]
+on:
+  repository_dispatch:
+    types: [my-event]
 
 jobs:
   build:
