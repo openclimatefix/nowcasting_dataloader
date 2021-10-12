@@ -32,6 +32,7 @@ from nowcasting_dataset.consts import (
     NWP_Y_COORDS,
     SATELLITE_Y_COORDS,
     SATELLITE_X_COORDS,
+    DATETIME_FEATURE_NAMES,
 )
 from nowcasting_dataset.data_sources.satellite.satellite_data_source import SAT_VARIABLE_NAMES
 
