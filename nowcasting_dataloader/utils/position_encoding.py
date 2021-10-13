@@ -64,7 +64,7 @@ def encode_modalities(
 def encode_position(
     shape: List[int],
     positioning: str,
-    geospatial_coordinates: Optional[List[np.ndarray, np.ndarray]] = None,
+    geospatial_coordinates: Optional[List[np.ndarray]] = None,
     datetimes: Optional[List[datetime.datetime]] = None,
     geospatial_bounds: Optional[Dict[str, float]] = None,
     method: str = "fourier",
@@ -100,7 +100,7 @@ def encode_position(
 
 def encode_absolute_position(
     shape: List[int],
-    geospatial_coordinates: List[np.ndarray, np.ndarray],
+    geospatial_coordinates: List[np.ndarray],
     geospatial_bounds: Dict[str, float],
     datetimes,
     **kwargs,
@@ -185,7 +185,7 @@ def create_datetime_features(
     Converts a list of datetimes to day of year, hour of day sin and cos representation
 
     Args:
-        datetimes: List of datetimes
+        datetimes: List of list of datetimes for the examples in a batch
 
     Returns:
         Tuple of torch Tensors containing the hour of day sin,cos, and day of year sin,cos
