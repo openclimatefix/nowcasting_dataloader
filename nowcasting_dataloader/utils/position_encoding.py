@@ -14,7 +14,6 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
-import pandas as pd
 
 
 def encode_modalities(
@@ -60,71 +59,8 @@ def encode_modalities(
                 geospatial_bounds=geospatial_bounds,
             )
         return modalities_to_encode
-
-    # Build relative position encoding:
-    # Step 1: Find the total time range covered
-    # Step 1.5: Find smallest temporal interval
-    start_times = []
-    end_times = []
-    intervals = []
-    for key, dates in datetimes.items():
-        if len(dates) >= 2:
-            start_times.append(dates[0])
-            end_times.append(dates[-1])
-            intervals.append(dates[1] - dates[0])
-    interval = min(intervals)
-    start_time = min(start_times)
-    end_time = max(end_times)
-
-    # Step 2: Find the total spatial extant covered
-    # Step 2.5: Find the smallest spatial interval
-    distance = np.inf
-    number_of_pixels = 0
-    min_lat = np.inf
-    min_lon = np.inf
-    max_lat = -np.inf
-    max_lon = -np.inf
-    for key, lat_lon in geospatial_coordinates.items():
-        lat = lat_lon[0]
-        lon = lat_lon[1]
-        min_lat = lat[0] if lat[0] < min_lat else min_lat
-        max_lat = lat[-1] if lat[-1] > max_lat else max_lat
-        min_lon = lon[0] if lon[0] < min_lon else min_lon
-        max_lon = lat[-1] if lat[-1] > max_lon else max_lon
-        # Assumes each pixel is square
-        pixel_size = lat[1] - lat[0]
-        distance = pixel_size if pixel_size < distance else distance
-    geospatial_bounds = {"x_min": min_lat, "y_min": min_lon, "x_max": max_lat, "y_max": max_lon}
-    # Step 3: Build relative position encoding
-    # Step 3.5: Build the shape for this B x T x H x W -> Channels is ignored for this
-    batch_size = 1
-    number_of_timesteps = (
-        end_time - start_time
-    ) // interval  # Full time covered divided by the smallest interval
-    number_of_spatial_steps = (
-        max_lat - min_lat
-    ) // distance  # Full spatial extant divided by the smallest spatial interval
-    shape = (batch_size, number_of_timesteps, number_of_spatial_steps, number_of_spatial_steps)
-
-    # Generate "golden" position encoding
-
-    # To do this, create a fake data shape, datetimes, and geospatial coordinates to cover the new area
-    golden_datetimes = pd.date_range(start=start_time, end=end_time, freq=interval)
-    golden_lat = np.arange(start=min_lat, stop=max_lat, step=distance)
-    golden_lon = np.arange(start=min_lon, stop=max_lon, step=distance)
-    golden_geospatial = (golden_lat, golden_lon)
-    # Subselect from the golden encoding to each individual one
-    # Step 4: Return position encodings as new keys
-    # Have to go through each modality separately?
-    position_encoding = encode_position(
-        shape,
-        positioning=positioning,
-        geospatial_coordinates=golden_geospatial,
-        datetimes=golden_datetimes,
-        geospatial_bounds=geospatial_bounds,
-        **kwargs,
-    )
-    return modalities_to_encode
+    else:
+        raise NotImplementedError(f"Position encodings {positioning} is not implemented yet")
 
 
 def encode_position(
@@ -134,7 +70,6 @@ def encode_position(
     datetimes: Optional[List[datetime.datetime]] = None,
     geospatial_bounds: Optional[Dict[str, float]] = None,
     method: str = "fourier",
-    **kwargs,
 ) -> torch.Tensor:
     """
     This function wraps a variety of different methods for generating position features for given inputs.
@@ -155,97 +90,13 @@ def encode_position(
     assert method in [
         "fourier",
     ], AssertionError(f"method must be one of 'fourier', not '{method}'")
-    assert positioning in ["relative", "absolute", "both"], AssertionError(
+    assert positioning in ["absolute"], AssertionError(
         f"positioning must be one of 'relative', 'absolute' or 'both', not '{positioning}'"
     )
 
-    if positioning == "relative":
-        position_encoding = encode_relative_position(shape, **kwargs)
-    elif positioning == "absolute":
-        position_encoding = encode_absolute_position(
-            shape, geospatial_coordinates, geospatial_bounds, datetimes
-        )
-    else:
-        # Both position encodings
-        position_encoding = torch.cat(
-            [
-                encode_relative_position(shape),
-                encode_absolute_position(
-                    shape, geospatial_coordinates, geospatial_bounds, datetimes
-                ),
-            ],
-            dim=-1,
-        )
-    return position_encoding
-
-
-def subselect_position_encoding(
-    position_encoding: torch.Tensor,
-    encoding_datetimes,
-    encoding_geospatial_coordinates,
-    modality_to_encode,
-    modality_datetimes,
-    modality_geospatial_coordinates,
-) -> torch.Tensor:
-    """
-    Subselect from a common position encoding to create the position encoding for the given modality
-
-    Args:
-        position_encoding: The common position encoding for all modalities in the example, in [C, T, H, W] format
-        encoding_datetimes: The datetimes corresponding to the temporal part of the encoding
-        encoding_geospatial_coordinates: The geospatial coordinates corresponding to the spatial part of the encoding
-        modality_to_encode: The modality Tensor to encode
-        modality_datetimes: The datetimes for the temporal part of the Tensor
-        modality_geospatial_coordinates: The geospatial coordinates for the spatial part of the Tensor, optional if there is no spatial component
-
-    Returns:
-        The position encoding for that modality
-    """
-    # Step 1: Get temporal start and end
-    # Step 2: Get temporal interval
-    # TODO: Maybe take from Nowcasting Dataset time intersection?
-    start_time_index = 0
-    end_time_index = 0
-    time_step_size = 1
-    # Step 3: Get Spatial Start and End, if exists
-    # Step 4: Get Spatial distance, if exists
-    start_spatial_index = None
-    end_spatial_index = None
-    spatial_step_size = None
-    # Step 5: Subselect from position encoding Tensor
-    # Step 6: Ensure subselected Tensor matches Modality_to_encode in all dimensions other than Channels
-    if start_spatial_index is None:  # No spatial component
-        # Results in a [C, new_T] array
-        subselected_position_encoding = position_encoding[
-            :, start_time_index:end_time_index:time_step_size, 0, 0
-        ]
-    else:
-        subselected_position_encoding = position_encoding[
-            :,
-            start_time_index:end_time_index:time_step_size,
-            start_spatial_index:end_spatial_index:spatial_step_size,
-            start_spatial_index:end_spatial_index:spatial_step_size,
-        ]
-    return subselected_position_encoding
-
-
-def encode_relative_position(shape: List[int], **kwargs) -> torch.Tensor:
-    """
-    Encode the relative position of the pixels/voxels
-
-    This relative position is in relation the the union of all the input modalities. This means, for example, if
-    the inputs are the last 4 hourly NWPs, and the last 6 5-minutely satellite imagery, the relative positioning
-    will be generated for the last 4 hours at 5 minutely intervals, so that it can capture both the NWP and satellite
-    imagery in the same position encoding.
-
-    Args:
-        shape:
-
-    Returns:
-        The relative position encoding as a torch Tensor
-
-    """
-    position_encoding = encode_fouier_position(1, shape, **kwargs)
+    position_encoding = encode_absolute_position(
+        shape, geospatial_coordinates, geospatial_bounds, datetimes
+    )
     return position_encoding
 
 
