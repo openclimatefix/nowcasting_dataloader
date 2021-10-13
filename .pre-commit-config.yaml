@@ -1,7 +1,7 @@
 default_language_version:
   python: python3.9
 
-files: ^nowcasting_dataloader/
+# files: ^nowcasting_dataloader/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
