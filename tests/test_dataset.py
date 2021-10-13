@@ -1,14 +1,9 @@
-from nowcasting_dataloader.dataloader import SatFlowDataset
+from nowcasting_dataloader.dataloaders import SatFlowDataset
 from nowcasting_dataset.consts import (
     SATELLITE_DATA,
-    SATELLITE_X_COORDS,
-    SATELLITE_Y_COORDS,
     SATELLITE_DATETIME_INDEX,
     NWP_DATA,
-    NWP_Y_COORDS,
-    NWP_X_COORDS,
     NWP_TARGET_TIME,
-    DATETIME_FEATURE_NAMES,
 )
 import os
 from nowcasting_dataset.config.load import load_yaml_configuration
