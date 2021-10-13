@@ -121,9 +121,7 @@ def encode_absolute_position(
     Returns:
         The absolute position encoding for the given shape
     """
-    hour_of_day_sin, hour_of_day_cos, day_of_year_sin, day_of_year_cos = create_datetime_features(
-        datetimes
-    )
+    datetime_features = create_datetime_features(datetimes)
 
     # Fourier Features of absolute position
     encoded_latlon = normalize_geospatial_coordinates(
@@ -131,20 +129,14 @@ def encode_absolute_position(
     )
 
     # Combine time and space features
-    # Time features should be in shape [Channels,Timestep]
-    # Space features should be in [Channels, Height, Width]
-    # So can just concat along channels, after expanding time features to Height, Width, and Space along Time
-    hour_of_day_sin = einops.repeat(hour_of_day_sin, "b c t -> b c t h w", h=shape[-2], w=shape[-1])
-    hour_of_day_cos = einops.repeat(hour_of_day_cos, "b c t -> b c t h w", h=shape[-2], w=shape[-1])
-    day_of_year_sin = einops.repeat(day_of_year_sin, "b c t -> b c t h w", h=shape[-2], w=shape[-1])
-    day_of_year_cos = einops.repeat(day_of_year_cos, "b c t -> b c t h w", h=shape[-2], w=shape[-1])
-    # Now do for latlon encoding
-    encoded_latlon = einops.repeat(encoded_latlon, "b c h w -> b c t h w", t=shape[1])
+    to_concat = [einops.repeat(encoded_latlon, "b c h w -> b c t h w", t=shape[1])]
+    for date_feature in datetime_features:
+        to_concat.append(
+            einops.repeat(date_feature, "b c t -> b c t h w", h=shape[-2], w=shape[-1])
+        )
 
     # Now combined into one large encoding
-    absolute_position_encoding = torch.cat(
-        [encoded_latlon, hour_of_day_sin, hour_of_day_cos, day_of_year_sin, day_of_year_cos], dim=1
-    )
+    absolute_position_encoding = torch.cat(to_concat, dim=1)
 
     return absolute_position_encoding
 
@@ -188,7 +180,7 @@ def normalize_geospatial_coordinates(
 
 def create_datetime_features(
     datetimes: List[List[datetime.datetime]],
-) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> List[torch.Tensor]:
     """
     Converts a list of datetimes to day of year, hour of day sin and cos representation
 
@@ -208,16 +200,17 @@ def create_datetime_features(
             days.append((index.timetuple().tm_yday / 365))
         hour_of_day.append(hours)
         day_of_year.append(days)
-    hour_of_day = torch.as_tensor(hour_of_day)
-    day_of_year = torch.as_tensor(day_of_year)
-    hour_radians = hour_of_day * 2 * np.pi
-    day_radians = day_of_year * 2 * np.pi
-    hour_of_day_sin = torch.sin(hour_radians)
-    hour_of_day_cos = torch.cos(hour_radians)
-    day_of_year_sin = torch.sin(day_radians)
-    day_of_year_cos = torch.cos(day_radians)
 
-    return hour_of_day_sin, hour_of_day_cos, day_of_year_sin, day_of_year_cos
+    outputs = []
+    for index in [hour_of_day, day_of_year]:
+        index = torch.as_tensor(index)
+        radians = index * 2 * np.pi
+        index_sin = torch.sin(radians)
+        index_cos = torch.cos(radians)
+        outputs.append(index_sin)
+        outputs.append(index_cos)
+
+    return outputs
 
 
 def encode_fouier_position(
