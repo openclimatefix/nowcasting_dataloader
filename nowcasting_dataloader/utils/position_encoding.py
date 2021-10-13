@@ -14,13 +14,15 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+import pandas as pd
 
 
 def encode_modalities(
     positioning: str,
     modalities_to_encode: Dict[str, torch.Tensor],
     datetimes: Dict[str, List[datetime.datetime]],
-    geospatial_coordinates: Dict[str, Tuple[List[int], List[int]]],
+    geospatial_coordinates: Dict[str, Tuple[List[float], List[float]]],
+    geospatial_bounds: Dict[str, float],
     **kwargs,
 ) -> dict:
     """
@@ -36,7 +38,8 @@ def encode_modalities(
         positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, optional, used to determine smallest spatial step needed
+        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, optional, used to determine smallest spatial step needed, in OSGB coordinates
+        geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
         **kwargs:
 
     Returns:
@@ -47,6 +50,15 @@ def encode_modalities(
     )
     # Build Absolute position encoding for each modality
     if positioning == "absolute":
+        # If absolute, can just skip all the computing for relative encoding
+        for key in modalities_to_encode.keys():
+            modalities_to_encode[key + "_position_encoding"] = encode_position(
+                modalities_to_encode[key].shape,
+                positioning=positioning,
+                geospatial_coordinates=geospatial_coordinates[key],
+                datetimes=datetimes[key],
+                geospatial_bounds=geospatial_bounds,
+            )
         return modalities_to_encode
 
     # Build relative position encoding:
@@ -82,7 +94,7 @@ def encode_modalities(
         # Assumes each pixel is square
         pixel_size = lat[1] - lat[0]
         distance = pixel_size if pixel_size < distance else distance
-
+    geospatial_bounds = {"x_min": min_lat, "y_min": min_lon, "x_max": max_lat, "y_max": max_lon}
     # Step 3: Build relative position encoding
     # Step 3.5: Build the shape for this B x T x H x W -> Channels is ignored for this
     batch_size = 1
@@ -93,15 +105,32 @@ def encode_modalities(
         max_lat - min_lat
     ) // distance  # Full spatial extant divided by the smallest spatial interval
     shape = (batch_size, number_of_timesteps, number_of_spatial_steps, number_of_spatial_steps)
-    # Step 4: Return position encodings as new keys
 
+    # Generate "golden" position encoding
+
+    # To do this, create a fake data shape, datetimes, and geospatial coordinates to cover the new area
+    golden_datetimes = pd.date_range(start=start_time, end=end_time, freq=interval)
+    golden_lat = np.arange(start=min_lat, stop=max_lat, step=distance)
+    golden_lon = np.arange(start=min_lon, stop=max_lon, step=distance)
+    golden_geospatial = (golden_lat, golden_lon)
+    # Subselect from the golden encoding to each individual one
+    # Step 4: Return position encodings as new keys
+    # Have to go through each modality separately?
+    position_encoding = encode_position(
+        shape,
+        positioning=positioning,
+        geospatial_coordinates=golden_geospatial,
+        datetimes=golden_datetimes,
+        geospatial_bounds=geospatial_bounds,
+        **kwargs,
+    )
     return modalities_to_encode
 
 
 def encode_position(
     shape: List[int],
     positioning: str,
-    geospatial_coordinates: Optional[Tuple[List[int], List[int]]] = None,
+    geospatial_coordinates: Optional[Tuple[List[float], List[float]]] = None,
     datetimes: Optional[List[datetime.datetime]] = None,
     geospatial_bounds: Optional[Dict[str, float]] = None,
     method: str = "fourier",
