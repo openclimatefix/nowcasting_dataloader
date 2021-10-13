@@ -1,10 +1,8 @@
 from nowcasting_dataloader.utils.position_encoding import encode_position, encode_modalities, encode_absolute_position, \
     create_datetime_features, normalize_geospatial_coordinates
 import pytest
-import datetime
 import pandas as pd
 import torch
-import numpy as np
 
 
 def test_datetime_feature_creation():
@@ -22,7 +20,16 @@ def test_datetime_feature_creation():
 
 
 def test_geospatial_normalization():
-    pass
+    geospatial_bounds = {"x_min": -2900., "y_min": -20, "x_max": 230000, "y_max": 670430}
+    geospatial_coordinates = []
+    x = torch.sort(torch.rand(32, 128) * 9)[0]
+    y = torch.sort(torch.rand(32, 128) * 120, descending=True)[0]
+    geospatial_coordinates.append(x)
+    geospatial_coordinates.append(y)
+    normalized_coordinates = normalize_geospatial_coordinates(geospatial_coordinates, geospatial_bounds=geospatial_bounds, max_freq=64,num_bands=128)
+    assert normalized_coordinates.size() == (32, 128, 128, 514)
+    assert torch.min(normalized_coordinates) >= -1.0
+    assert torch.max(normalized_coordinates) <= 1.0
 
 
 def test_encode_absolute_position():

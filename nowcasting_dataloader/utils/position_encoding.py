@@ -169,12 +169,20 @@ def normalize_geospatial_coordinates(
     # Now those are between 0 and 1, want between -1 and 1
     geospatial_coordinates[0] = geospatial_coordinates[0] * 2 - 1
     geospatial_coordinates[1] = geospatial_coordinates[1] * 2 - 1
-
     # Now create a grid of the coordinates
-    pos = torch.stack(torch.meshgrid(*geospatial_coordinates), dim=-1)
+    # Have to do it for each individual example in the batch, and zip together x and y for it
+    to_concat = []
+    for idx in range(len(geospatial_coordinates[0])):
+        x = geospatial_coordinates[0][idx]
+        y = geospatial_coordinates[1][idx]
+        grid = torch.meshgrid(x, y)
+        pos = torch.stack(grid, dim=-1)
+        encoded_position = fourier_encode(pos, **kwargs)
+        encoded_position = einops.rearrange(encoded_position, "... n d -> ... (n d)")
+        to_concat.append(encoded_position)
 
     # And now convert to Fourier features, based off the absolute positions of the coordinates
-    encoded_position = fourier_encode(pos, **kwargs)
+    encoded_position = torch.stack(to_concat, dim=0)
     return encoded_position
 
 
