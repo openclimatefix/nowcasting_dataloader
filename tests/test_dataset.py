@@ -1,4 +1,4 @@
-from satflow.data.datasets import SatFlowDataset
+from nowcasting_dataloader.dataloader import SatFlowDataset
 from nowcasting_dataset.consts import (
     SATELLITE_DATA,
     SATELLITE_X_COORDS,
