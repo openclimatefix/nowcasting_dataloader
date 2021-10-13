@@ -12,7 +12,7 @@ setup(
     name="nowcasting_dataloader",
     version="0.0.2",
     license="MIT",
-    description="Nowcasting Dataset",
+    description="Nowcasting Dataloader",
     author="Jack Kelly, Peter Dudfield, Jacob Bieker",
     author_email="info@openclimatefix.org",
     company="Open Climate Fix Ltd",
