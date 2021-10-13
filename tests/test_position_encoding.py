@@ -89,6 +89,27 @@ def test_encode_position(positioning):
     assert torch.max(position_encoding) <= 1.0
 
 
+def test_encode_modalities():
+    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
+    encoded_position = encode_modalities(
+        modalities_to_encode={"NWP": torch.randn(12, 10, 13, 64, 64)},
+        datetimes={"NWP": datetimes},
+        geospatial_coordinates={"NWP": geospatial_coordinates},
+        geospatial_bounds=geospatial_bounds,
+        positioning="absolute",
+        method="fourier",
+        max_freq=128,
+        num_bands=32,
+    )
+    assert "NWP" in encoded_position.keys()
+    assert "NWP_position_encoding" in encoded_position.keys()
+    assert encoded_position["NWP_position_encoding"].size() == (12, 650, 13, 64, 64)
+    combined = torch.cat(
+        [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
+    )
+    assert combined.size() == (12, 660, 13, 64, 64)
+
+
 @pytest.mark.parametrize("positioning", ["relative", "both"])
 def test_not_implemented_option(positioning):
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()

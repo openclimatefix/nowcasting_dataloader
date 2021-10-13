@@ -49,15 +49,21 @@ def encode_modalities(
     # Build Absolute position encoding for each modality
     if positioning == "absolute":
         # If absolute, can just skip all the computing for relative encoding
+        position_encodings = {}
         for key in modalities_to_encode.keys():
-            modalities_to_encode[key + "_position_encoding"] = encode_position(
-                modalities_to_encode[key].shape,
+            position_encodings[key + "_position_encoding"] = encode_position(
+                [
+                    modalities_to_encode[key].shape[0],
+                    *modalities_to_encode[key].shape[2:],
+                ],  # We want to remove the channel dimension, as that's not relevant here
                 positioning=positioning,
                 geospatial_coordinates=geospatial_coordinates[key],
                 datetimes=datetimes[key],
                 geospatial_bounds=geospatial_bounds,
                 **kwargs,
             )
+        # Update original dictionary
+        modalities_to_encode.update(position_encodings)
         return modalities_to_encode
     else:
         raise NotImplementedError(f"Position encodings {positioning} is not implemented yet")
