@@ -22,6 +22,7 @@ def encode_modalities(
     datetimes: Dict[str, List[datetime.datetime]],
     geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
     geospatial_bounds: Dict[str, float],
+    **kwargs,
 ) -> dict:
     """
     Create a consistent position encoding and encode the positions of the different modalities in time and space
@@ -55,6 +56,7 @@ def encode_modalities(
                 geospatial_coordinates=geospatial_coordinates[key],
                 datetimes=datetimes[key],
                 geospatial_bounds=geospatial_bounds,
+                **kwargs,
             )
         return modalities_to_encode
     else:
