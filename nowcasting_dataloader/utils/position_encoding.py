@@ -20,9 +20,8 @@ def encode_modalities(
     positioning: str,
     modalities_to_encode: Dict[str, torch.Tensor],
     datetimes: Dict[str, List[datetime.datetime]],
-    geospatial_coordinates: Dict[str, Tuple[List[float], List[float]]],
+    geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
     geospatial_bounds: Dict[str, float],
-    **kwargs,
 ) -> dict:
     """
     Create a consistent position encoding and encode the positions of the different modalities in time and space
@@ -39,10 +38,9 @@ def encode_modalities(
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
         geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, optional, used to determine smallest spatial step needed, in OSGB coordinates
         geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
-        **kwargs:
 
     Returns:
-        Input modali
+        Input modality dictionary with extra keys added containing the absolute position encoding of the examples
     """
     assert positioning in ["relative", "absolute", "both"], AssertionError(
         f"positioning must be one of 'relative', 'absolute' or 'both', not '{positioning}'"
@@ -66,7 +64,7 @@ def encode_modalities(
 def encode_position(
     shape: List[int],
     positioning: str,
-    geospatial_coordinates: Optional[Tuple[List[float], List[float]]] = None,
+    geospatial_coordinates: Optional[List[np.ndarray, np.ndarray]] = None,
     datetimes: Optional[List[datetime.datetime]] = None,
     geospatial_bounds: Optional[Dict[str, float]] = None,
     method: str = "fourier",
@@ -82,7 +80,7 @@ def encode_position(
         datetimes: time of day and date for each of the timesteps in the shape, unused if using relative positioning only
         method: Method of the encoding, either 'fourier' for Fourier Features
         positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
-        geospatial_bounds: The bounds of the geospatial area covered, in x_min, y_min, x_max, y_max ordering, only used for absolute coordinates
+        geospatial_bounds: The bounds of the geospatial area covered, in a dict with the keys 'x_min', 'y_min', 'x_max', 'y_max'
 
     Returns:
         The position encodings for all items in the batch
@@ -101,7 +99,11 @@ def encode_position(
 
 
 def encode_absolute_position(
-    shape: List[int], geospatial_coordinates, geospatial_bounds, datetimes, **kwargs
+    shape: List[int],
+    geospatial_coordinates: List[np.ndarray, np.ndarray],
+    geospatial_bounds: Dict[str, float],
+    datetimes,
+    **kwargs,
 ) -> torch.Tensor:
     """
     Encodes the absolute position of the pixels/voxels in time and space
@@ -113,6 +115,7 @@ def encode_absolute_position(
         shape: Shape to encode positions for
         geospatial_coordinates: The geospatial coordinates, in OSGB format
         datetimes: Time of day and date as a list of datetimes, one for each timestep
+        geospatial_bounds: The geospatial bounds of the area where the examples come from, e.g. the coordinates of the area covered by the SEVIRI RSS image
         **kwargs:
 
     Returns:
@@ -147,26 +150,28 @@ def encode_absolute_position(
 
 
 def normalize_geospatial_coordinates(
-    geospatial_coordinates, geospatial_bounds, **kwargs
+    geospatial_coordinates, geospatial_bounds: Dict[str, float], **kwargs
 ) -> torch.Tensor:
     """
     Normalize the geospatial coordinates by the max extant to keep everything between -1 and 1, in sin and cos
+
+    This should work on a batch level, as the geospatial bounds should be the same for every example in the batch
 
     Args:
         geospatial_coordinates: The coordinates for the pixels in the image
         geospatial_bounds: The maximum extant
 
     Returns:
-        The normalized geospatial coordinates, rescaled to between -1 and 1
+        The normalized geospatial coordinates, rescaled to between -1 and 1 for the whole extant of the training area
 
     """
     # Normalize the X first
-    geospatial_coordinates[0] = (geospatial_coordinates[0] - geospatial_bounds[0]) / (
-        geospatial_bounds[2] - geospatial_bounds[0]
+    geospatial_coordinates[0] = (geospatial_coordinates[0] - geospatial_bounds["x_min"]) / (
+        geospatial_bounds["x_max"] - geospatial_bounds["x_min"]
     )
     # Normalize the Y second
-    geospatial_coordinates[1] = (geospatial_coordinates[1] - geospatial_bounds[1]) / (
-        geospatial_bounds[3] - geospatial_bounds[1]
+    geospatial_coordinates[1] = (geospatial_coordinates[1] - geospatial_bounds["y_min"]) / (
+        geospatial_bounds["y_max"] - geospatial_bounds["y_min"]
     )
 
     # Now those are between 0 and 1, want between -1 and 1
@@ -182,7 +187,7 @@ def normalize_geospatial_coordinates(
 
 
 def create_datetime_features(
-    datetimes: List[datetime.datetime],
+    datetimes: List[List[datetime.datetime]],
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Converts a list of datetimes to day of year, hour of day sin and cos representation
@@ -195,9 +200,14 @@ def create_datetime_features(
     """
     hour_of_day = []
     day_of_year = []
-    for index in datetimes:
-        hour_of_day.append((index.hour + (index.minute / 60) / 24))
-        day_of_year.append((index.timetuple().tm_yday / 365))
+    for batch_idx in range(len(datetimes)):
+        hours = []
+        days = []
+        for index in datetimes[batch_idx]:
+            hours.append((index.hour + (index.minute / 60) / 24))
+            days.append((index.timetuple().tm_yday / 365))
+        hour_of_day.append(hours)
+        day_of_year.append(days)
     hour_of_day = torch.as_tensor(hour_of_day)
     day_of_year = torch.as_tensor(day_of_year)
     hour_radians = hour_of_day * 2 * np.pi
