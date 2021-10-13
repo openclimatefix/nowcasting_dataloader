@@ -233,9 +233,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
 
 class SatFlowDataset(NetCDFDataset):
-    """Loads data saved by the `prepare_ml_training_data.py` script.
-    Adapted from predict_pv_yield
-    """
+    """Loads data saved by the `prepare_ml_training_data.py` script."""
 
     def __init__(
         self,
@@ -257,16 +255,19 @@ class SatFlowDataset(NetCDFDataset):
         + list(DATETIME_FEATURE_NAMES),
         history_minutes: int = 30,
         forecast_minutes: int = 60,
-        combine_inputs: bool = False,
     ):
         """
+        Extension to NetCDFDataset for specific Satflow model training
+
         Args:
-          n_batches: Number of batches available on disk.
-          src_path: The full path (including 'gs://') to the data on
-            Google Cloud storage.
-          tmp_path: The full path to the local temporary directory
-            (on a local filesystem).
-        batch_size: Batch size, if requested, will subset data along batch dimension
+            n_batches: Number of batches
+            src_path: The source path for the training files
+            tmp_path: The temporary path to use if streaming from a remote filesystem
+            configuration: Nowcasting Configuration to use
+            cloud: Which cloud is being used, either 'gcp', 'aws', or 'local' for local filesystem
+            required_keys: What keys are required in the final batch
+            history_minutes: Number of history minutes to use
+            forecast_minutes: Number of forecast minutes to use
         """
         super().__init__(
             n_batches,
@@ -280,13 +281,12 @@ class SatFlowDataset(NetCDFDataset):
         )
         # SatFlow specific changes, i.e. which timestep to split on
         self.required_keys = list(required_keys)
-        self.combine_inputs = combine_inputs
         self.current_timestep_index = (history_minutes // 5) + 1
         self.current_timestep_index_30 = (history_minutes // 30) + 1
 
     def __getitem__(self, batch_idx: int) -> Tuple[dict, dict]:
         """
-        SatFlow extension for the dataloader, splitting up the past and future images/data to give to the model
+        Satflow extension for the dataloader, splitting up the past and future images/data to give to the model
 
         Args:
             batch_idx: Batch ID to load
