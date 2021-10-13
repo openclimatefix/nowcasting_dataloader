@@ -16,8 +16,8 @@ def test_dataset():
     config = load_yaml_configuration(filename)
     train_dataset = SatFlowDataset(
         1,
-        "tests/",
-        "tests/",
+        "tests/batch/",
+        "tests/batch/",
         cloud="local",
         required_keys=[
             NWP_DATA,
