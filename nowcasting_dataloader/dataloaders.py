@@ -284,7 +284,16 @@ class SatFlowDataset(NetCDFDataset):
         self.current_timestep_index = (history_minutes // 5) + 1
         self.current_timestep_index_30 = (history_minutes // 30) + 1
 
-    def __getitem__(self, batch_idx: int):
+    def __getitem__(self, batch_idx: int) -> Tuple[dict, dict]:
+        """
+        SatFlow extension for the dataloader, splitting up the past and future images/data to give to the model
+
+        Args:
+            batch_idx: Batch ID to load
+
+        Returns:
+            Tuple of dicts of torch.Tensors holding the data
+        """
         batch = super().__getitem__(batch_idx)
 
         # Need to partition out past and future sat images here, along with the rest of the data
