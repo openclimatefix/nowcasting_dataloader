@@ -1,6 +1,7 @@
 default_language_version:
   python: python3.9
 
+files: ^nowcasting_dataloader/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
@@ -25,3 +26,17 @@ repos:
     hooks:
       - id: prettier
         types: [yaml]
+
+  # Google docstring
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.1.1
+    hooks:
+      - id: pydocstyle
+        args:
+          [
+            --convention,
+            "google",
+            --add-ignore,
+            "D200,D210,D212,D415",
+            "nowcasting_dataloader",
+          ]
