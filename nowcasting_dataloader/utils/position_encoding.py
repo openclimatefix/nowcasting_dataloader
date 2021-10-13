@@ -179,6 +179,31 @@ def encode_position(
     return position_encoding
 
 
+def subselect_position_encoding(
+    position_encoding: torch.Tensor,
+    encoding_datetimes,
+    encoding_geospatial_coordinates,
+    modality_to_encode,
+    modality_datetimes,
+    modality_geospatial_coordinates,
+):
+    """
+    Subselect from a common position encoding to create the position encoding for the given modality
+
+    Args:
+        position_encoding: The common position encoding for all modalities in the example
+        encoding_datetimes: The datetimes corresponding to the temporal part of the encoding
+        encoding_geospatial_coordinates: The geospatial coordinates corresponding to the spatial part of the encoding
+        modality_to_encode: The modality Tensor to encode
+        modality_datetimes: The datetimes for the temporal part of the Tensor
+        modality_geospatial_coordinates: The geospatial coordinates for the spatial part of the Tensor, optional if there is no spatial component
+
+    Returns:
+        The position encoding for that modality
+    """
+    pass
+
+
 def encode_relative_position(shape: List[int], **kwargs) -> torch.Tensor:
     """
     Encode the relative position of the pixels/voxels
