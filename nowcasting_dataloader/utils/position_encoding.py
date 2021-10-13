@@ -68,6 +68,7 @@ def encode_position(
     datetimes: Optional[List[datetime.datetime]] = None,
     geospatial_bounds: Optional[Dict[str, float]] = None,
     method: str = "fourier",
+    **kwargs,
 ) -> torch.Tensor:
     """
     This function wraps a variety of different methods for generating position features for given inputs.
@@ -93,7 +94,7 @@ def encode_position(
     )
 
     position_encoding = encode_absolute_position(
-        shape, geospatial_coordinates, geospatial_bounds, datetimes
+        shape, geospatial_coordinates, geospatial_bounds, datetimes, **kwargs
     )
     return position_encoding
 
