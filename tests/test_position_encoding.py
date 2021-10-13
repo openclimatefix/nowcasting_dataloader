@@ -30,3 +30,6 @@ def test_5min_30min_encoding():
 
 def test_satellite_pv_encoding():
     pass
+
+def test_subselect_encoding():
+    pass

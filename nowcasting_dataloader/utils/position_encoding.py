@@ -186,12 +186,12 @@ def subselect_position_encoding(
     modality_to_encode,
     modality_datetimes,
     modality_geospatial_coordinates,
-):
+) -> torch.Tensor:
     """
     Subselect from a common position encoding to create the position encoding for the given modality
 
     Args:
-        position_encoding: The common position encoding for all modalities in the example
+        position_encoding: The common position encoding for all modalities in the example, in [C, T, H, W] format
         encoding_datetimes: The datetimes corresponding to the temporal part of the encoding
         encoding_geospatial_coordinates: The geospatial coordinates corresponding to the spatial part of the encoding
         modality_to_encode: The modality Tensor to encode
@@ -201,7 +201,32 @@ def subselect_position_encoding(
     Returns:
         The position encoding for that modality
     """
-    pass
+    # Step 1: Get temporal start and end
+    # Step 2: Get temporal interval
+    # TODO: Maybe take from Nowcasting Dataset time intersection?
+    start_time_index = 0
+    end_time_index = 0
+    time_step_size = 1
+    # Step 3: Get Spatial Start and End, if exists
+    # Step 4: Get Spatial distance, if exists
+    start_spatial_index = None
+    end_spatial_index = None
+    spatial_step_size = None
+    # Step 5: Subselect from position encoding Tensor
+    # Step 6: Ensure subselected Tensor matches Modality_to_encode in all dimensions other than Channels
+    if start_spatial_index is None:  # No spatial component
+        # Results in a [C, new_T] array
+        subselected_position_encoding = position_encoding[
+            :, start_time_index:end_time_index:time_step_size, 0, 0
+        ]
+    else:
+        subselected_position_encoding = position_encoding[
+            :,
+            start_time_index:end_time_index:time_step_size,
+            start_spatial_index:end_spatial_index:spatial_step_size,
+            start_spatial_index:end_spatial_index:spatial_step_size,
+        ]
+    return subselected_position_encoding
 
 
 def encode_relative_position(shape: List[int], **kwargs) -> torch.Tensor:
