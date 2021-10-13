@@ -212,6 +212,7 @@ def subselect_position_encoding(
     start_spatial_index = None
     end_spatial_index = None
     spatial_step_size = None
+
     # Step 5: Subselect from position encoding Tensor
     # Step 6: Ensure subselected Tensor matches Modality_to_encode in all dimensions other than Channels
     if start_spatial_index is None:  # No spatial component
@@ -220,6 +221,7 @@ def subselect_position_encoding(
             :, start_time_index:end_time_index:time_step_size, 0, 0
         ]
     else:
+        # Results in a [C, new_T, new_H, new_W] array
         subselected_position_encoding = position_encoding[
             :,
             start_time_index:end_time_index:time_step_size,
