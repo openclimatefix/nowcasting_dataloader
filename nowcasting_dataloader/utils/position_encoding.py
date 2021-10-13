@@ -20,7 +20,7 @@ def encode_modalities(
     positioning: str,
     modalities_to_encode: Dict[str, torch.Tensor],
     datetimes: Dict[str, List[datetime.datetime]],
-    resolutions: Dict[str, float] = None,
+    geospatial_coordinates: Dict[str, Tuple[List[int], List[int]]],
     **kwargs,
 ) -> dict:
     """
@@ -30,11 +30,13 @@ def encode_modalities(
     instead of appending the position encoding in case the position encoding needs to be used for the query to the
     Perceiver IO model
 
+    This code assumes that there is at least 2 timesteps of at least one modality to be encoded
+
     Args:
         positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        resolutions: Dict of physical resolutions for each pixel in the input, optional, used to determine smallest spatial step needed, if None, assumes all pixels cover the same physical size
+        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, optional, used to determine smallest spatial step needed
         **kwargs:
 
     Returns:
@@ -45,13 +47,52 @@ def encode_modalities(
     )
     # Build Absolute position encoding for each modality
     if positioning == "absolute":
-        pass
-    # Step 1: Find the total time range covered
+        return modalities_to_encode
 
+    # Build relative position encoding:
+    # Step 1: Find the total time range covered
     # Step 1.5: Find smallest temporal interval
+    start_times = []
+    end_times = []
+    intervals = []
+    for key, dates in datetimes.items():
+        if len(dates) >= 2:
+            start_times.append(dates[0])
+            end_times.append(dates[-1])
+            intervals.append(dates[1] - dates[0])
+    interval = min(intervals)
+    start_time = min(start_times)
+    end_time = max(end_times)
+
     # Step 2: Find the total spatial extant covered
     # Step 2.5: Find the smallest spatial interval
+    distance = np.inf
+    number_of_pixels = 0
+    min_lat = np.inf
+    min_lon = np.inf
+    max_lat = -np.inf
+    max_lon = -np.inf
+    for key, lat_lon in geospatial_coordinates.items():
+        lat = lat_lon[0]
+        lon = lat_lon[1]
+        min_lat = lat[0] if lat[0] < min_lat else min_lat
+        max_lat = lat[-1] if lat[-1] > max_lat else max_lat
+        min_lon = lon[0] if lon[0] < min_lon else min_lon
+        max_lon = lat[-1] if lat[-1] > max_lon else max_lon
+        # Assumes each pixel is square
+        pixel_size = lat[1] - lat[0]
+        distance = pixel_size if pixel_size < distance else distance
+
     # Step 3: Build relative position encoding
+    # Step 3.5: Build the shape for this B x T x H x W -> Channels is ignored for this
+    batch_size = 1
+    number_of_timesteps = (
+        end_time - start_time
+    ) // interval  # Full time covered divided by the smallest interval
+    number_of_spatial_steps = (
+        max_lat - min_lat
+    ) // distance  # Full spatial extant divided by the smallest spatial interval
+    shape = (batch_size, number_of_timesteps, number_of_spatial_steps, number_of_spatial_steps)
     # Step 4: Return position encodings as new keys
 
     return modalities_to_encode
