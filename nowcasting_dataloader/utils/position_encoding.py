@@ -7,7 +7,6 @@ These encodings can be:
 
 These encodings can also be performed with:
 - Fourier Features, based off what is done in PerceiverIO
-- Coordinates, based off the idea from Coordinate Convolutions
 """
 import numpy as np
 import torch
@@ -15,6 +14,47 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+
+
+def encode_modalities(
+    positioning: str,
+    modalities_to_encode: Dict[str, torch.Tensor],
+    datetimes: Dict[str, List[datetime.datetime]],
+    resolutions: Dict[str, float] = None,
+    **kwargs,
+) -> dict:
+    """
+    Create a consistent position encoding and encode the positions of the different modalities in time and space
+
+    This position encoding is added as new keys to the dictionary containing the modalities to encode. This is done
+    instead of appending the position encoding in case the position encoding needs to be used for the query to the
+    Perceiver IO model
+
+    Args:
+        positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
+        modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
+        datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
+        resolutions: Dict of physical resolutions for each pixel in the input, optional, used to determine smallest spatial step needed, if None, assumes all pixels cover the same physical size
+        **kwargs:
+
+    Returns:
+        Input modali
+    """
+    assert positioning in ["relative", "absolute", "both"], AssertionError(
+        f"positioning must be one of 'relative', 'absolute' or 'both', not '{positioning}'"
+    )
+    # Build Absolute position encoding for each modality
+    if positioning == "absolute":
+        pass
+    # Step 1: Find the total time range covered
+
+    # Step 1.5: Find smallest temporal interval
+    # Step 2: Find the total spatial extant covered
+    # Step 2.5: Find the smallest spatial interval
+    # Step 3: Build relative position encoding
+    # Step 4: Return position encodings as new keys
+
+    return modalities_to_encode
 
 
 def encode_position(
@@ -73,6 +113,11 @@ def encode_relative_position(shape: List[int], **kwargs) -> torch.Tensor:
     """
     Encode the relative position of the pixels/voxels
 
+    This relative position is in relation the the union of all the input modalities. This means, for example, if
+    the inputs are the last 4 hourly NWPs, and the last 6 5-minutely satellite imagery, the relative positioning
+    will be generated for the last 4 hours at 5 minutely intervals, so that it can capture both the NWP and satellite
+    imagery in the same position encoding.
+
     Args:
         shape:
 
@@ -89,6 +134,9 @@ def encode_absolute_position(
 ) -> torch.Tensor:
     """
     Encodes the absolute position of the pixels/voxels in time and space
+
+    This should be done per-modality and can be thought of as the relative position of the input modalities across a
+    given year and the area of the Earth covered by all the examples.
 
     Args:
         shape: Shape to encode positions for
