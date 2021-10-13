@@ -33,7 +33,21 @@ def test_geospatial_normalization():
 
 
 def test_encode_absolute_position():
-    pass
+    # Generate fake datetime data for the whole year
+    datetimes = []
+    for month in range(1,12):
+        datetimes.append(pd.date_range(start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq="5min"))
+    datetimes.append(pd.date_range(start=f"2020-12-31 22:55", end=f"2020-12-31 23:55", freq="5min"))
+    geospatial_bounds = {"x_min": -2900., "y_min": -20, "x_max": 230000, "y_max": 670430}
+    geospatial_coordinates = []
+    x = torch.sort(torch.rand(12, 64) * 9)[0]
+    y = torch.sort(torch.rand(12, 64) * 120, descending=True)[0]
+    geospatial_coordinates.append(x)
+    geospatial_coordinates.append(y)
+    absolute_position_encoding = encode_absolute_position(shape=(12, 13, 64, 64), geospatial_bounds=geospatial_bounds, geospatial_coordinates=geospatial_coordinates, datetimes=datetimes, max_freq=128,num_bands=32)
+    assert absolute_position_encoding.size() == (12, 650, 13, 64, 64)
+    assert torch.min(absolute_position_encoding) >= -1.0
+    assert torch.max(absolute_position_encoding) <= 1.0
 
 
 def test_encode_modalities():
