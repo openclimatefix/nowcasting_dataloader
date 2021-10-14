@@ -10,7 +10,7 @@ import pandas as pd
 import torch
 
 
-def get_data(batch_size: int = 12, interval="5min"):
+def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
     datetimes = []
     for month in range(1, batch_size):
         datetimes.append(
@@ -23,8 +23,8 @@ def get_data(batch_size: int = 12, interval="5min"):
     )
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(batch_size, 64) * 9)[0]
-    y = torch.sort(torch.rand(batch_size, 64) * 120, descending=True)[0]
+    x = torch.sort(torch.rand(batch_size, spatial_size) * 9)[0]
+    y = torch.sort(torch.rand(batch_size, spatial_size) * 120, descending=True)[0]
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     return datetimes, geospatial_bounds, geospatial_coordinates
@@ -119,13 +119,21 @@ def test_encode_multiple_modalities():
     sat_datetimes, geospatial_bounds, sat_geospatial_coordinates = get_data(
         interval="30min", batch_size=12
     )
+    pv_datetimes, geospatial_bounds, pv_geospatial_coordinates = get_data(
+        batch_size=12, interval="15min", spatial_size=1
+    )  # PV systems have x, y coord for their location, but not spatial extant
     encoded_position = encode_modalities(
         modalities_to_encode={
             "NWP": torch.randn(12, 10, 13, 64, 64),
-            "Sat": torch.randn(12, 10, 3, 64, 64),
+            "Sat": torch.randn(12, 12, 3, 64, 64),
+            "PV": torch.randn(12, 1, 5, 1, 1),
         },
-        datetimes={"NWP": datetimes, "Sat": sat_datetimes},
-        geospatial_coordinates={"NWP": geospatial_coordinates, "Sat": sat_geospatial_coordinates},
+        datetimes={"NWP": datetimes, "Sat": sat_datetimes, "PV": pv_datetimes},
+        geospatial_coordinates={
+            "NWP": geospatial_coordinates,
+            "Sat": sat_geospatial_coordinates,
+            "PV": pv_geospatial_coordinates,
+        },
         geospatial_bounds=geospatial_bounds,
         positioning="absolute",
         method="fourier",
@@ -138,6 +146,9 @@ def test_encode_multiple_modalities():
     assert "Sat" in encoded_position.keys()
     assert "Sat_position_encoding" in encoded_position.keys()
     assert encoded_position["Sat_position_encoding"].size() == (12, 650, 3, 64, 64)
+    assert "PV" in encoded_position.keys()
+    assert "PV_position_encoding" in encoded_position.keys()
+    assert encoded_position["PV_position_encoding"].size() == (12, 650, 5, 1, 1)
 
 
 @pytest.mark.parametrize("positioning", ["relative", "both"])
