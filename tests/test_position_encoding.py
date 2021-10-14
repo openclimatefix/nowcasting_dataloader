@@ -1,3 +1,5 @@
+import numpy as np
+
 from nowcasting_dataloader.utils.position_encoding import (
     encode_position,
     encode_modalities,
@@ -149,6 +151,27 @@ def test_encode_multiple_modalities():
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
     assert encoded_position["PV_position_encoding"].size() == (12, 134, 5, 1, 1)
+    # Check that the time features are the same for the start and end of them
+    # Geospatial ones would not be as the coordinates are random, but time isn't
+    # Time channels are the last 4 in the encoding, so check those, first and last time values should be the same
+    # Intermediate ones should vary
+    for i in range(130, 134):
+        assert np.isclose(
+            encoded_position["PV_position_encoding"][0, i, 0, 0, 0],
+            encoded_position["NWP_position_encoding"][0, i, 0, 0, 0],
+        )
+        assert np.isclose(
+            encoded_position["NWP_position_encoding"][0, i, 0, 0, 0],
+            encoded_position["Sat_position_encoding"][0, i, 0, 0, 0],
+        )
+        assert np.isclose(
+            encoded_position["PV_position_encoding"][0, i, -1, 0, 0],
+            encoded_position["NWP_position_encoding"][0, i, -1, 0, 0],
+        )
+        assert np.isclose(
+            encoded_position["NWP_position_encoding"][0, i, -1, 0, 0],
+            encoded_position["Sat_position_encoding"][0, i, -1, 0, 0],
+        )
 
 
 @pytest.mark.parametrize("positioning", ["relative", "both"])
