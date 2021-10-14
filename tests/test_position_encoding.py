@@ -79,11 +79,9 @@ def test_encode_absolute_position():
     assert torch.max(absolute_position_encoding) <= 1.0
 
 
-@pytest.mark.parametrize("positioning", ["absolute"])
-def test_encode_position(positioning):
+def test_encode_position():
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     position_encoding = encode_position(
-        positioning=positioning,
         shape=(12, 13, 64, 64),
         geospatial_bounds=geospatial_bounds,
         geospatial_coordinates=geospatial_coordinates,
@@ -103,7 +101,6 @@ def test_encode_modalities():
         datetimes={"NWP": datetimes},
         geospatial_coordinates={"NWP": geospatial_coordinates},
         geospatial_bounds=geospatial_bounds,
-        positioning="absolute",
         method="fourier",
         max_freq=128,
         num_bands=32,
@@ -138,7 +135,6 @@ def test_encode_multiple_modalities():
             "PV": pv_geospatial_coordinates,
         },
         geospatial_bounds=geospatial_bounds,
-        positioning="absolute",
         method="fourier",
         max_freq=128,
         num_bands=32,
@@ -220,26 +216,14 @@ def test_encode_multiple_modalities():
         )
 
 
-@pytest.mark.parametrize("positioning", ["relative", "both"])
-def test_not_implemented_option(positioning):
-    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
-    with pytest.raises(NotImplementedError):
-        encode_modalities(
-            modalities_to_encode={"NWP": torch.randn(16, 1, 1, 1)},
-            datetimes=datetimes,
-            geospatial_coordinates=geospatial_coordinates,
-            geospatial_bounds=geospatial_bounds,
-            shape=[1, 1, 1, 1],
-            positioning=positioning,
-            method="fourier",
-        )
-
-
 def test_fake_method_option():
+    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     with pytest.raises(AssertionError):
-        encode_position(shape=[1, 1, 1, 1], positioning="relative", method="test_method")
-
-
-def test_fake_positioning_option():
-    with pytest.raises(AssertionError):
-        encode_position(shape=[1, 1, 1, 1], positioning="fake positioning scheme")
+        encode_position(
+            shape=[1, 1, 1, 1],
+            positioning="relative",
+            method="test_method",
+            datetimes=datetimes,
+            geospatial_bounds=geospatial_bounds,
+            geospatial_coordinates=geospatial_coordinates,
+        )

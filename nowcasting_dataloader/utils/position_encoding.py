@@ -17,7 +17,6 @@ import datetime
 
 
 def encode_modalities(
-    positioning: str,
     modalities_to_encode: Dict[str, torch.Tensor],
     datetimes: Dict[str, List[datetime.datetime]],
     geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
@@ -37,45 +36,35 @@ def encode_modalities(
         positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, optional, used to determine smallest spatial step needed, in OSGB coordinates
+        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
         geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
         kwargs: Passed to fourier_encode
 
     Returns:
         Input modality dictionary with extra keys added containing the absolute position encoding of the examples
     """
-    assert positioning in ["relative", "absolute", "both"], AssertionError(
-        f"positioning must be one of 'relative', 'absolute' or 'both', not '{positioning}'"
-    )
-    # Build Absolute position encoding for each modality
-    if positioning == "absolute":
-        # If absolute, can just skip all the computing for relative encoding
-        position_encodings = {}
-        for key in modalities_to_encode.keys():
-            position_encodings[key + "_position_encoding"] = encode_position(
-                [
-                    modalities_to_encode[key].shape[0],
-                    *modalities_to_encode[key].shape[2:],
-                ],  # We want to remove the channel dimension, as that's not relevant here
-                positioning=positioning,
-                geospatial_coordinates=geospatial_coordinates[key],
-                datetimes=datetimes[key],
-                geospatial_bounds=geospatial_bounds,
-                **kwargs,
-            )
-        # Update original dictionary
-        modalities_to_encode.update(position_encodings)
-        return modalities_to_encode
-    else:
-        raise NotImplementedError(f"Position encodings {positioning} is not implemented yet")
+    position_encodings = {}
+    for key in modalities_to_encode.keys():
+        position_encodings[key + "_position_encoding"] = encode_position(
+            [
+                modalities_to_encode[key].shape[0],
+                *modalities_to_encode[key].shape[2:],
+            ],  # We want to remove the channel dimension, as that's not relevant here
+            geospatial_coordinates=geospatial_coordinates[key],
+            datetimes=datetimes[key],
+            geospatial_bounds=geospatial_bounds,
+            **kwargs,
+        )
+    # Update original dictionary
+    modalities_to_encode.update(position_encodings)
+    return modalities_to_encode
 
 
 def encode_position(
     shape: List[int],
-    positioning: str,
-    geospatial_coordinates: Optional[List[np.ndarray]] = None,
-    datetimes: Optional[List[datetime.datetime]] = None,
-    geospatial_bounds: Optional[Dict[str, float]] = None,
+    geospatial_coordinates: List[np.ndarray],
+    datetimes: List[datetime.datetime],
+    geospatial_bounds: Dict[str, float],
     method: str = "fourier",
     **kwargs,
 ) -> torch.Tensor:
@@ -86,8 +75,8 @@ def encode_position(
         shape: The shape of the input to be encoded, should be the largest or finest-grained input
             For example, if the inputs are shapes (12, 6, 128, 128) and (1, 6), (12, 6, 128, 128) should be passed in as
             shape, as it has the most elements and the input (1, 6) can just subselect the position encoding
-        geospatial_coordinates: The latitude/longitude of the inputs for shape, in OSGB coordinates, unused if using relative positioning only
-        datetimes: time of day and date for each of the timesteps in the shape, unused if using relative positioning only
+        geospatial_coordinates: The latitude/longitude of the inputs for shape, in OSGB coordinates
+        datetimes: time of day and date for each of the timesteps in the shape
         method: Method of the encoding, either 'fourier' for Fourier Features
         positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         geospatial_bounds: The bounds of the geospatial area covered, in a dict with the keys 'x_min', 'y_min', 'x_max', 'y_max'
@@ -99,9 +88,6 @@ def encode_position(
     assert method in [
         "fourier",
     ], AssertionError(f"method must be one of 'fourier', not '{method}'")
-    assert positioning in ["absolute"], AssertionError(
-        f"positioning must be one of 'relative', 'absolute' or 'both', not '{positioning}'"
-    )
 
     position_encoding = encode_absolute_position(
         shape, geospatial_coordinates, geospatial_bounds, datetimes, **kwargs
@@ -113,7 +99,7 @@ def encode_absolute_position(
     shape: List[int],
     geospatial_coordinates: List[np.ndarray],
     geospatial_bounds: Dict[str, float],
-    datetimes,
+    datetimes: List[datetime.datetime],
     **kwargs,
 ) -> torch.Tensor:
     """
@@ -153,7 +139,7 @@ def encode_absolute_position(
 
 
 def normalize_geospatial_coordinates(
-    geospatial_coordinates, geospatial_bounds: Dict[str, float], **kwargs
+    geospatial_coordinates: List[np.ndarray], geospatial_bounds: Dict[str, float], **kwargs
 ) -> torch.Tensor:
     """
     Normalize the geospatial coordinates by the max extant to keep everything between -1 and 1, in sin and cos
