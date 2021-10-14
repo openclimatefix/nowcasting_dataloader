@@ -156,21 +156,41 @@ def test_encode_multiple_modalities():
     # Time channels are the last 4 in the encoding, so check those, first and last time values should be the same
     # Intermediate ones should vary
     for i in range(130, 134):
-        assert np.isclose(
-            encoded_position["PV_position_encoding"][0, i, 0, 0, 0],
-            encoded_position["NWP_position_encoding"][0, i, 0, 0, 0],
+        assert np.all(
+            np.isclose(
+                encoded_position["PV_position_encoding"][:, i, 0, 0, 0],
+                encoded_position["NWP_position_encoding"][:, i, 0, 0, 0],
+            )
         )
-        assert np.isclose(
-            encoded_position["NWP_position_encoding"][0, i, 0, 0, 0],
-            encoded_position["Sat_position_encoding"][0, i, 0, 0, 0],
+        assert np.all(
+            np.isclose(
+                encoded_position["NWP_position_encoding"][:, i, 0, 0, 0],
+                encoded_position["Sat_position_encoding"][:, i, 0, 0, 0],
+            )
         )
-        assert np.isclose(
-            encoded_position["PV_position_encoding"][0, i, -1, 0, 0],
-            encoded_position["NWP_position_encoding"][0, i, -1, 0, 0],
+        assert np.all(
+            np.isclose(
+                encoded_position["PV_position_encoding"][:, i, -1, 0, 0],
+                encoded_position["NWP_position_encoding"][:, i, -1, 0, 0],
+            )
         )
-        assert np.isclose(
-            encoded_position["NWP_position_encoding"][0, i, -1, 0, 0],
-            encoded_position["Sat_position_encoding"][0, i, -1, 0, 0],
+        assert np.all(
+            np.isclose(
+                encoded_position["NWP_position_encoding"][:, i, -1, 0, 0],
+                encoded_position["Sat_position_encoding"][:, i, -1, 0, 0],
+            )
+        )
+        assert np.all(
+            np.isclose(
+                encoded_position["PV_position_encoding"][:, i, 2, 0, 0],
+                encoded_position["NWP_position_encoding"][:, i, 6, 0, 0],
+            )
+        )
+        assert np.all(
+            np.isclose(
+                encoded_position["NWP_position_encoding"][:, i, 6, 0, 0],
+                encoded_position["Sat_position_encoding"][:, i, 1, 0, 0],
+            )
         )
 
 
