@@ -10,17 +10,21 @@ import pandas as pd
 import torch
 
 
-def get_data():
+def get_data(batch_size: int = 12, interval="5min"):
     datetimes = []
-    for month in range(1, 12):
+    for month in range(1, batch_size):
         datetimes.append(
-            pd.date_range(start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq="5min")
+            pd.date_range(
+                start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq=interval
+            )
         )
-    datetimes.append(pd.date_range(start=f"2020-12-31 22:55", end=f"2020-12-31 23:55", freq="5min"))
+    datetimes.append(
+        pd.date_range(start=f"2020-12-31 22:55", end=f"2020-12-31 23:55", freq=interval)
+    )
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(12, 64) * 9)[0]
-    y = torch.sort(torch.rand(12, 64) * 120, descending=True)[0]
+    x = torch.sort(torch.rand(batch_size, 64) * 9)[0]
+    y = torch.sort(torch.rand(batch_size, 64) * 120, descending=True)[0]
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     return datetimes, geospatial_bounds, geospatial_coordinates
@@ -108,6 +112,32 @@ def test_encode_modalities():
         [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
     )
     assert combined.size() == (12, 660, 13, 64, 64)
+
+
+def test_encode_multiple_modalities():
+    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
+    sat_datetimes, geospatial_bounds, sat_geospatial_coordinates = get_data(
+        interval="30min", batch_size=12
+    )
+    encoded_position = encode_modalities(
+        modalities_to_encode={
+            "NWP": torch.randn(12, 10, 13, 64, 64),
+            "Sat": torch.randn(12, 10, 3, 64, 64),
+        },
+        datetimes={"NWP": datetimes, "Sat": sat_datetimes},
+        geospatial_coordinates={"NWP": geospatial_coordinates, "Sat": sat_geospatial_coordinates},
+        geospatial_bounds=geospatial_bounds,
+        positioning="absolute",
+        method="fourier",
+        max_freq=128,
+        num_bands=32,
+    )
+    assert "NWP" in encoded_position.keys()
+    assert "NWP_position_encoding" in encoded_position.keys()
+    assert encoded_position["NWP_position_encoding"].size() == (12, 650, 13, 64, 64)
+    assert "Sat" in encoded_position.keys()
+    assert "Sat_position_encoding" in encoded_position.keys()
+    assert encoded_position["Sat_position_encoding"].size() == (12, 650, 3, 64, 64)
 
 
 @pytest.mark.parametrize("positioning", ["relative", "both"])
