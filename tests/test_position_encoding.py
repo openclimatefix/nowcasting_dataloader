@@ -10,6 +10,7 @@ from nowcasting_dataloader.utils.position_encoding import (
 import pytest
 import pandas as pd
 import torch
+from copy import deepcopy
 
 
 def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
@@ -118,9 +119,7 @@ def test_encode_modalities():
 
 def test_encode_multiple_modalities():
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
-    sat_datetimes, geospatial_bounds, sat_geospatial_coordinates = get_data(
-        interval="30min", batch_size=12
-    )
+    sat_datetimes, geospatial_bounds, _ = get_data(interval="30min", batch_size=12)
     pv_datetimes, geospatial_bounds, pv_geospatial_coordinates = get_data(
         batch_size=12, interval="15min", spatial_size=1
     )  # PV systems have x, y coord for their location, but not spatial extant
@@ -133,7 +132,9 @@ def test_encode_multiple_modalities():
         datetimes={"NWP": datetimes, "Sat": sat_datetimes, "PV": pv_datetimes},
         geospatial_coordinates={
             "NWP": geospatial_coordinates,
-            "Sat": sat_geospatial_coordinates,
+            "Sat": deepcopy(
+                geospatial_coordinates
+            ),  # Otherwise the coordinates get overwritten and fail the checks
             "PV": pv_geospatial_coordinates,
         },
         geospatial_bounds=geospatial_bounds,
@@ -151,8 +152,33 @@ def test_encode_multiple_modalities():
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
     assert encoded_position["PV_position_encoding"].size() == (12, 134, 5, 1, 1)
-    # Check that the time features are the same for the start and end of them
-    # Geospatial ones would not be as the coordinates are random, but time isn't
+
+    # Check that time and space features match for NWP and Sat when the times line up
+    assert np.all(
+        np.isclose(
+            encoded_position["NWP_position_encoding"][:, :, 0, :, :],
+            encoded_position["Sat_position_encoding"][:, :, 0, :, :],
+        )
+    )
+    assert np.all(
+        np.isclose(
+            encoded_position["NWP_position_encoding"][:, :, -1, :, :],
+            encoded_position["Sat_position_encoding"][:, :, -1, :, :],
+        )
+    )
+    assert np.all(
+        np.isclose(
+            encoded_position["NWP_position_encoding"][:, :, 6, :, :],
+            encoded_position["Sat_position_encoding"][:, :, 1, :, :],
+        )
+    )
+    assert not np.all(
+        np.isclose(
+            encoded_position["NWP_position_encoding"][:, :, 7, :, :],
+            encoded_position["Sat_position_encoding"][:, :, 1, :, :],
+        )
+    )
+    # Check that the time and space features are the same for the start and end of them
     # Time channels are the last 4 in the encoding, so check those, first and last time values should be the same
     # Intermediate ones should vary
     for i in range(130, 134):
