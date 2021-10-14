@@ -78,7 +78,6 @@ def encode_position(
         geospatial_coordinates: The latitude/longitude of the inputs for shape, in OSGB coordinates
         datetimes: time of day and date for each of the timesteps in the shape
         method: Method of the encoding, either 'fourier' for Fourier Features
-        positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         geospatial_bounds: The bounds of the geospatial area covered, in a dict with the keys 'x_min', 'y_min', 'x_max', 'y_max'
         kwargs: Passed to fourier_encode
 
