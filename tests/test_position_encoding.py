@@ -221,7 +221,6 @@ def test_fake_method_option():
     with pytest.raises(AssertionError):
         encode_position(
             shape=[1, 1, 1, 1],
-            positioning="relative",
             method="test_method",
             datetimes=datetimes,
             geospatial_bounds=geospatial_bounds,
