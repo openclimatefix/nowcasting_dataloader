@@ -141,9 +141,7 @@ def encode_absolute_position(
     to_concat = [einops.repeat(encoded_latlon, "b h w c -> b c t h w", t=shape[1])]
     for date_feature in datetime_features:
         to_concat.append(
-            einops.repeat(
-                date_feature, "b t -> b c t h w", h=shape[-2], w=shape[-1], c=to_concat[0].size()[1]
-            )
+            einops.repeat(date_feature, "b t -> b c t h w", h=shape[-2], w=shape[-1], c=1)
         )
 
     # Now combined into one large encoding

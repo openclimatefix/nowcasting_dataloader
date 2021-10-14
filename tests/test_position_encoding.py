@@ -71,7 +71,7 @@ def test_encode_absolute_position():
         max_freq=128,
         num_bands=32,
     )
-    assert absolute_position_encoding.size() == (12, 650, 13, 64, 64)
+    assert absolute_position_encoding.size() == (12, 134, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
 
@@ -88,7 +88,7 @@ def test_encode_position(positioning):
         max_freq=128,
         num_bands=32,
     )
-    assert position_encoding.size() == (12, 650, 13, 64, 64)
+    assert position_encoding.size() == (12, 134, 13, 64, 64)
     assert torch.min(position_encoding) >= -1.0
     assert torch.max(position_encoding) <= 1.0
 
@@ -107,11 +107,11 @@ def test_encode_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 650, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 134, 13, 64, 64)
     combined = torch.cat(
         [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
     )
-    assert combined.size() == (12, 660, 13, 64, 64)
+    assert combined.size() == (12, 144, 13, 64, 64)
 
 
 def test_encode_multiple_modalities():
@@ -142,13 +142,13 @@ def test_encode_multiple_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 650, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 134, 13, 64, 64)
     assert "Sat" in encoded_position.keys()
     assert "Sat_position_encoding" in encoded_position.keys()
-    assert encoded_position["Sat_position_encoding"].size() == (12, 650, 3, 64, 64)
+    assert encoded_position["Sat_position_encoding"].size() == (12, 134, 3, 64, 64)
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
-    assert encoded_position["PV_position_encoding"].size() == (12, 650, 5, 1, 1)
+    assert encoded_position["PV_position_encoding"].size() == (12, 134, 5, 1, 1)
 
 
 @pytest.mark.parametrize("positioning", ["relative", "both"])
