@@ -20,6 +20,21 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build package
+        run: python -m build
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   release:
     needs: [build]
@@ -37,32 +52,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.build.outputs.new_tag }}
+          tag_name: v${{ needs.build.outputs.new_tag }}
           release_name: v${{ needs.build.outputs.new_tag }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: false
-
-  publish:
-    needs: [build, release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.build.outputs.new_tag }}
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build
-      - name: Build package
-        run: python -m build
-      - name: Publish package
-        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
