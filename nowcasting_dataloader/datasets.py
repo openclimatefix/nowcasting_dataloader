@@ -196,6 +196,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 current_timestep_index=self.current_timestep_5_index,
             )
 
+        # TODO Add positional encodings here https://github.com/openclimatefix/nowcasting_dataloader/issues/4
         # change batch into ML learning batch ready for training
         batch = BatchML.from_batch(batch=batch)
 
