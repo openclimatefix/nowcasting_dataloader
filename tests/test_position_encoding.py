@@ -66,7 +66,7 @@ def test_geospatial_normalization():
 def test_encode_absolute_position():
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     absolute_position_encoding = encode_absolute_position(
-        shape=(12, 13, 64, 64),
+        shape=(12, 5, 13, 64, 64),
         geospatial_bounds=geospatial_bounds,
         geospatial_coordinates=geospatial_coordinates,
         datetimes=datetimes,
