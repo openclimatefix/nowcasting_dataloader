@@ -60,7 +60,8 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
             "nwp",
             "satellite",
             "topographic",
-        ]:  # , "pv", "sun", "topographic"
+            "gsp",
+        ]:  # , "pv", "sun"
             xr_dataset = getattr(batch, k)
             print(xr_dataset)
             print(xr_dataset.sizes)
@@ -70,20 +71,24 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                     datetimes = xr_dataset.time.values
                 elif hasattr(xr_dataset, "target_time"):
                     datetimes = xr_dataset.target_time.values
-
+                channel_key = (
+                    "channels_index" if "channels_index" in xr_dataset.sizes else "id_index"
+                )
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     [
                         batch.batch_size,
                         xr_dataset.sizes.get(
-                            "channels_index", 1
+                            channel_key, 1
                         ),  # If no channels, count as single channel image
                         xr_dataset.sizes.get(
                             "time_index", 1
                         ),  # If no time dimension, just a single one
-                        xr_dataset.sizes["x_index"],
-                        xr_dataset.sizes["y_index"],
+                        xr_dataset.sizes.get("x_index", 1),  # If no x index, not an image
+                        xr_dataset.sizes.get("y_index", 1),  # If no y index, not an image
                     ],
-                    geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values],
+                    geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values]
+                    if "x_index" in xr_dataset.sizes
+                    else [xr_dataset.x_coords.values, xr_dataset.y_coords.values],
                     datetimes=datetimes,
                     geospatial_bounds=SEVIRI_RSS_BOUNDS,
                     **kwargs,
@@ -176,7 +181,7 @@ def encode_absolute_position(
                     date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
                 )
             )
-
+        print([x.shape for x in to_concat])
         # Now combined into one large encoding
         absolute_position_encoding = torch.cat(to_concat, dim=1)
 
