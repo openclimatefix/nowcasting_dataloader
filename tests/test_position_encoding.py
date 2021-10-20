@@ -85,7 +85,6 @@ def test_encode_modalities():
         datetimes={"NWP": datetimes},
         geospatial_coordinates={"NWP": geospatial_coordinates},
         geospatial_bounds=geospatial_bounds,
-        method="fourier",
         max_freq=128,
         num_bands=32,
     )
@@ -119,7 +118,6 @@ def test_encode_multiple_modalities():
             "PV": pv_geospatial_coordinates,
         },
         geospatial_bounds=geospatial_bounds,
-        method="fourier",
         max_freq=128,
         num_bands=32,
     )
