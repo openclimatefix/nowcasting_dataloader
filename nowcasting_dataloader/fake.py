@@ -2,7 +2,7 @@
 import torch
 
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.dataset.batch import BatchML
+from nowcasting_dataloader.batch import BatchML
 
 
 class FakeDataset(torch.utils.data.Dataset):

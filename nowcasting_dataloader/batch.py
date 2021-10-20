@@ -2,37 +2,32 @@
 from __future__ import annotations
 
 import logging
-import os
-from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
-import xarray as xr
 from pydantic import BaseModel, Field
 
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.data_sources.datetime.datetime_model import DatetimeML, Datetime
-from nowcasting_dataset.data_sources.gsp.gsp_model import GSPML, GSP
-from nowcasting_dataset.data_sources.metadata.metadata_model import MetadataML, Metadata
-from nowcasting_dataset.data_sources.nwp.nwp_model import (
-    NWPML,
-    NWP,
-)
-from nowcasting_dataset.data_sources.pv.pv_model import PVML, PV
-from nowcasting_dataset.data_sources.satellite.satellite_model import SatelliteML, Satellite
-from nowcasting_dataset.data_sources.sun.sun_model import SunML, Sun
-from nowcasting_dataset.data_sources.topographic.topographic_model import TopographicML, Topographic
 from nowcasting_dataset.dataset.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )
 from nowcasting_dataset.time import make_random_time_vectors
+from nowcasting_dataset.dataset.batch import Batch
+from nowcasting_dataloader.data_sources import (
+    TopographicML,
+    SatelliteML,
+    MetadataML,
+    PVML,
+    SunML,
+    GSPML,
+    NWPML,
+    DatetimeML,
+)
 
 _LOG = logging.getLogger(__name__)
 
 register_xr_data_array_to_tensor()
 register_xr_data_set_to_tensor()
-
-data_sources = [Metadata, Satellite, Topographic, PV, Sun, GSP, NWP, Datetime]
 
 
 class Example(BaseModel):
