@@ -19,7 +19,23 @@ TIME_DIM = 2
 HEIGHT_DIM = 3
 WIDTH_DIM = 4
 
-SEVIRI_RSS_BOUNDS = {"x_min": 0, "y_min": 0, "x_max": 1, "y_max": 1}
+# Latitude coverage is 15 to 70
+# Longitude coverage is -45 to 65
+# These bounds are calculated by:
+# from nowcasting_dataset.geospatial import lat_lon_to_osgb
+# Y_min, X_max
+# print(lat_lon_to_osgb(15, -45))
+# Y_min, X_min
+# print(lat_lon_to_osgb(15, 65))
+# print(lat_lon_to_osgb(70, -45))
+# Y_min,
+# print(lat_lon_to_osgb(70, 65))
+SEVIRI_RSS_BOUNDS = {
+    "x_min": -3296985.3339010067,
+    "y_min": -4644595.096209157,
+    "x_max": 3566863.835770559,
+    "y_max": 9451529.32492207,
+}
 
 
 def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, torch.Tensor]:
