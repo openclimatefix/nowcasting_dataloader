@@ -45,7 +45,7 @@ def encode_modalities(
     position_encodings = {}
     for key in modalities_to_encode.keys():
         position_encodings[key + "_position_encoding"] = encode_position(
-            [
+            shape=[
                 modalities_to_encode[key].shape[0],
                 *modalities_to_encode[key].shape[2:],
             ],  # We want to remove the channel dimension, as that's not relevant here
