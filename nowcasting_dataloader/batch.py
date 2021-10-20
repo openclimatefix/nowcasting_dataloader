@@ -142,3 +142,9 @@ class BatchML(Example):
         data_sources_dict["batch_size"] = data_sources_dict["satellite"].batch_size
 
         return BatchML(**data_sources_dict)
+
+    def normalize(self):
+        """ Normalize the batch """
+
+        for data_sources in self.data_sources:
+            data_sources.normalize()
