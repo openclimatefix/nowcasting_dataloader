@@ -1,0 +1,7 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "datetime_gmt"
+    ],
+    "calendar": "proleptic_gregorian",
+    "units": "minutes since 2019-01-01"
+}

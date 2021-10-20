@@ -1,0 +1,117 @@
+{
+    "metadata": {
+        ".zattrs": {},
+        ".zgroup": {
+            "zarr_format": 2
+        },
+        "datetime_gmt/.zarray": {
+            "chunks": [
+                49
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<i8",
+            "fill_value": null,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                49
+            ],
+            "zarr_format": 2
+        },
+        "datetime_gmt/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "datetime_gmt"
+            ],
+            "calendar": "proleptic_gregorian",
+            "units": "minutes since 2019-01-01"
+        },
+        "generation_mw/.zarray": {
+            "chunks": [
+                49,
+                21
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "zstd",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                49,
+                21
+            ],
+            "zarr_format": 2
+        },
+        "generation_mw/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "datetime_gmt",
+                "gsp_id"
+            ]
+        },
+        "gsp_id/.zarray": {
+            "chunks": [
+                21
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "lz4",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<U2",
+            "fill_value": null,
+            "filters": null,
+            "order": "C",
+            "shape": [
+                21
+            ],
+            "zarr_format": 2
+        },
+        "gsp_id/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "gsp_id"
+            ]
+        },
+        "installedcapacity_mwp/.zarray": {
+            "chunks": [
+                49,
+                21
+            ],
+            "compressor": {
+                "blocksize": 0,
+                "clevel": 5,
+                "cname": "zstd",
+                "id": "blosc",
+                "shuffle": 1
+            },
+            "dtype": "<f8",
+            "fill_value": "NaN",
+            "filters": null,
+            "order": "C",
+            "shape": [
+                49,
+                21
+            ],
+            "zarr_format": 2
+        },
+        "installedcapacity_mwp/.zattrs": {
+            "_ARRAY_DIMENSIONS": [
+                "datetime_gmt",
+                "gsp_id"
+            ]
+        }
+    },
+    "zarr_consolidated_format": 1
+}
