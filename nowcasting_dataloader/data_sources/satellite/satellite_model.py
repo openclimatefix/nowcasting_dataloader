@@ -8,7 +8,7 @@ import xarray as xr
 from pydantic import Field
 
 from nowcasting_dataset.consts import Array
-from nowcasting_dataset.data_sources.datasource_output import (
+from nowcasting_dataloader.data_sources.datasource_output import (
     DataSourceOutputML,
 )
 from nowcasting_dataset.time import make_random_time_vectors
