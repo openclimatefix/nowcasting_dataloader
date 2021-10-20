@@ -1,7 +1,6 @@
 import numpy as np
 
 from nowcasting_dataloader.utils.position_encoding import (
-    encode_position,
     encode_modalities,
     encode_absolute_position,
     create_datetime_features,
@@ -77,21 +76,6 @@ def test_encode_absolute_position():
     assert absolute_position_encoding.size() == (12, 134, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
-
-
-def test_encode_position():
-    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
-    position_encoding = encode_position(
-        shape=(12, 13, 64, 64),
-        geospatial_bounds=geospatial_bounds,
-        geospatial_coordinates=geospatial_coordinates,
-        datetimes=datetimes,
-        max_freq=128,
-        num_bands=32,
-    )
-    assert position_encoding.size() == (12, 134, 13, 64, 64)
-    assert torch.min(position_encoding) >= -1.0
-    assert torch.max(position_encoding) <= 1.0
 
 
 def test_encode_modalities():
@@ -213,16 +197,4 @@ def test_encode_multiple_modalities():
                 encoded_position["NWP_position_encoding"][:, i, 6, 0, 0],
                 encoded_position["Sat_position_encoding"][:, i, 1, 0, 0],
             )
-        )
-
-
-def test_fake_method_option():
-    datetimes, geospatial_bounds, geospatial_coordinates = get_data()
-    with pytest.raises(AssertionError):
-        encode_position(
-            shape=[1, 1, 1, 1],
-            method="test_method",
-            datetimes=datetimes,
-            geospatial_bounds=geospatial_bounds,
-            geospatial_coordinates=geospatial_coordinates,
         )

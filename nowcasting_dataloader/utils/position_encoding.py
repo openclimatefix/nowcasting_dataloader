@@ -45,7 +45,7 @@ def encode_modalities(
     """
     position_encodings = {}
     for key in modalities_to_encode.keys():
-        position_encodings[key + "_position_encoding"] = encode_position(
+        position_encodings[key + "_position_encoding"] = encode_absolute_position(
             shape=[
                 modalities_to_encode[key].shape[0],
                 *modalities_to_encode[key].shape[2:],
@@ -58,40 +58,6 @@ def encode_modalities(
     # Update original dictionary
     modalities_to_encode.update(position_encodings)
     return modalities_to_encode
-
-
-def encode_position(
-    shape: List[int],
-    geospatial_coordinates: List[np.ndarray],
-    datetimes: List[datetime.datetime],
-    geospatial_bounds: Dict[str, float],
-    method: str = "fourier",
-    **kwargs,
-) -> torch.Tensor:
-    """
-    This function wraps a variety of different methods for generating position features for given inputs.
-
-    Args:
-        shape: The shape of the input to be encoded, should be the largest or finest-grained input
-            For example, if the inputs are shapes (12, 6, 128, 128) and (1, 6), (12, 6, 128, 128) should be passed in as
-            shape, as it has the most elements and the input (1, 6) can just subselect the position encoding
-        geospatial_coordinates: The x, y of the inputs for shape, in OSGB coordinates
-        datetimes: time of day and date for each of the timesteps in the shape
-        method: Method of the encoding, currently only 'fourier' for Fourier Features
-        geospatial_bounds: The bounds of the geospatial area covered, in a dict with the keys 'x_min', 'y_min', 'x_max', 'y_max'
-        kwargs: Passed to fourier_encode
-
-    Returns:
-        The position encodings for all items in the batch
-    """
-    assert method in [
-        "fourier",
-    ], AssertionError(f"method must be one of 'fourier', not '{method}'")
-
-    position_encoding = encode_absolute_position(
-        shape, geospatial_coordinates, geospatial_bounds, datetimes, **kwargs
-    )
-    return position_encoding
 
 
 def encode_absolute_position(
