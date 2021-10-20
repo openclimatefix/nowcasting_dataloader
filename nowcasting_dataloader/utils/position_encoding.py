@@ -35,7 +35,7 @@ def encode_modalities(
     Args:
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
+        geospatial_coordinates: Dict of x, y coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
         geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
         kwargs: Passed to fourier_encode
 
