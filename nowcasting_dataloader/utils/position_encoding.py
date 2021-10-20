@@ -33,7 +33,6 @@ def encode_modalities(
     This code assumes that there is at least 2 timesteps of at least one modality to be encoded
 
     Args:
-        positioning: The type of positioning used, either 'relative' for relative positioning, or 'absolute', or 'both'
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
         geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
