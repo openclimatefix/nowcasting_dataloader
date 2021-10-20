@@ -30,6 +30,11 @@ class DataSourceOutputML(BaseModel):
         "then this item stores one data item i.e Example",
     )
 
+    normalized: bool = Field(
+        False,
+        description="If the data field has been normalized or not",
+    )
+
     def get_name(self) -> str:
         """Get the name of the class"""
         return self.__class__.__name__.lower()
@@ -37,6 +42,11 @@ class DataSourceOutputML(BaseModel):
     def get_datetime_index(self):
         """Datetime index for the data"""
         pass
+
+    def normalize(self):
+        """ Normalize the data """
+        pass
+
 
 
 def pad_nans(array, pad_width) -> np.ndarray:
