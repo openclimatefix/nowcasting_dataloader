@@ -127,7 +127,7 @@ class NWPML(DataSourceOutputML):
         return NWPML(**nwp_batch_ml)
 
     def normalize(self):
-        """Normalize the topological data """
+        """Normalize the nwp data """
         if not self.normalized:
             self.data = self.data - NWP_MEAN
             self.data = self.data / NWP_STD

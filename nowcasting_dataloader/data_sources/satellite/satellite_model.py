@@ -118,7 +118,7 @@ class SatelliteML(DataSourceOutputML):
         return SatelliteML(**satellite_batch_ml)
     
     def normalize(self):
-        """Normalize the topological data """
+        """Normalize the satellite data """
         if not self.normalized:
             self.data = self.data - SAT_MEAN
             self.data = self.data / SAT_STD
