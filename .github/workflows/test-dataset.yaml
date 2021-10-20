@@ -5,7 +5,7 @@ name: Test against Nowcasting Dataset
 
 on:
   repository_dispatch:
-    types: [dataset-update]
+    types: [nowcasting-dataset-update]
 
 jobs:
   build:
