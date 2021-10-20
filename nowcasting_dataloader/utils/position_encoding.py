@@ -14,6 +14,10 @@ from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
 
+TIME_DIM = 2
+HEIGHT_DIM = 3
+WIDTH_DIM = 4
+
 
 def encode_modalities(
     modalities_to_encode: Dict[str, torch.Tensor],
@@ -46,10 +50,7 @@ def encode_modalities(
     position_encodings = {}
     for key in modalities_to_encode.keys():
         position_encodings[key + "_position_encoding"] = encode_absolute_position(
-            shape=[
-                modalities_to_encode[key].shape[0],
-                *modalities_to_encode[key].shape[2:],
-            ],  # We want to remove the channel dimension, as that's not relevant here
+            shape=modalities_to_encode[key].shape,
             geospatial_coordinates=geospatial_coordinates[key],
             datetimes=datetimes[key],
             geospatial_bounds=geospatial_bounds,
@@ -86,15 +87,17 @@ def encode_absolute_position(
     datetime_features = create_datetime_features(datetimes)
 
     # Fourier Features of absolute position
-    encoded_latlon = normalize_geospatial_coordinates(
+    encoded_geo_position = normalize_geospatial_coordinates(
         geospatial_coordinates, geospatial_bounds, **kwargs
     )
 
     # Combine time and space features
-    to_concat = [einops.repeat(encoded_latlon, "b h w c -> b c t h w", t=shape[1])]
+    to_concat = [einops.repeat(encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM])]
     for date_feature in datetime_features:
         to_concat.append(
-            einops.repeat(date_feature, "b t -> b c t h w", h=shape[-2], w=shape[-1], c=1)
+            einops.repeat(
+                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+            )
         )
 
     # Now combined into one large encoding
