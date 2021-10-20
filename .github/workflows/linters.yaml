@@ -21,4 +21,4 @@ jobs:
           pip install pydocstyle
       - name: Docstyle linting
         run: |
-          pydocstyle --convention=google --add-ignore=D200,D210,D212,D415 nowcasting_dataloader
+          pydocstyle --convention=google --add-ignore=D200,D202,D210,D212,D415 nowcasting_dataloader

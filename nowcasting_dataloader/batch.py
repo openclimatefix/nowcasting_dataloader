@@ -145,6 +145,7 @@ class BatchML(Example):
 
     def normalize(self):
         """ Normalize the batch """
-
+        
+        # loop over all data sources and normalize
         for data_sources in self.data_sources:
             data_sources.normalize()
