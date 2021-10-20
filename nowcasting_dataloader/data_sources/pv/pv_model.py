@@ -13,7 +13,7 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_ROW_NUMBER,
     PV_SYSTEM_ID,
 )
-from nowcasting_dataset.data_sources.datasource_output import (
+from nowcasting_dataloader.data_sources.datasource_output import (
     DataSourceOutputML,
 )
 from nowcasting_dataset.time import make_random_time_vectors
