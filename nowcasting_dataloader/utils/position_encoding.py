@@ -170,6 +170,11 @@ def encode_absolute_position(
         encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
     )
 
+    if shape[HEIGHT_DIM] == 1 and shape[HEIGHT_DIM] != absolute_position_encoding.shape[HEIGHT_DIM]:
+        # Probably GSP or PV, just need the diagonal of the values, so have B, C, T, GSP/PV ID
+        absolute_position_encoding = torch.diagonal(absolute_position_encoding, dim1=-2, dim2=-1)
+        print(absolute_position_encoding.shape)
+
     if datetimes is not None:
         datetime_features = create_datetime_features(datetimes)
 
