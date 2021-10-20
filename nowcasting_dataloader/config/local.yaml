@@ -6,7 +6,7 @@ input_data:
   satellite_zarr_path: /mnt/storage_a/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/satellite/EUMETSAT/SEVIRI_RSS/zarr/all_zarr_int16_single_timestep.zarr
   solar_pv_data_filename: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/PV/PVOutput.org/UK_PV_timeseries_batch.nc
   solar_pv_metadata_filename: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/PV/PVOutput.org/UK_PV_metadata.csv
-  gsp_zarr_path: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/PV/GSP/v1/pv_gsp.zarr
+  gsp_zarr_path: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/PV/GSP/v2/pv_gsp.zarr
   topographic_filename: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/Topographic/europe_dem_1km_osgb.tif
   sun_zarr_path: /mnt/storage_b/data/ocf/solar_pv_nowcasting/nowcasting_dataset_pipeline/Sun/v0/sun.zarr
 output_data:
