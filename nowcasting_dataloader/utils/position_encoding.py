@@ -21,7 +21,7 @@ def encode_modalities(
     geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
     geospatial_bounds: Dict[str, float],
     **kwargs,
-) -> dict:
+) -> dict[str, torch.Tensor]:
     """
     Create a consistent position encoding and encode the positions of the different modalities in time and space
 
@@ -34,7 +34,7 @@ def encode_modalities(
     Args:
         modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
         datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        geospatial_coordinates: Dict of lat/lon coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
+        geospatial_coordinates: Dict of x, y coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
         geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
             in the format of a dictionary with the keys {'x_min', 'x_max', 'y_min', 'y_max'}
         kwargs: Passed to fourier_encode
@@ -46,7 +46,7 @@ def encode_modalities(
     position_encodings = {}
     for key in modalities_to_encode.keys():
         position_encodings[key + "_position_encoding"] = encode_position(
-            [
+            shape=[
                 modalities_to_encode[key].shape[0],
                 *modalities_to_encode[key].shape[2:],
             ],  # We want to remove the channel dimension, as that's not relevant here
