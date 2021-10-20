@@ -5,11 +5,23 @@ from nowcasting_dataloader.utils.position_encoding import (
     encode_absolute_position,
     create_datetime_features,
     normalize_geospatial_coordinates,
+    generate_position_encodings_for_batch,
 )
+from nowcasting_dataset.dataset.batch import Batch
 import pytest
 import pandas as pd
 import torch
 from copy import deepcopy
+
+
+def test_batch_encoding():
+    batch: Batch = Batch.fake()
+    position_encodings = generate_position_encodings_for_batch(
+        batch,
+        max_freq=64,
+        num_bands=16,
+    )
+    print(position_encodings.keys())
 
 
 def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):

@@ -13,6 +13,7 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+import pandas as pd
 from nowcasting_dataset.dataset.batch import Batch
 
 TIME_DIM = 2
@@ -55,18 +56,35 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
     # Go for each modality where a position encoding makes sense
     for k in batch.__fields__.keys():
         print(k)
-        if k in ["nwp", "satellite", "gsp", "pv", "sun", "topographic"]:
-            if batch.__fields__[k] is not None:
+        if k in [
+            "nwp",
+            "satellite",
+            "topographic",
+        ]:  # , "pv", "sun", "topographic"
+            xr_dataset = getattr(batch, k)
+            print(xr_dataset)
+            print(xr_dataset.sizes)
+            if xr_dataset is not None:
+                datetimes = None
+                if hasattr(xr_dataset, "time"):
+                    datetimes = xr_dataset.time.values
+                elif hasattr(xr_dataset, "target_time"):
+                    datetimes = xr_dataset.target_time.values
+
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     [
                         batch.batch_size,
-                        len(batch.__fields__[k].data[0]),  # Need to know the sequence length
-                        len(batch.__fields__[k].time[0]),
-                        len(batch.__fields__[k].x[0]),
-                        len(batch.__fields__[k].y[0]),
+                        xr_dataset.sizes.get(
+                            "channels_index", 1
+                        ),  # If no channels, count as single channel image
+                        xr_dataset.sizes.get(
+                            "time_index", 1
+                        ),  # If no time dimension, just a single one
+                        xr_dataset.sizes["x_index"],
+                        xr_dataset.sizes["y_index"],
                     ],
-                    geospatial_coordinates=[batch.satellite.x, batch.satellite.y],
-                    datetimes=batch.satellite.time,
+                    geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values],
+                    datetimes=datetimes,
                     geospatial_bounds=SEVIRI_RSS_BOUNDS,
                     **kwargs,
                 )
@@ -120,7 +138,7 @@ def encode_absolute_position(
     shape: List[int],
     geospatial_coordinates: List[np.ndarray],
     geospatial_bounds: Dict[str, float],
-    datetimes: List[datetime.datetime],
+    datetimes: Optional[List[datetime.datetime]] = None,
     **kwargs,
 ) -> torch.Tensor:
     """
@@ -139,24 +157,28 @@ def encode_absolute_position(
     Returns:
         The absolute position encoding for the given shape
     """
-    datetime_features = create_datetime_features(datetimes)
-
     # Fourier Features of absolute position
     encoded_geo_position = normalize_geospatial_coordinates(
         geospatial_coordinates, geospatial_bounds, **kwargs
     )
+    absolute_position_encoding = einops.repeat(
+        encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
+    )
 
-    # Combine time and space features
-    to_concat = [einops.repeat(encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM])]
-    for date_feature in datetime_features:
-        to_concat.append(
-            einops.repeat(
-                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+    if datetimes is not None:
+        datetime_features = create_datetime_features(datetimes)
+
+        # Combine time and space features
+        to_concat = [absolute_position_encoding]
+        for date_feature in datetime_features:
+            to_concat.append(
+                einops.repeat(
+                    date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+                )
             )
-        )
 
-    # Now combined into one large encoding
-    absolute_position_encoding = torch.cat(to_concat, dim=1)
+        # Now combined into one large encoding
+        absolute_position_encoding = torch.cat(to_concat, dim=1)
 
     return absolute_position_encoding
 
@@ -194,8 +216,8 @@ def normalize_geospatial_coordinates(
     # Have to do it for each individual example in the batch, and zip together x and y for it
     to_concat = []
     for idx in range(len(geospatial_coordinates[0])):
-        x = geospatial_coordinates[0][idx]
-        y = geospatial_coordinates[1][idx]
+        x = torch.from_numpy(geospatial_coordinates[0][idx])
+        y = torch.from_numpy(geospatial_coordinates[1][idx])
         grid = torch.meshgrid(x, y)
         pos = torch.stack(grid, dim=-1)
         encoded_position = fourier_encode(pos, **kwargs)
@@ -224,8 +246,9 @@ def create_datetime_features(
         hours = []
         days = []
         for index in datetimes[batch_idx]:
-            hours.append((index.hour + (index.minute / 60) / 24))
-            days.append((index.timetuple().tm_yday / 365))
+            time_index = pd.Timestamp(index)
+            hours.append((time_index.hour + (time_index.minute / 60) / 24))
+            days.append((time_index.timetuple().tm_yday / 365))
         hour_of_day.append(hours)
         day_of_year.append(days)
 
