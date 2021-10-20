@@ -10,6 +10,9 @@ from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutpu
 
 logger = logging.getLogger(__name__)
 
+TOPO_MEAN = 365.486887
+TOPO_STD = 478.841369
+
 
 class TopographicML(DataSourceOutputML):
     """
@@ -80,3 +83,11 @@ class TopographicML(DataSourceOutputML):
             )
         else:
             return None
+        
+    def normalize(self):
+        """Normalize the topological data """
+        if not self.normalized:
+            self.topo_data = self.topo_data - TOPO_MEAN
+            self.topo_data = self.topo_data / TOPO_STD
+            self.normalized = True
+

@@ -15,6 +15,36 @@ from nowcasting_dataset.time import make_random_time_vectors
 
 logger = logging.getLogger(__name__)
 
+SAT_MEAN = [
+        93.23458,
+        131.71373,
+        843.7779,
+        736.6148,
+        771.1189,
+        589.66034,
+        862.29816,
+        927.69586,
+        90.70885,
+        107.58985,
+        618.4583,
+        532.47394,
+    ]
+
+SAT_STD = [
+        115.34247,
+        139.92636,
+        36.99538,
+        57.366386,
+        30.346825,
+        149.68007,
+        51.70631,
+        35.872967,
+        115.77212,
+        120.997154,
+        98.57828,
+        99.76469,
+    ]
+
 
 class SatelliteML(DataSourceOutputML):
     """Model for output of satellite data"""
@@ -86,3 +116,10 @@ class SatelliteML(DataSourceOutputML):
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
         return SatelliteML(**satellite_batch_ml)
+    
+    def normalize(self):
+        """Normalize the satellite data """
+        if not self.normalized:
+            self.data = self.data - SAT_MEAN
+            self.data = self.data / SAT_STD
+            self.normalized = True

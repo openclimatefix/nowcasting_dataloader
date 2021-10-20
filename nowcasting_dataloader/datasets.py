@@ -87,6 +87,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
+        normalize: bool = False
     ):
         """
         Netcdf Dataset
@@ -103,6 +104,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             forecast_minutes: How many future minutes of data to use, if reducing the amount of forecast time
             configuration: configuration object
             cloud: which cloud is used, can be "gcp", "aws" or "local".
+            normalize: normalize the batch data
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -111,6 +113,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.history_minutes = history_minutes
         self.forecast_minutes = forecast_minutes
         self.configuration = configuration
+        self.normalize = normalize
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -193,21 +196,16 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         # TODO Add positional encodings here https://github.com/openclimatefix/nowcasting_dataloader/issues/4
         # change batch into ML learning batch ready for training
-        batch = BatchML.from_batch(batch=batch)
+        batch: BatchML = BatchML.from_batch(batch=batch)
 
         # netcdf_batch = xr.load_dataset(local_netcdf_filename)
         if self.cloud != "local":
             # remove files in a folder, but not the folder itself
             delete_all_files_in_temp_path(self.src_path)
 
-        # Todo issue - https://github.com/openclimatefix/nowcasting_dataset/issues/231
-        if SATELLITE_DATA in self.required_keys:
-            sat_data = batch.satellite.data
-            if sat_data.dtype == np.int16:
-                sat_data = sat_data.astype(np.float32)
-                sat_data = sat_data - SAT_MEAN
-                sat_data = sat_data / SAT_STD
-                batch.satellite.data = sat_data
+        # normalize the data
+        if self.normalize:
+            batch.normalize()
 
         return batch.dict()
 
