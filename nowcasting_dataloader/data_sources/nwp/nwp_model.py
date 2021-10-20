@@ -15,7 +15,11 @@ from nowcasting_dataset.time import make_random_time_vectors
 
 logger = logging.getLogger(__name__)
 
-
+# Means computed with
+# nwp_ds = NWPDataSource(...)
+# nwp_ds.open()
+# mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
+#     dim=['step', 'x', 'init_time', 'y']).compute()
 NWP_MEAN = [
         2.8041010e02,
         1.6854691e01,
