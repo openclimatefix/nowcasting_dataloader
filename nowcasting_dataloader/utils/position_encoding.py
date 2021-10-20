@@ -13,10 +13,95 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+from nowcasting_dataset.dataset.batch import Batch
 
 TIME_DIM = 2
 HEIGHT_DIM = 3
 WIDTH_DIM = 4
+
+SEVIRI_RSS_BOUNDS = {"x_min": 0, "y_min": 0, "x_max": 1, "y_max": 1}
+
+
+def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, torch.Tensor]:
+    """
+    Generates positional encodings and returns them as a dictionary
+
+    This is not returned with the Batch, as that would require more keys, etc. in Batch
+
+    Args:
+        batch: Batch object holding the data
+
+    Returns:
+        Dictionary containing the keys of the modalities in the Batch + '_position_encoding'
+    """
+
+    assert batch.datetime is not None, "Datetime must be set for position encoding to work"
+
+    position_encodings = {}
+    # Go for each modality where a position encoding makes sense
+    if batch.satellite is not None:
+        position_encodings[batch.satellite.key + "_position_encoding"] = encode_absolute_position(
+            [
+                batch.batch_size,
+                len(batch.satellite.time),
+                len(batch.satellite.x),
+                len(batch.satellite.y),
+            ],  # We want to remove the channel dimension, as that's not relevant here
+            geospatial_coordinates=[batch.satellite.x, batch.satellite.y],
+            datetimes=batch.satellite.time,
+            geospatial_bounds=SEVIRI_RSS_BOUNDS,
+            **kwargs,
+        )
+
+    if batch.nwp is not None:
+        position_encodings[batch.satellite.key + "_position_encoding"] = encode_absolute_position(
+            [
+                batch.batch_size,
+                len(batch.satellite.time),
+                len(batch.satellite.x),
+                len(batch.satellite.y),
+            ],  # We want to remove the channel dimension, as that's not relevant here
+            geospatial_coordinates=[batch.satellite.x, batch.satellite.y],
+            datetimes=batch.satellite.time,
+            geospatial_bounds=SEVIRI_RSS_BOUNDS,
+            **kwargs,
+        )
+
+    if batch.gsp is not None:
+        position_encodings[batch.satellite.key + "_position_encoding"] = encode_absolute_position(
+            [
+                batch.batch_size,
+                len(batch.gsp.time),
+                len(batch.gsp.x),
+                len(batch.gsp.y),
+            ],  # We want to remove the channel dimension, as that's not relevant here
+            geospatial_coordinates=[batch.gsp.x, batch.gsp.y],
+            datetimes=batch.gsp.time,
+            geospatial_bounds=SEVIRI_RSS_BOUNDS,
+            **kwargs,
+        )
+
+    if batch.pv is not None:
+        position_encodings[batch.satellite.key + "_position_encoding"] = encode_absolute_position(
+            [
+                batch.batch_size,
+                len(batch.satellite.time),
+                len(batch.satellite.x),
+                len(batch.satellite.y),
+            ],  # We want to remove the channel dimension, as that's not relevant here
+            geospatial_coordinates=[batch.satellite.x, batch.satellite.y],
+            datetimes=batch.satellite.time,
+            geospatial_bounds=SEVIRI_RSS_BOUNDS,
+            **kwargs,
+        )
+
+    if batch.sun is not None:
+        pass
+
+    if batch.topographic is not None:
+        pass
+
+    return NotImplementedError
 
 
 def encode_modalities(
