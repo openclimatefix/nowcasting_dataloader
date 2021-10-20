@@ -8,8 +8,7 @@ import plotly.graph_objects as go
 import pytest
 import torch
 
-import nowcasting_dataset
-import nowcasting_dataset.dataset.batch
+import nowcasting_dataloader
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     SATELLITE_X_COORDS,
@@ -26,17 +25,16 @@ from nowcasting_dataset.consts import (
     T0_DT,
 )
 
-# from nowcasting_dataset.dataset import example
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 
 
 def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     DATA_PATH = os.path.join(
-        os.path.dirname(nowcasting_dataset.__file__), "../tests", "data", "batch"
+        os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch"
     )
     TEMP_PATH = os.path.join(
-        os.path.dirname(nowcasting_dataset.__file__), "../tests", "data", "batch", "temp"
+        os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch", "temp"
     )
 
     train_dataset = NetCDFDataset(
@@ -171,15 +169,6 @@ def test_required_keys_gcp(configuration: Configuration):
         os.path.join(DATA_PATH, "train"),
         os.path.join(TEMP_PATH, "train"),
         cloud="gcp",
-        # required_keys=[
-        #     NWP_DATA,
-        #     NWP_X_COORDS,
-        #     NWP_Y_COORDS,
-        #     SATELLITE_DATA,
-        #     SATELLITE_X_COORDS,
-        #     SATELLITE_Y_COORDS,
-        #     GSP_DATETIME_INDEX,
-        # ],
         configuration=configuration,
     )
 
