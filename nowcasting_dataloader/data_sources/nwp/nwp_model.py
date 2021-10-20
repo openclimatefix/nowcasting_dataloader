@@ -15,6 +15,37 @@ from nowcasting_dataset.time import make_random_time_vectors
 
 logger = logging.getLogger(__name__)
 
+# Means computed with
+# nwp_ds = NWPDataSource(...)
+# nwp_ds.open()
+# mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
+#     dim=['step', 'x', 'init_time', 'y']).compute()
+NWP_MEAN = [
+        2.8041010e02,
+        1.6854691e01,
+        6.7529683e-05,
+        8.1832832e01,
+        7.1233767e-03,
+        8.8566933e00,
+        4.3474598e04,
+        4.9820110e01,
+        4.8095409e01,
+        4.2833260e01,
+    ]
+
+NWP_STD =[
+        2.5812180e00,
+        4.1278820e01,
+        2.7507244e-04,
+        9.0967312e00,
+        1.4110464e-01,
+        4.3616886e00,
+        2.3853148e04,
+        3.8900299e01,
+        4.2830105e01,
+        4.2778091e01,
+    ]
+
 
 class NWPML(DataSourceOutputML):
     """ Model for output of NWP data """
@@ -94,3 +125,11 @@ class NWPML(DataSourceOutputML):
         )
 
         return NWPML(**nwp_batch_ml)
+
+    def normalize(self):
+        """Normalize the nwp data """
+        if not self.normalized:
+            self.data = self.data - NWP_MEAN
+            self.data = self.data / NWP_STD
+            self.normalized = True
+
