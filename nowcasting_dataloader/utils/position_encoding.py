@@ -177,7 +177,6 @@ def normalize_geospatial_coordinates(
         encoded_position = einops.rearrange(encoded_position, "... n d -> ... (n d)")
         to_concat.append(encoded_position)
 
-    # And now convert to Fourier features, based off the absolute positions of the coordinates
     encoded_position = torch.stack(to_concat, dim=0)
     return encoded_position
 
@@ -215,44 +214,6 @@ def create_datetime_features(
         outputs.append(index_cos)
 
     return outputs
-
-
-def encode_fouier_position(
-    batch_size: int,
-    axis: list,
-    max_frequency: float,
-    num_frequency_bands: int,
-    sine_only: bool = False,
-) -> torch.Tensor:
-    """
-    Encode the Fourier Features and return them
-
-    Args:
-        batch_size: Batch size
-        axis: List containing the size of each axis
-        max_frequency: Max frequency
-        num_frequency_bands: Number of frequency bands to use
-        sine_only: (bool) Whether to only use Sine features or both Sine and Cosine, defaults to both
-
-    Returns:
-        Torch tensor containing the Fourier Features of shape [Batch, *axis]
-    """
-    axis_pos = list(
-        map(
-            lambda size: torch.linspace(-1.0, 1.0, steps=size),
-            axis,
-        )
-    )
-    pos = torch.stack(torch.meshgrid(*axis_pos), dim=-1)
-    enc_pos = fourier_encode(
-        pos,
-        max_frequency,
-        num_frequency_bands,
-        sine_only=sine_only,
-    )
-    enc_pos = einops.rearrange(enc_pos, "... n d -> ... (n d)")
-    enc_pos = einops.repeat(enc_pos, "... -> b ...", b=batch_size)
-    return enc_pos
 
 
 def fourier_encode(
