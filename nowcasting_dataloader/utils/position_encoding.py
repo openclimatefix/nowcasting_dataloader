@@ -22,7 +22,7 @@ def encode_modalities(
     geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
     geospatial_bounds: Dict[str, float],
     **kwargs,
-) -> dict:
+) -> dict[str, torch.Tensor]:
     """
     Create a consistent position encoding and encode the positions of the different modalities in time and space
 
