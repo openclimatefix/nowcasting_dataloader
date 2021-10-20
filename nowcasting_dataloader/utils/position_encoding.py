@@ -75,7 +75,7 @@ def encode_position(
         shape: The shape of the input to be encoded, should be the largest or finest-grained input
             For example, if the inputs are shapes (12, 6, 128, 128) and (1, 6), (12, 6, 128, 128) should be passed in as
             shape, as it has the most elements and the input (1, 6) can just subselect the position encoding
-        geospatial_coordinates: The latitude/longitude of the inputs for shape, in OSGB coordinates
+        geospatial_coordinates: The x, y of the inputs for shape, in OSGB coordinates
         datetimes: time of day and date for each of the timesteps in the shape
         method: Method of the encoding, currently only 'fourier' for Fourier Features
         geospatial_bounds: The bounds of the geospatial area covered, in a dict with the keys 'x_min', 'y_min', 'x_max', 'y_max'
