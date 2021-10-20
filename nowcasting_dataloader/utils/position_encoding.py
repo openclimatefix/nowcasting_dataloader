@@ -112,7 +112,8 @@ def normalize_geospatial_coordinates(
     """
     Normalize the geospatial coordinates by the max extant to keep everything between -1 and 1, in sin and cos
 
-    This should work on a batch level, as the geospatial bounds should be the same for every example in the batch
+    This normalization should be against a set geospatial area, so that the same place has the same spatial encoding
+    every time.
 
     Args:
         geospatial_coordinates: The coordinates for the pixels in the image
