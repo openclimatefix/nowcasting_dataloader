@@ -19,6 +19,8 @@ from nowcasting_dataset.dataset.batch import Batch
 TIME_DIM = 2
 HEIGHT_DIM = 3
 WIDTH_DIM = 4
+# For GSP and PV, have an ID dimension
+ID_DIM = 3
 
 # Latitude coverage is 15 to 70
 # Longitude coverage is -45 to 65
@@ -61,7 +63,8 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
             "satellite",
             "topographic",
             "gsp",
-        ]:  # , "pv", "sun"
+            "pv",
+        ]:
             xr_dataset = getattr(batch, k)
             print(xr_dataset)
             print(xr_dataset.sizes)
@@ -71,21 +74,8 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                     datetimes = xr_dataset.time.values
                 elif hasattr(xr_dataset, "target_time"):
                     datetimes = xr_dataset.target_time.values
-                channel_key = (
-                    "channels_index" if "channels_index" in xr_dataset.sizes else "id_index"
-                )
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
-                    [
-                        batch.batch_size,
-                        xr_dataset.sizes.get(
-                            channel_key, 1
-                        ),  # If no channels, count as single channel image
-                        xr_dataset.sizes.get(
-                            "time_index", 1
-                        ),  # If no time dimension, just a single one
-                        xr_dataset.sizes.get("x_index", 1),  # If no x index, not an image
-                        xr_dataset.sizes.get("y_index", 1),  # If no y index, not an image
-                    ],
+                    shape=determine_shape_of_encoding(xr_dataset),
                     geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values]
                     if "x_index" in xr_dataset.sizes
                     else [xr_dataset.x_coords.values, xr_dataset.y_coords.values],
@@ -95,6 +85,35 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                 )
 
     return position_encodings
+
+
+def determine_shape_of_encoding(xr_dataset) -> List[int]:
+    """
+    Determine the shape of the encoding needed for the batch example
+
+    Args:
+        xr_dataset: Xarray dataset containing the data
+
+    Returns:
+        The determined shape that the encoding needs to be, either a 5-element list for image modalities,
+         or a 4-element list for point modalities (GSP, PV systems)
+    """
+    channel_key = "channels_index" if "channels_index" in xr_dataset.sizes else "id_index"
+    shape = [xr_dataset.sizes["example"]]
+    shape.append(
+        xr_dataset.sizes.get(channel_key, 1)
+    )  # If no channels, count as single channel image)
+    shape.append(xr_dataset.sizes.get("time_index", 1))  # If no time dimension, just a single one)
+
+    # Now for the main issue, either 4 or 5D here
+    if "x_index" in xr_dataset.sizes:
+        shape.append(xr_dataset.sizes["x_index"])
+        shape.append(xr_dataset.sizes["y_index"])
+    else:
+        # No spatial extant i.e. GSP, or PV
+        # Then the output should be for each ID, so would then be the same as the channels ID
+        shape.append(xr_dataset.sizes["id_index"])
+    return shape
 
 
 def encode_modalities(
@@ -170,10 +189,9 @@ def encode_absolute_position(
         encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
     )
 
-    if shape[HEIGHT_DIM] == 1 and shape[HEIGHT_DIM] != absolute_position_encoding.shape[HEIGHT_DIM]:
+    if len(shape) == 4:  # Point systems
         # Probably GSP or PV, just need the diagonal of the values, so have B, C, T, GSP/PV ID
         absolute_position_encoding = torch.diagonal(absolute_position_encoding, dim1=-2, dim2=-1)
-        print(absolute_position_encoding.shape)
 
     if datetimes is not None:
         datetime_features = create_datetime_features(datetimes)
@@ -181,11 +199,13 @@ def encode_absolute_position(
         # Combine time and space features
         to_concat = [absolute_position_encoding]
         for date_feature in datetime_features:
-            to_concat.append(
-                einops.repeat(
+            if len(shape) == 5:
+                date_feature = einops.repeat(
                     date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
                 )
-            )
+            else:
+                date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
+            to_concat.append(date_feature)
         print([x.shape for x in to_concat])
         # Now combined into one large encoding
         absolute_position_encoding = torch.cat(to_concat, dim=1)
