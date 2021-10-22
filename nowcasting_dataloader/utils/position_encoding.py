@@ -69,8 +69,6 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                 datetimes = None
                 if hasattr(xr_dataset, "time"):
                     datetimes = xr_dataset.time.values
-                elif hasattr(xr_dataset, "target_time"):
-                    datetimes = xr_dataset.target_time.values
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     shape=determine_shape_of_encoding(xr_dataset),
                     geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values]

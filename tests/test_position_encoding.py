@@ -6,12 +6,30 @@ from nowcasting_dataloader.utils.position_encoding import (
     create_datetime_features,
     normalize_geospatial_coordinates,
     generate_position_encodings_for_batch,
+    determine_shape_of_encoding,
 )
 from nowcasting_dataset.dataset.batch import Batch
 import pytest
 import pandas as pd
 import torch
 from copy import deepcopy
+
+
+@pytest.mark.parametrize(
+    ["key", "expected_shape"],
+    [
+        ("nwp", [32, 10, 19, 64, 64]),
+        ("satellite", [32, 12, 19, 64, 64]),
+        ("topographic", [32, 1, 1, 64, 64]),
+        ("pv", [32, 128, 19, 128]),
+        ("gsp", [32, 32, 4, 32]),
+    ],
+)
+def test_shape_encoding(key, expected_shape):
+    batch: Batch = Batch.fake()
+    xr_dataset = getattr(batch, key)
+    shape = determine_shape_of_encoding(xr_dataset)
+    assert shape == expected_shape
 
 
 def test_batch_encoding():
