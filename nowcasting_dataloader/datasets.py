@@ -208,9 +208,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.normalize:
             batch.normalize()
 
-        batch = batch.dict()
+        batch: dict = batch.dict()
         # Add position encodings
-        batch = batch.update(position_encodings)
+        batch.update(position_encodings)
         return batch
 
 
