@@ -36,29 +36,29 @@ class TopographicML(DataSourceOutputML):
 
     @property
     def height(self):
-        """ The height of the topographic image """
+        """The height of the topographic image"""
         return self.topo_data.shape[-1]
 
     @property
     def width(self):
-        """ The width of the topographic image """
+        """The width of the topographic image"""
         return self.topo_data.shape[-2]
 
     @validator("topo_x_coords")
     def x_coordinates_shape(cls, v, values):
-        """ Validate 'topo_x_coords' """
+        """Validate 'topo_x_coords'"""
         assert v.shape[-1] == values["topo_data"].shape[-2]
         return v
 
     @validator("topo_y_coords")
     def y_coordinates_shape(cls, v, values):
-        """ Validate 'topo_y_coords' """
+        """Validate 'topo_y_coords'"""
         assert v.shape[-1] == values["topo_data"].shape[-1]
         return v
 
     @staticmethod
     def fake(batch_size, image_size_pixels):
-        """ Create fake data """
+        """Create fake data"""
         return TopographicML(
             batch_size=batch_size,
             topo_data=np.random.randn(
@@ -73,7 +73,7 @@ class TopographicML(DataSourceOutputML):
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
-        """ Change xr dataset to model. If data does not exist, then return None """
+        """Change xr dataset to model. If data does not exist, then return None"""
         if TOPOGRAPHIC_DATA in xr_dataset.keys():
             return TopographicML(
                 batch_size=xr_dataset.data.shape[0],
@@ -83,11 +83,10 @@ class TopographicML(DataSourceOutputML):
             )
         else:
             return None
-        
+
     def normalize(self):
-        """Normalize the topological data """
+        """Normalize the topological data"""
         if not self.normalized:
             self.topo_data = self.topo_data - TOPO_MEAN
             self.topo_data = self.topo_data / TOPO_STD
             self.normalized = True
-

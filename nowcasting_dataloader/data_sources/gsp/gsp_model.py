@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class GSPML(DataSourceOutputML):
-    """ Model for output of GSP data """
+    """Model for output of GSP data"""
 
     # Shape: [batch_size,] seq_length, width, height, channel
     gsp_yield: Array = Field(
@@ -65,7 +65,7 @@ class GSPML(DataSourceOutputML):
 
     @validator("gsp_yield")
     def gsp_yield_shape(cls, v, values):
-        """ Validate 'gsp_yield' """
+        """Validate 'gsp_yield'"""
         if values["batch_size"] > 0:
             assert len(v.shape) == 3
         else:
@@ -74,19 +74,19 @@ class GSPML(DataSourceOutputML):
 
     @validator("gsp_x_coords")
     def x_coordinates_shape(cls, v, values):
-        """ Validate 'gsp_x_coords' """
+        """Validate 'gsp_x_coords'"""
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         return v
 
     @validator("gsp_y_coords")
     def y_coordinates_shape(cls, v, values):
-        """ Validate 'gsp_y_coords' """
+        """Validate 'gsp_y_coords'"""
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         return v
 
     @staticmethod
     def fake(batch_size, seq_length_30, n_gsp_per_batch, time_30=None):
-        """ Make a fake GSP object """
+        """Make a fake GSP object"""
         if time_30 is None:
             _, _, time_30 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=0, seq_length_30_minutes=seq_length_30
@@ -107,12 +107,12 @@ class GSPML(DataSourceOutputML):
         # copy is needed as torch doesnt not support negative strides
 
     def get_datetime_index(self) -> Array:
-        """ Get the datetime index of this data """
+        """Get the datetime index of this data"""
         return self.gsp_datetime_index
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
-        """ Change xr dataset to model. If data does not exist, then return None """
+        """Change xr dataset to model. If data does not exist, then return None"""
         if "gsp_yield" in xr_dataset.keys():
             return GSPML(
                 batch_size=xr_dataset["gsp_yield"].shape[0],

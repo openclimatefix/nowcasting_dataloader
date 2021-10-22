@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class SunML(DataSourceOutputML):
-    """ Model for Sun features """
+    """Model for Sun features"""
 
     sun_azimuth_angle: Array = Field(
         ...,
@@ -50,7 +50,7 @@ class SunML(DataSourceOutputML):
 
     @staticmethod
     def fake(batch_size, seq_length_5, time_5=None):
-        """ Create fake data """
+        """Create fake data"""
         if time_5 is None:
             _, time_5, _ = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
@@ -70,12 +70,12 @@ class SunML(DataSourceOutputML):
         )
 
     def get_datetime_index(self):
-        """ Get the datetime index of this data """
+        """Get the datetime index of this data"""
         return self.sun_datetime_index
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
-        """ Change xr dataset to model. If data does not exist, then return None """
+        """Change xr dataset to model. If data does not exist, then return None"""
         if SUN_AZIMUTH_ANGLE in xr_dataset.keys():
             return SunML(
                 batch_size=xr_dataset[SUN_AZIMUTH_ANGLE].shape[0],

@@ -116,14 +116,14 @@ class NetCDFDataset(torch.utils.data.Dataset):
             os.mkdir(self.tmp_path)
 
     def per_worker_init(self, worker_id: int):
-        """ Function called by a worker """
+        """Function called by a worker"""
         if self.cloud == "gcp":
             self.gcs = gcsfs.GCSFileSystem()
         elif self.cloud == "aws":
             self.s3_resource = boto3.resource("s3")
 
     def __len__(self):
-        """ Length of dataset """
+        """Length of dataset"""
         return self.n_batches
 
     def __getitem__(self, batch_idx: int) -> dict:

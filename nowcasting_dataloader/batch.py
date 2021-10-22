@@ -127,7 +127,7 @@ class BatchML(Example):
 
     @staticmethod
     def from_batch(batch: Batch) -> BatchML:
-        """ Change batch to ML batch """
+        """Change batch to ML batch"""
         data_sources_names = Example.__fields__.keys()
 
         data_sources_dict = {}
@@ -145,7 +145,7 @@ class BatchML(Example):
         return BatchML(**data_sources_dict)
 
     def normalize(self):
-        """ Normalize the batch """
+        """Normalize the batch"""
 
         # loop over all data sources and normalize
         for data_sources in self.data_sources:

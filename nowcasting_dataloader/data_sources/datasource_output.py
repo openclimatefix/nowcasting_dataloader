@@ -44,9 +44,8 @@ class DataSourceOutputML(BaseModel):
         pass
 
     def normalize(self):
-        """ Normalize the data """
+        """Normalize the data"""
         pass
-
 
 
 def pad_nans(array, pad_width) -> np.ndarray:

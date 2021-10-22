@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class PVML(DataSourceOutputML):
-    """ Model for output of PV data """
+    """Model for output of PV data"""
 
     # Shape: [batch_size,] seq_length, width, height, channel
     pv_yield: Array = Field(
@@ -65,19 +65,19 @@ class PVML(DataSourceOutputML):
 
     @validator("pv_system_x_coords")
     def x_coordinates_shape(cls, v, values):
-        """ Validate 'pv_system_x_coords' """
+        """Validate 'pv_system_x_coords'"""
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
 
     @validator("pv_system_y_coords")
     def y_coordinates_shape(cls, v, values):
-        """ Validate 'pv_system_y_coords' """
+        """Validate 'pv_system_y_coords'"""
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
 
     @staticmethod
     def fake(batch_size, seq_length_5, n_pv_systems_per_batch, time_5=None):
-        """ Create fake data """
+        """Create fake data"""
         if time_5 is None:
             _, time_5, _ = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
@@ -102,12 +102,12 @@ class PVML(DataSourceOutputML):
         )
 
     def get_datetime_index(self) -> Array:
-        """ Get the datetime index of this data """
+        """Get the datetime index of this data"""
         return self.pv_datetime_index
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
-        """ Change xr dataset to model. If data does not exist, then return None """
+        """Change xr dataset to model. If data does not exist, then return None"""
         if PV_YIELD in xr_dataset.keys():
             return PVML(
                 batch_size=xr_dataset[PV_YIELD].shape[0],
