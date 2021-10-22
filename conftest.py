@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import nowcasting_dataset
 import nowcasting_dataloader
 from nowcasting_dataset.config.load import load_yaml_configuration
 from nowcasting_dataset.dataset.xr_utils import (
@@ -34,7 +35,7 @@ def use_cloud_data(request):
 
 @pytest.fixture
 def configuration():
-    filename = os.path.join(os.path.dirname(nowcasting_dataloader.__file__), "config", "gcp.yaml")
+    filename = os.path.join(os.path.dirname(nowcasting_dataset.__file__), "config", "gcp.yaml")
     configuration = load_yaml_configuration(filename)
 
     return configuration
