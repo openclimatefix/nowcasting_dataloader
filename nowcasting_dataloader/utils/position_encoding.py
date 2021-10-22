@@ -33,6 +33,8 @@ ID_DIM = 3
 # print(lat_lon_to_osgb(70, -45))
 # Y_min,
 # print(lat_lon_to_osgb(70, 65))
+# SEVIRI RSS is the source of the satellite images that we use, and this is the spatial extant of the images that are
+# used for our nowcasting models
 SEVIRI_RSS_BOUNDS = {
     "x_min": -3296985.3339010067,
     "y_min": -4644595.096209157,
