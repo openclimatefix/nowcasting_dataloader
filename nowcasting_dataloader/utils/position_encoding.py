@@ -43,11 +43,11 @@ def get_seviri_rss_bounds() -> Dict[str, float]:
             x, y = lat_lon_to_osgb(lat, lon)
             if x < x_min:
                 x_min = x
-            elif x > x_max:
+            if x > x_max:
                 x_max = x
             if y < y_min:
                 y_min = y
-            elif y > y_max:
+            if y > y_max:
                 y_max = y
     return {
         "x_min": x_min,
