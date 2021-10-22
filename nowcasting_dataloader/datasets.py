@@ -119,20 +119,22 @@ class NetCDFDataset(torch.utils.data.Dataset):
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
         if self.forecast_minutes is None:
-            self.forecast_minutes = configuration.process.forecast_minutes
+            self.forecast_minutes = configuration.input_data.default_forecast_minutes
         if self.history_minutes is None:
-            self.history_minutes = configuration.process.history_minutes
+            self.history_minutes = configuration.input_data.default_history_minutes
 
         # see if we need to select the subset of data. If turned on -
         # only history_minutes + current time + forecast_minutes data is used.
         self.select_subset_data = False
-        if self.forecast_minutes != configuration.process.forecast_minutes:
+        if self.forecast_minutes != configuration.input_data.default_forecast_minutes:
             self.select_subset_data = True
-        if self.history_minutes != configuration.process.history_minutes:
+        if self.history_minutes != configuration.input_data.default_history_minutes:
             self.select_subset_data = True
 
         # Index into either sat_datetime_index or nwp_target_time indicating the current time,
-        self.current_timestep_5_index = int(configuration.process.history_minutes // 5) + 1
+        self.current_timestep_5_index = (
+            int(configuration.input_data.default_history_minutes // 5) + 1
+        )
 
         if required_keys is None:
             required_keys = DEFAULT_REQUIRED_KEYS
