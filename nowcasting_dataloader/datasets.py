@@ -20,6 +20,7 @@ from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataloader.subset import subselect_data
 from nowcasting_dataset.filesystem.utils import download_to_local, delete_all_files_in_temp_path
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
+from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
-        normalize: bool = False
+        normalize: bool = False,
     ):
         """
         Netcdf Dataset
@@ -184,7 +185,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         else:
             local_netcdf_folder = self.src_path
 
-        batch = Batch.load_netcdf(local_netcdf_folder, batch_idx=batch_idx)
+        batch: Batch = Batch.load_netcdf(local_netcdf_folder, batch_idx=batch_idx)
 
         if self.select_subset_data:
             batch = subselect_data(
@@ -194,7 +195,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 current_timestep_index=self.current_timestep_5_index,
             )
 
-        # TODO Add positional encodings here https://github.com/openclimatefix/nowcasting_dataloader/issues/4
+        position_encodings = generate_position_encodings_for_batch(batch)
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 
@@ -207,7 +208,10 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.normalize:
             batch.normalize()
 
-        return batch.dict()
+        batch = batch.dict()
+        # Add position encodings
+        batch = batch.update(position_encodings)
+        return batch
 
 
 def worker_init_fn(worker_id):
