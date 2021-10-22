@@ -21,11 +21,11 @@ class FakeDataset(torch.utils.data.Dataset):
         self.configuration = configuration
 
     def __len__(self):
-        """ Number of pieces of data """
+        """Number of pieces of data"""
         return self.length
 
     def per_worker_init(self, worker_id: int):
-        """ Nothing to do for FakeDataset """
+        """Nothing to do for FakeDataset"""
         pass
 
     def __getitem__(self, idx):

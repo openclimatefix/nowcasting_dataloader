@@ -12,7 +12,7 @@ from nowcasting_dataset.utils import coord_to_range
 
 
 class DatetimeML(DataSourceOutputML):
-    """ Model for output of datetime data """
+    """Model for output of datetime data"""
 
     hour_of_day_sin: Array  #: Shape: [batch_size,] seq_length
     hour_of_day_cos: Array
@@ -27,25 +27,25 @@ class DatetimeML(DataSourceOutputML):
 
     @validator("hour_of_day_cos")
     def v_hour_of_day_cos(cls, v, values):
-        """ Validate 'hour_of_day_cos' """
+        """Validate 'hour_of_day_cos'"""
         assert v.shape[-1] == values["hour_of_day_sin"].shape[-1]
         return v
 
     @validator("day_of_year_sin")
     def v_day_of_year_sin(cls, v, values):
-        """ Validate 'day_of_year_sin' """
+        """Validate 'day_of_year_sin'"""
         assert v.shape[-1] == values["hour_of_day_sin"].shape[-1]
         return v
 
     @validator("day_of_year_cos")
     def v_day_of_year_cos(cls, v, values):
-        """ Validate 'day_of_year_cos' """
+        """Validate 'day_of_year_cos'"""
         assert v.shape[-1] == values["hour_of_day_sin"].shape[-1]
         return v
 
     @staticmethod
     def fake(batch_size, seq_length_5):
-        """ Make a fake Datetime object """
+        """Make a fake Datetime object"""
         return DatetimeML(
             batch_size=batch_size,
             hour_of_day_sin=np.random.randn(
@@ -69,7 +69,7 @@ class DatetimeML(DataSourceOutputML):
         )
 
     def to_xr_dataset(self, _):
-        """ Make a xr dataset """
+        """Make a xr dataset"""
         individual_datasets = []
         for name in DATETIME_FEATURE_NAMES:
 
@@ -90,7 +90,7 @@ class DatetimeML(DataSourceOutputML):
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
-        """ Change xr dataset to model. If data does not exist, then return None """
+        """Change xr dataset to model. If data does not exist, then return None"""
         if "hour_of_day_sin" in xr_dataset.keys():
             return DatetimeML(
                 batch_size=xr_dataset["hour_of_day_sin"].shape[0],

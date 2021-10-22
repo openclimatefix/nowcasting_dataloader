@@ -112,13 +112,13 @@ class SatelliteML(DataSourceOutputML):
 
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
-        """Change xr dataset to model. """
+        """Change xr dataset to model."""
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
         return SatelliteML(**satellite_batch_ml)
 
     def normalize(self):
-        """Normalize the satellite data """
+        """Normalize the satellite data"""
         if not self.normalized:
             self.data = self.data - SAT_MEAN
             self.data = self.data / SAT_STD
