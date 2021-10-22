@@ -42,8 +42,8 @@ def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
     )
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(batch_size, spatial_size) * 9)[0]
-    y = torch.sort(torch.rand(batch_size, spatial_size) * 120, descending=True)[0]
+    x = np.sort(np.random.rand(batch_size, spatial_size) * 9)
+    y = np.sort(np.random.rand(batch_size, spatial_size) * 120)
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     return datetimes, geospatial_bounds, geospatial_coordinates
@@ -68,8 +68,8 @@ def test_datetime_feature_creation():
 def test_geospatial_normalization():
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(32, 128) * 9)[0]
-    y = torch.sort(torch.rand(32, 128) * 120, descending=True)[0]
+    x = np.sort(np.random.rand(32, 128) * 9)
+    y = np.sort(np.random.rand(32, 128) * 120)
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     normalized_coordinates = normalize_geospatial_coordinates(
