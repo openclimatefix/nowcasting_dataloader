@@ -15,6 +15,7 @@ from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
 import pandas as pd
 from nowcasting_dataset.dataset.batch import Batch
+import xarray as xr
 
 TIME_DIM = 2
 HEIGHT_DIM = 3
@@ -71,11 +72,14 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                 datetimes = None
                 if hasattr(xr_dataset, "time"):
                     datetimes = xr_dataset.time.values
+                geospatial_coordinates = (
+                    [xr_dataset.x.values, xr_dataset.y.values]
+                    if "x_index" in xr_dataset.sizes
+                    else [xr_dataset.x_coords.values, xr_dataset.y_coords.values]
+                )
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     shape=determine_shape_of_encoding(xr_dataset),
-                    geospatial_coordinates=[xr_dataset.x.values, xr_dataset.y.values]
-                    if "x_index" in xr_dataset.sizes
-                    else [xr_dataset.x_coords.values, xr_dataset.y_coords.values],
+                    geospatial_coordinates=geospatial_coordinates,
                     datetimes=datetimes,
                     geospatial_bounds=SEVIRI_RSS_BOUNDS,
                     **kwargs,
@@ -84,7 +88,7 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
     return position_encodings
 
 
-def determine_shape_of_encoding(xr_dataset) -> List[int]:
+def determine_shape_of_encoding(xr_dataset: xr.Dataset) -> List[int]:
     """
     Determine the shape of the encoding needed for the batch example
 
