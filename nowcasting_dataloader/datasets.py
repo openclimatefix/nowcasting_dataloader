@@ -89,6 +89,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
         normalize: bool = False,
+        add_position_encoding: bool = False,
     ):
         """
         Netcdf Dataset
@@ -106,6 +107,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             configuration: configuration object
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
+            add_position_encoding: Whether to add position encoding or not
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -115,6 +117,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.forecast_minutes = forecast_minutes
         self.configuration = configuration
         self.normalize = normalize
+        self.add_position_encoding = add_position_encoding
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -196,8 +199,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 forecast_minutes=self.forecast_minutes,
                 current_timestep_index=self.current_timestep_5_index,
             )
-
-        position_encodings = generate_position_encodings_for_batch(batch)
+        if self.add_position_encoding:
+            position_encodings = generate_position_encodings_for_batch(batch)
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 
@@ -211,8 +214,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
             batch.normalize()
 
         batch: dict = batch.dict()
-        # Add position encodings
-        batch.update(position_encodings)
+        if self.add_position_encoding:
+            # Add position encodings
+            batch.update(position_encodings)
         return batch
 
 
