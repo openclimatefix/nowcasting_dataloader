@@ -16,6 +16,7 @@ import datetime
 import pandas as pd
 from nowcasting_dataset.dataset.batch import Batch
 import xarray as xr
+from nowcasting_dataset.geospatial import lat_lon_to_osgb
 
 TIME_DIM = 2
 HEIGHT_DIM = 3
@@ -23,25 +24,37 @@ WIDTH_DIM = 4
 # For GSP and PV, have an ID dimension
 ID_DIM = 3
 
-# Latitude coverage is 15 to 70
-# Longitude coverage is -45 to 65
-# These bounds are calculated by:
-# from nowcasting_dataset.geospatial import lat_lon_to_osgb
-# Y_min, X_max
-# print(lat_lon_to_osgb(15, -45))
-# Y_min, X_min
-# print(lat_lon_to_osgb(15, 65))
-# print(lat_lon_to_osgb(70, -45))
-# Y_min,
-# print(lat_lon_to_osgb(70, 65))
-# SEVIRI RSS is the source of the satellite images that we use, and this is the spatial extant of the images that are
-# used for our nowcasting models
-SEVIRI_RSS_BOUNDS = {
-    "x_min": -3296985.3339010067,
-    "y_min": -4644595.096209157,
-    "x_max": 3566863.835770559,
-    "y_max": 9451529.32492207,
-}
+
+def get_seviri_rss_bounds() -> Dict[str, float]:
+    """
+    Computes the SEVIRI RSS bounds in OSGB coordinates
+
+    SEVIRI RSS is the imager that takes all the satellite imagery currently used by the nowcasting dataset and models
+
+    Returns:
+        Dictionary containing the geographic bounds of the RSS images in OSGB coordinates
+    """
+    x_min = np.inf
+    x_max = -np.inf
+    y_min = np.inf
+    y_max = -np.inf
+    for lat in [15, 70]:
+        for lon in [-45, 65]:
+            x, y = lat_lon_to_osgb(lat, lon)
+            if x < x_min:
+                x_min = x
+            elif x > x_max:
+                x_max = x
+            if y < y_min:
+                y_min = y
+            elif y > y_max:
+                y_max = y
+    return {
+        "x_min": x_min,
+        "y_min": y_min,
+        "x_max": x_max,
+        "y_max": y_max,
+    }
 
 
 def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, torch.Tensor]:
@@ -81,7 +94,7 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                     shape=determine_shape_of_encoding(xr_dataset),
                     geospatial_coordinates=geospatial_coordinates,
                     datetimes=datetimes,
-                    geospatial_bounds=SEVIRI_RSS_BOUNDS,
+                    geospatial_bounds=get_seviri_rss_bounds(),
                     **kwargs,
                 )
 
