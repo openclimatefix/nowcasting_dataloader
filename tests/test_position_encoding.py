@@ -21,7 +21,12 @@ def test_batch_encoding():
         max_freq=64,
         num_bands=16,
     )
-    print(position_encodings.keys())
+    for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
+        position_encoding_key = key + "_position_encoding"
+        assert position_encoding_key in position_encodings.keys()
+        assert torch.isfinite(position_encodings[position_encoding_key]).all()
+        assert torch.min(position_encodings[position_encoding_key]) >= -1.0
+        assert torch.max(position_encodings[position_encoding_key]) <= 1.0
 
 
 def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
