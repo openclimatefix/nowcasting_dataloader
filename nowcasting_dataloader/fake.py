@@ -16,7 +16,7 @@ class FakeDataset(torch.utils.data.Dataset):
             configuration: configuration object
             length: length of dataset
         """
-        self.number_nwp_channels = len(configuration.process.nwp_channels)
+        self.number_nwp_channels = len(configuration.input_data.nwp.nwp_channels)
         self.length = length
         self.configuration = configuration
 
