@@ -7,6 +7,7 @@ from nowcasting_dataloader.utils.position_encoding import (
     normalize_geospatial_coordinates,
     generate_position_encodings_for_batch,
     determine_shape_of_encoding,
+    combine_space_and_time_features,
 )
 from nowcasting_dataset.dataset.batch import Batch
 import pytest
@@ -111,6 +112,23 @@ def test_encode_absolute_position():
     assert absolute_position_encoding.size() == (12, 134, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
+
+
+def test_combine_space_and_time_features():
+    space_features = torch.randn(32, 66, 10, 64, 64)
+    time_features = [torch.randn(32, 10) for _ in range(4)]
+    shape = [32, 5, 10, 64, 64]
+    combined_encoding = combine_space_and_time_features(
+        spatial_features=space_features, datetime_features=time_features, shape=shape
+    )
+    assert torch.isfinite(combined_encoding).all()
+    assert combined_encoding.shape == (
+        32,
+        70,
+        10,
+        64,
+        64,
+    )  # 70 from the 66 spatial channels, and 4 temporal ones
 
 
 def test_encode_modalities():

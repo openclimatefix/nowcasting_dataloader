@@ -193,20 +193,39 @@ def encode_absolute_position(
     if datetimes is not None:
         datetime_features = create_datetime_features(datetimes)
 
-        # Combine time and space features
-        to_concat = [absolute_position_encoding]
-        for date_feature in datetime_features:
-            if len(shape) == 5:
-                date_feature = einops.repeat(
-                    date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
-                )
-            else:
-                date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
-            to_concat.append(date_feature)
-        # Now combined into one large encoding
-        absolute_position_encoding = torch.cat(to_concat, dim=1)
+        absolute_position_encoding = combine_space_and_time_features(
+            absolute_position_encoding, datetime_features=datetime_features, shape=shape
+        )
 
     return absolute_position_encoding
+
+
+def combine_space_and_time_features(
+    spatial_features: torch.Tensor, datetime_features: List[torch.Tensor], shape: List[int]
+) -> torch.Tensor:
+    """
+    Combine spatial and temporal features a list of Tensors to be concatenated
+
+    Args:
+        spatial_features: Spatial features
+        datetime_features: List of datetime features
+        shape: The desired shape of the encoding
+
+    Returns:
+        Tensor containing the combined space and time features
+    """
+    to_concat = [spatial_features]
+    # Combine time and space features
+    for date_feature in datetime_features:
+        if len(shape) == 5:
+            date_feature = einops.repeat(
+                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+            )
+        else:
+            date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
+        to_concat.append(date_feature)
+    space_and_time_encoding = torch.cat(to_concat, dim=1)
+    return space_and_time_encoding
 
 
 def normalize_geospatial_coordinates(
