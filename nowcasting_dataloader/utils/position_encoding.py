@@ -57,7 +57,6 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
     position_encodings = {}
     # Go for each modality where a position encoding makes sense
     for k in batch.__fields__.keys():
-        print(k)
         if k in [
             "nwp",
             "satellite",
@@ -66,8 +65,6 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
             "pv",
         ]:
             xr_dataset = getattr(batch, k)
-            print(xr_dataset)
-            print(xr_dataset.sizes)
             if xr_dataset is not None:
                 datetimes = None
                 if hasattr(xr_dataset, "time"):
@@ -206,7 +203,6 @@ def encode_absolute_position(
             else:
                 date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
             to_concat.append(date_feature)
-        print([x.shape for x in to_concat])
         # Now combined into one large encoding
         absolute_position_encoding = torch.cat(to_concat, dim=1)
 
