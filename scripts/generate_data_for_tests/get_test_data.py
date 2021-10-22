@@ -13,8 +13,8 @@ local_path = os.path.dirname(nowcasting_dataloader.__file__) + "/.."
 
 c = Configuration()
 c.process.batch_size = 4
-c.process.nwp_channels = c.process.nwp_channels[0:1]
-c.process.sat_channels = c.process.sat_channels[0:1]
+c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
+c.input_data.satellite.sat_channels = c.input_data.satellite.sat_channels[0:1]
 
 f = Batch.fake(configuration=c)
 f.save_netcdf(batch_i=0, path=Path(f"{local_path}/tests/data/batch"))

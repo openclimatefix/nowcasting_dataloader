@@ -5,11 +5,47 @@ from nowcasting_dataloader.utils.position_encoding import (
     encode_absolute_position,
     create_datetime_features,
     normalize_geospatial_coordinates,
+    generate_position_encodings_for_batch,
+    determine_shape_of_encoding,
+    combine_space_and_time_features,
 )
+from nowcasting_dataset.dataset.batch import Batch
 import pytest
 import pandas as pd
 import torch
 from copy import deepcopy
+
+
+@pytest.mark.parametrize(
+    ["key", "expected_shape"],
+    [
+        ("nwp", [32, 10, 19, 64, 64]),
+        ("satellite", [32, 12, 19, 64, 64]),
+        ("topographic", [32, 1, 1, 64, 64]),
+        ("pv", [32, 128, 19, 128]),
+        ("gsp", [32, 32, 4, 32]),
+    ],
+)
+def test_shape_encoding(key, expected_shape):
+    batch: Batch = Batch.fake()
+    xr_dataset = getattr(batch, key)
+    shape = determine_shape_of_encoding(xr_dataset)
+    assert shape == expected_shape
+
+
+def test_batch_encoding():
+    batch: Batch = Batch.fake()
+    position_encodings = generate_position_encodings_for_batch(
+        batch,
+        max_freq=64,
+        num_bands=16,
+    )
+    for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
+        position_encoding_key = key + "_position_encoding"
+        assert position_encoding_key in position_encodings.keys()
+        assert torch.isfinite(position_encodings[position_encoding_key]).all()
+        assert torch.min(position_encodings[position_encoding_key]) >= -1.0
+        assert torch.max(position_encodings[position_encoding_key]) <= 1.0
 
 
 def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
@@ -25,8 +61,8 @@ def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
     )
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(batch_size, spatial_size) * 9)[0]
-    y = torch.sort(torch.rand(batch_size, spatial_size) * 120, descending=True)[0]
+    x = np.sort(np.random.rand(batch_size, spatial_size) * 9)
+    y = np.sort(np.random.rand(batch_size, spatial_size) * 120)
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     return datetimes, geospatial_bounds, geospatial_coordinates
@@ -51,8 +87,8 @@ def test_datetime_feature_creation():
 def test_geospatial_normalization():
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
-    x = torch.sort(torch.rand(32, 128) * 9)[0]
-    y = torch.sort(torch.rand(32, 128) * 120, descending=True)[0]
+    x = np.sort(np.random.rand(32, 128) * 9)
+    y = np.sort(np.random.rand(32, 128) * 120)
     geospatial_coordinates.append(x)
     geospatial_coordinates.append(y)
     normalized_coordinates = normalize_geospatial_coordinates(
@@ -76,6 +112,23 @@ def test_encode_absolute_position():
     assert absolute_position_encoding.size() == (12, 134, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
+
+
+def test_combine_space_and_time_features():
+    space_features = torch.randn(32, 66, 10, 64, 64)
+    time_features = [torch.randn(32, 10) for _ in range(4)]
+    shape = [32, 5, 10, 64, 64]
+    combined_encoding = combine_space_and_time_features(
+        spatial_features=space_features, datetime_features=time_features, shape=shape
+    )
+    assert torch.isfinite(combined_encoding).all()
+    assert combined_encoding.shape == (
+        32,
+        70,
+        10,
+        64,
+        64,
+    )  # 70 from the 66 spatial channels, and 4 temporal ones
 
 
 def test_encode_modalities():

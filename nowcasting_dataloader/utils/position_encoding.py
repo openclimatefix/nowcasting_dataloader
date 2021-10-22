@@ -13,10 +13,121 @@ import einops
 from math import pi
 from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+import pandas as pd
+from nowcasting_dataset.dataset.batch import Batch
+import xarray as xr
+from nowcasting_dataset.geospatial import lat_lon_to_osgb
 
 TIME_DIM = 2
 HEIGHT_DIM = 3
 WIDTH_DIM = 4
+# For GSP and PV, have an ID dimension
+ID_DIM = 3
+
+
+def get_seviri_rss_bounds() -> Dict[str, float]:
+    """
+    Computes the SEVIRI RSS bounds in OSGB coordinates
+
+    SEVIRI RSS is the imager that takes all the satellite imagery currently used by the nowcasting dataset and models
+
+    Returns:
+        Dictionary containing the geographic bounds of the RSS images in OSGB coordinates
+    """
+    x_min = np.inf
+    x_max = -np.inf
+    y_min = np.inf
+    y_max = -np.inf
+    for lat in [15, 70]:
+        for lon in [-45, 65]:
+            x, y = lat_lon_to_osgb(lat, lon)
+            if x < x_min:
+                x_min = x
+            if x > x_max:
+                x_max = x
+            if y < y_min:
+                y_min = y
+            if y > y_max:
+                y_max = y
+    return {
+        "x_min": x_min,
+        "y_min": y_min,
+        "x_max": x_max,
+        "y_max": y_max,
+    }
+
+
+def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, torch.Tensor]:
+    """
+    Generates positional encodings and returns them as a dictionary
+
+    This is not returned with the Batch, as that would require more keys, etc. in Batch
+
+    Args:
+        batch: Batch object holding the data
+
+    Returns:
+        Dictionary containing the keys of the modalities in the Batch + '_position_encoding'
+    """
+
+    position_encodings = {}
+    # Go for each modality where a position encoding makes sense
+    for k in batch.__fields__.keys():
+        if k in [
+            "nwp",
+            "satellite",
+            "topographic",
+            "gsp",
+            "pv",
+        ]:
+            xr_dataset = getattr(batch, k)
+            if xr_dataset is not None:
+                datetimes = None
+                if hasattr(xr_dataset, "time"):
+                    datetimes = xr_dataset.time.values
+                geospatial_coordinates = (
+                    [xr_dataset.x.values, xr_dataset.y.values]
+                    if "x_index" in xr_dataset.sizes
+                    else [xr_dataset.x_coords.values, xr_dataset.y_coords.values]
+                )
+                position_encodings[k + "_position_encoding"] = encode_absolute_position(
+                    shape=determine_shape_of_encoding(xr_dataset),
+                    geospatial_coordinates=geospatial_coordinates,
+                    datetimes=datetimes,
+                    geospatial_bounds=get_seviri_rss_bounds(),
+                    **kwargs,
+                )
+
+    return position_encodings
+
+
+def determine_shape_of_encoding(xr_dataset: xr.Dataset) -> List[int]:
+    """
+    Determine the shape of the encoding needed for the batch example
+
+    Args:
+        xr_dataset: Xarray dataset containing the data
+
+    Returns:
+        The determined shape that the encoding needs to be, either a 5-element list for image modalities,
+         or a 4-element list for point modalities (GSP, PV systems)
+    """
+    channel_key = "channels_index" if "channels_index" in xr_dataset.sizes else "id_index"
+    shape = [xr_dataset.sizes["example"]]
+    shape.append(
+        xr_dataset.sizes.get(channel_key, 1)
+    )  # If no channels, count as single channel image)
+    shape.append(xr_dataset.sizes.get("time_index", 1))  # If no time dimension, just a single one)
+
+    # Now for the main issue, either 4 or 5D here
+    if "x_index" in xr_dataset.sizes:
+        shape.append(xr_dataset.sizes["x_index"])
+        shape.append(xr_dataset.sizes["y_index"])
+    else:
+        # No spatial extant i.e. GSP, or PV
+        # Then the output should be for each ID, so would then be the same as the channels ID
+        shape.append(xr_dataset.sizes["id_index"])
+    return shape
 
 
 def encode_modalities(
@@ -65,7 +176,7 @@ def encode_absolute_position(
     shape: List[int],
     geospatial_coordinates: List[np.ndarray],
     geospatial_bounds: Dict[str, float],
-    datetimes: List[datetime.datetime],
+    datetimes: Optional[List[datetime.datetime]] = None,
     **kwargs,
 ) -> torch.Tensor:
     """
@@ -84,26 +195,54 @@ def encode_absolute_position(
     Returns:
         The absolute position encoding for the given shape
     """
-    datetime_features = create_datetime_features(datetimes)
-
     # Fourier Features of absolute position
     encoded_geo_position = normalize_geospatial_coordinates(
         geospatial_coordinates, geospatial_bounds, **kwargs
     )
+    absolute_position_encoding = einops.repeat(
+        encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
+    )
 
-    # Combine time and space features
-    to_concat = [einops.repeat(encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM])]
-    for date_feature in datetime_features:
-        to_concat.append(
-            einops.repeat(
-                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
-            )
+    if len(shape) == 4:  # Point systems
+        # Probably GSP or PV, just need the diagonal of the values, so have B, C, T, GSP/PV ID
+        absolute_position_encoding = torch.diagonal(absolute_position_encoding, dim1=-2, dim2=-1)
+
+    if datetimes is not None:
+        datetime_features = create_datetime_features(datetimes)
+
+        absolute_position_encoding = combine_space_and_time_features(
+            absolute_position_encoding, datetime_features=datetime_features, shape=shape
         )
 
-    # Now combined into one large encoding
-    absolute_position_encoding = torch.cat(to_concat, dim=1)
-
     return absolute_position_encoding
+
+
+def combine_space_and_time_features(
+    spatial_features: torch.Tensor, datetime_features: List[torch.Tensor], shape: List[int]
+) -> torch.Tensor:
+    """
+    Combine spatial and temporal features a list of Tensors to be concatenated
+
+    Args:
+        spatial_features: Spatial features
+        datetime_features: List of datetime features
+        shape: The desired shape of the encoding
+
+    Returns:
+        Tensor containing the combined space and time features
+    """
+    to_concat = [spatial_features]
+    # Combine time and space features
+    for date_feature in datetime_features:
+        if len(shape) == 5:
+            date_feature = einops.repeat(
+                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+            )
+        else:
+            date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
+        to_concat.append(date_feature)
+    space_and_time_encoding = torch.cat(to_concat, dim=1)
+    return space_and_time_encoding
 
 
 def normalize_geospatial_coordinates(
@@ -139,8 +278,8 @@ def normalize_geospatial_coordinates(
     # Have to do it for each individual example in the batch, and zip together x and y for it
     to_concat = []
     for idx in range(len(geospatial_coordinates[0])):
-        x = geospatial_coordinates[0][idx]
-        y = geospatial_coordinates[1][idx]
+        x = torch.from_numpy(geospatial_coordinates[0][idx])
+        y = torch.from_numpy(geospatial_coordinates[1][idx])
         grid = torch.meshgrid(x, y)
         pos = torch.stack(grid, dim=-1)
         encoded_position = fourier_encode(pos, **kwargs)
@@ -169,8 +308,9 @@ def create_datetime_features(
         hours = []
         days = []
         for index in datetimes[batch_idx]:
-            hours.append((index.hour + (index.minute / 60) / 24))
-            days.append((index.timetuple().tm_yday / 365))
+            time_index = pd.Timestamp(index)
+            hours.append((time_index.hour + (time_index.minute / 60) / 24))
+            days.append((time_index.timetuple().tm_yday / 365))
         hour_of_day.append(hours)
         day_of_year.append(days)
 

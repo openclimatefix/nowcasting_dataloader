@@ -82,11 +82,12 @@ class BatchML(Example):
     def fake(configuration: Configuration = Configuration()):
         """Create fake batch"""
         process = configuration.process
+        input_data = configuration.input_data
 
         t0_dt, time_5, time_30 = make_random_time_vectors(
             batch_size=process.batch_size,
-            seq_length_5_minutes=process.seq_length_5_minutes,
-            seq_length_30_minutes=process.seq_length_30_minutes,
+            seq_length_5_minutes=input_data.default_seq_length_5_minutes,
+            seq_length_30_minutes=input_data.default_seq_length_5_minutes // 6,
         )
 
         return BatchML(
@@ -94,33 +95,33 @@ class BatchML(Example):
             metadata=MetadataML.fake(batch_size=process.batch_size, t0_dt=t0_dt),
             satellite=SatelliteML.fake(
                 process.batch_size,
-                process.seq_length_5_minutes,
-                process.satellite_image_size_pixels,
-                len(process.sat_channels),
+                input_data.default_seq_length_5_minutes,
+                input_data.satellite.satellite_image_size_pixels,
+                len(input_data.satellite.sat_channels),
                 time_5=time_5,
             ),
             topographic=TopographicML.fake(
                 batch_size=process.batch_size,
-                image_size_pixels=process.satellite_image_size_pixels,
+                image_size_pixels=input_data.satellite.satellite_image_size_pixels,
             ),
             pv=PVML.fake(
                 batch_size=process.batch_size,
-                seq_length_5=process.seq_length_5_minutes,
+                seq_length_5=input_data.default_seq_length_5_minutes,
                 n_pv_systems_per_batch=128,
                 time_5=time_5,
             ),
             sun=SunML.fake(
-                batch_size=process.batch_size, seq_length_5=process.seq_length_5_minutes
+                batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
             ),
             nwp=NWPML.fake(
                 batch_size=process.batch_size,
-                seq_length_5=process.seq_length_5_minutes,
-                image_size_pixels=process.nwp_image_size_pixels,
-                number_nwp_channels=len(process.nwp_channels),
+                seq_length_5=input_data.default_seq_length_5_minutes,
+                image_size_pixels=input_data.nwp.nwp_image_size_pixels,
+                number_nwp_channels=len(input_data.nwp.nwp_channels),
                 time_5=time_5,
             ),
             datetime=DatetimeML.fake(
-                batch_size=process.batch_size, seq_length_5=process.seq_length_5_minutes
+                batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
             ),
         )
 
@@ -145,7 +146,7 @@ class BatchML(Example):
 
     def normalize(self):
         """ Normalize the batch """
-        
+
         # loop over all data sources and normalize
         for data_sources in self.data_sources:
             data_sources.normalize()
