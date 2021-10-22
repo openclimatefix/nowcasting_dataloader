@@ -30,43 +30,6 @@ NetCDFDataset- torch.utils.data.Dataset: Use for loading pre-made batches
 NowcastingDataset - torch.utils.data.IterableDataset: Dataset for making batches
 """
 
-SAT_MEAN = xr.DataArray(
-    data=[
-        93.23458,
-        131.71373,
-        843.7779,
-        736.6148,
-        771.1189,
-        589.66034,
-        862.29816,
-        927.69586,
-        90.70885,
-        107.58985,
-        618.4583,
-        532.47394,
-    ],
-    dims=["sat_variable"],
-    coords={"sat_variable": list(SAT_VARIABLE_NAMES)},
-).astype(np.float32)
-
-SAT_STD = xr.DataArray(
-    data=[
-        115.34247,
-        139.92636,
-        36.99538,
-        57.366386,
-        30.346825,
-        149.68007,
-        51.70631,
-        35.872967,
-        115.77212,
-        120.997154,
-        98.57828,
-        99.76469,
-    ],
-    dims=["sat_variable"],
-    coords={"sat_variable": list(SAT_VARIABLE_NAMES)},
-).astype(np.float32)
 
 _LOG = logging.getLogger(__name__)
 
