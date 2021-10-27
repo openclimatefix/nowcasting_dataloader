@@ -1,0 +1,50 @@
+loaders:
+  - type: python
+    search_path: [nowcasting_dataloader/]
+processors:
+  - type: filter
+  - type: smart
+renderer:
+  type: mkdocs
+  pages:
+    - title: Home
+      name: index
+      source: README.md
+    - title: API Documentation
+      children:
+        - title: Data sources
+          children:
+            - title: Overview
+              source: nowcasting_dataset/data_sources/README.md
+            - title: Datetime
+              contents: [data_sources.datetime, data_sources.datetime.*]
+            - title: Grid Supply Point (GSP)
+              contents: [data_sources.gsp, data_sources.gsp.*]
+            - title: Metadata
+              contents: [data_sources.metadata, data_sources.metadata.*]
+            - title: Numerical Weather Predictions (NWP)
+              contents: [data_sources.nwp, data_sources.nwp.*]
+            - title: Satellite
+              contents: [data_sources.satellite, data_sources.satellite.*]
+            - title: Sun
+              contents: [data_sources.sun, data_sources.sun.*]
+            - title: Topographic
+              contents: [data_sources.topographic, data_sources.topographic.*]
+        - title: Utils
+          contents: [utils, utils.*]
+        - title: Dataloaders
+          children:
+            - title: Dataloaders
+              contents: [dataloaders]
+            - title: Subsetting Data
+              contents: [subset]
+            - title: Test Data
+              contents: [fake]
+        - title: Datasets
+          contents: [datasets]
+        - title: Batch
+          contents: [batch]
+  mkdocs_config:
+    site_name: Nowcasting Dataloader
+    theme: readthedocs
+    repo_url: https://github.com/openclimatefix/nowcasting_dataloader
