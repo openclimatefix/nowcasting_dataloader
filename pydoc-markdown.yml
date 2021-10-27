@@ -15,7 +15,7 @@ renderer:
         - title: Data sources
           children:
             - title: Overview
-              source: nowcasting_dataset/data_sources/README.md
+              source: nowcasting_dataloader/data_sources/README.md
             - title: Datetime
               contents: [data_sources.datetime, data_sources.datetime.*]
             - title: Grid Supply Point (GSP)
