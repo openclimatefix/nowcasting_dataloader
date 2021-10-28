@@ -1,25 +1,19 @@
 """ Dataset and functions"""
 import logging
 import os
-from typing import List, Tuple, Union, Optional
+from typing import List, Optional, Tuple, Union
 
 import boto3
 import gcsfs
-import numpy as np
 import torch
-import xarray as xr
-
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import (
-    SATELLITE_DATA,
-    DEFAULT_REQUIRED_KEYS,
-)
-from nowcasting_dataset.data_sources.satellite.satellite_data_source import SAT_VARIABLE_NAMES
-from nowcasting_dataloader.batch import BatchML
+from nowcasting_dataset.consts import DEFAULT_REQUIRED_KEYS
 from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataloader.subset import subselect_data
-from nowcasting_dataset.filesystem.utils import download_to_local, delete_all_files_in_temp_path
+from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
+
+from nowcasting_dataloader.batch import BatchML
+from nowcasting_dataloader.subset import subselect_data
 from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 logger = logging.getLogger(__name__)
@@ -64,9 +58,11 @@ class NetCDFDataset(torch.utils.data.Dataset):
             tmp_path: The full path to the local temporary directory
                 (on a local filesystem).
             cloud:
-            required_keys: Tuple or list of keys required in the example for it to be considered usable
+            required_keys: Tuple or list of keys required in the example for
+                it to be considered usable
             history_minutes: How many past minutes of data to use, if subsetting the batch
-            forecast_minutes: How many future minutes of data to use, if reducing the amount of forecast time
+            forecast_minutes: How many future minutes of data to use, if reducing the amount
+                of forecast time
             configuration: configuration object
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data

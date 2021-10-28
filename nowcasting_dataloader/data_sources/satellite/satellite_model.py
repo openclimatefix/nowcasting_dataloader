@@ -5,13 +5,11 @@ import logging
 
 import numpy as np
 import xarray as xr
+from nowcasting_dataset.consts import Array
+from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
-from nowcasting_dataset.consts import Array
-from nowcasting_dataloader.data_sources.datasource_output import (
-    DataSourceOutputML,
-)
-from nowcasting_dataset.time import make_random_time_vectors
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +54,13 @@ class SatelliteML(DataSourceOutputML):
     )
     x: Array = Field(
         ...,
-        description="The x (OSGB geo-spatial) coordinates of the satellite images. Shape: [batch_size,] width",
+        description="The x (OSGB geo-spatial) coordinates of the satellite images. "
+        "Shape: [batch_size,] width",
     )
     y: Array = Field(
         ...,
-        description="The y (OSGB geo-spatial) coordinates of the satellite images. Shape: [batch_size,] height",
+        description="The y (OSGB geo-spatial) coordinates of the satellite images. "
+        "Shape: [batch_size,] height",
     )
 
     time: Array = Field(

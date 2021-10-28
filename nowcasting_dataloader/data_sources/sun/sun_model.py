@@ -2,13 +2,11 @@
 import logging
 
 import numpy as np
+from nowcasting_dataset.consts import SUN_AZIMUTH_ANGLE, SUN_ELEVATION_ANGLE, Array
+from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
-from nowcasting_dataset.consts import Array, SUN_AZIMUTH_ANGLE, SUN_ELEVATION_ANGLE
-from nowcasting_dataloader.data_sources.datasource_output import (
-    DataSourceOutputML,
-)
-from nowcasting_dataset.time import make_random_time_vectors
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 

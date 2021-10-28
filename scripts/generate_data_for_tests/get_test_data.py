@@ -1,8 +1,11 @@
+"""Generate test data for tests"""
 import os
 from pathlib import Path
-import nowcasting_dataloader
+
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
+
+import nowcasting_dataloader
 
 # set up
 local_path = os.path.dirname(nowcasting_dataloader.__file__) + "/.."

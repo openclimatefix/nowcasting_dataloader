@@ -2,10 +2,9 @@
 import logging
 
 import numpy as np
+from nowcasting_dataset.consts import TOPOGRAPHIC_DATA, Array
 from pydantic import Field, validator
 
-from nowcasting_dataset.consts import Array
-from nowcasting_dataset.consts import TOPOGRAPHIC_DATA
 from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 logger = logging.getLogger(__name__)
@@ -27,11 +26,13 @@ class TopographicML(DataSourceOutputML):
     )
     topo_x_coords: Array = Field(
         ...,
-        description="The x (OSGB geo-spatial) coordinates of the topographic images. Shape: [batch_size,] width",
+        description="The x (OSGB geo-spatial) coordinates of the topographic images. "
+        "Shape: [batch_size,] width",
     )
     topo_y_coords: Array = Field(
         ...,
-        description="The y (OSGB geo-spatial) coordinates of the topographic images. Shape: [batch_size,] height",
+        description="The y (OSGB geo-spatial) coordinates of the topographic images. "
+        "Shape: [batch_size,] height",
     )
 
     @property

@@ -7,7 +7,6 @@ from typing import List
 import numpy as np
 from pydantic import BaseModel, Field
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -73,7 +72,8 @@ def pad_data(
         data: typed dictionary of data objects
         pad_size: the maount that should be padded
         one_dimensional_arrays: list of data items that should be padded by one dimension
-        two_dimensional_arrays: list of data tiems that should be padded in the third dimension (and more)
+        two_dimensional_arrays: list of data tiems that should be padded in the
+            third dimension (and more)
 
     """
     # Pad (if necessary) so returned arrays are always of size

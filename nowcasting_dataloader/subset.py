@@ -5,7 +5,6 @@ from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-
 from nowcasting_dataset.dataset.batch import Batch
 
 logger = logging.getLogger(__name__)
@@ -18,14 +17,15 @@ def subselect_data(
     current_timestep_index: Optional[int] = None,
 ) -> Batch:
     """
-    Subselects the data temporally. This function selects all data within the time range [t0 - history_minutes, t0 + forecast_minutes]
+    Subselects the data temporally.
 
-    Args:
-        batch: Example dictionary containing at least the required_keys
-        required_keys: The required keys present in the dictionary to use
-        current_timestep_index: The index into either SATELLITE_DATETIME_INDEX or NWP_TARGET_TIME giving the current timestep
-        history_minutes: How many minutes of history to use
-        forecast_minutes: How many minutes of future data to use for forecasting
+    This function selects all data within the time range [t0-history_minutes, t0+forecast_minutes]
+
+    Args: batch: Example dictionary containing at least the required_keys required_keys: The
+    required keys present in the dictionary to use current_timestep_index: The index into either
+    SATELLITE_DATETIME_INDEX or NWP_TARGET_TIME giving the current timestep history_minutes: How
+    many minutes of history to use forecast_minutes: How many minutes of future data to use for
+    forecasting
 
     Returns:
         Example with only data between [t0 - history_minutes, t0 + forecast_minutes] remaining

@@ -7,15 +7,16 @@ These encodings can be:
 These encodings can also be performed with:
 - Fourier Features, based off what is done in PerceiverIO
 """
-import numpy as np
-import torch
-import einops
-from math import pi
-from typing import Union, Optional, Dict, List, Tuple, Any
 import datetime
+from math import pi
+from typing import Dict, List, Optional, Tuple
+
+import einops
+import numpy as np
 import pandas as pd
-from nowcasting_dataset.dataset.batch import Batch
+import torch
 import xarray as xr
+from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.geospatial import lat_lon_to_osgb
 
 TIME_DIM = 2
@@ -29,7 +30,8 @@ def get_seviri_rss_bounds() -> Dict[str, float]:
     """
     Computes the SEVIRI RSS bounds in OSGB coordinates
 
-    SEVIRI RSS is the imager that takes all the satellite imagery currently used by the nowcasting dataset and models
+    SEVIRI RSS is the imager that takes all the satellite imagery currently used by
+    the nowcasting dataset and models
 
     Returns:
         Dictionary containing the geographic bounds of the RSS images in OSGB coordinates
@@ -109,8 +111,8 @@ def determine_shape_of_encoding(xr_dataset: xr.Dataset) -> List[int]:
         xr_dataset: Xarray dataset containing the data
 
     Returns:
-        The determined shape that the encoding needs to be, either a 5-element list for image modalities,
-         or a 4-element list for point modalities (GSP, PV systems)
+        The determined shape that the encoding needs to be, either a 5-element list
+        for image modalities, or a 4-element list for point modalities (GSP, PV systems)
     """
     channel_key = "channels_index" if "channels_index" in xr_dataset.sizes else "id_index"
     shape = [xr_dataset.sizes["example"]]
@@ -138,24 +140,30 @@ def encode_modalities(
     **kwargs,
 ) -> dict[str, torch.Tensor]:
     """
-    Create a consistent position encoding and encode the positions of the different modalities in time and space
+    Create a consistent position encoding and encode the positions of the different modalities
 
-    This position encoding is added as new keys to the dictionary containing the modalities to encode. This is done
-    instead of appending the position encoding in case the position encoding needs to be used for the query to the
+    This position encoding is added as new keys to the dictionary containing the modalities
+    to encode. This is done instead of appending the position encoding in case the position
+    encoding needs to be used for the query to the
     Perceiver IO model
 
     This code assumes that there is at least 2 timesteps of at least one modality to be encoded
 
     Args:
-        modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.Tensors in [B, C, T, H, W] ordering
-        datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in the modality
-        geospatial_coordinates: Dict of x, y coordinates for each modality with pixels, used to determine smallest spatial step needed, in OSGB coordinates
-        geospatial_bounds: Max extant of the area where examples could be drawn from, used for normalizing coordinates within an area of interest
+        modalities_to_encode: Dict of input modalities, i.e. NWP, Satellite, PV, GSP, etc as torch.
+            Tensors in [B, C, T, H, W] ordering
+        datetimes: Dict of datetimes for each modality, giving the actual date for each timestep in
+            the modality
+        geospatial_coordinates: Dict of x, y coordinates for each modality with pixels, used to
+            determine smallest spatial step needed, in OSGB coordinates
+        geospatial_bounds: Max extant of the area where examples could be drawn from, used for
+            normalizing coordinates within an area of interest
             in the format of a dictionary with the keys {'x_min', 'x_max', 'y_min', 'y_max'}
         kwargs: Passed to fourier_encode
 
     Returns:
-        Input modality dictionary where for every 'key' in modalities_to_encode, a new key called 'key+'_position_encoding' will be added
+        Input modality dictionary where for every 'key' in modalities_to_encode, a new key called
+            'key+'_position_encoding' will be added
         containing the absolute position encoding of the examples
     """
     position_encodings = {}
@@ -182,14 +190,15 @@ def encode_absolute_position(
     """
     Encodes the absolute position of the pixels/voxels in time and space
 
-    This should be done per-modality and can be thought of as the relative position of the input modalities across a
-    given year and the area of the Earth covered by all the examples.
+    This should be done per-modality and can be thought of as the relative position of the
+    input modalities across a given year and the area of the Earth covered by all the examples.
 
     Args:
         shape: Shape to encode positions for
         geospatial_coordinates: The geospatial coordinates, in OSGB format
         datetimes: Time of day and date as a list of datetimes, one for each timestep
-        geospatial_bounds: The geospatial bounds of the area where the examples come from, e.g. the coordinates of the area covered by the SEVIRI RSS image
+        geospatial_bounds: The geospatial bounds of the area where the examples come from, e.g.
+            the coordinates of the area covered by the SEVIRI RSS image
         **kwargs:
 
     Returns:
@@ -249,17 +258,18 @@ def normalize_geospatial_coordinates(
     geospatial_coordinates: List[np.ndarray], geospatial_bounds: Dict[str, float], **kwargs
 ) -> torch.Tensor:
     """
-    Normalize the geospatial coordinates by the max extant to keep everything between -1 and 1, in sin and cos
+    Normalize the geospatial coordinates by the max extant to keep everything between -1 and 1
 
-    This normalization should be against a set geospatial area, so that the same place has the same spatial encoding
-    every time.
+    This normalization should be against a set geospatial area, so that the same place has the
+     same spatial encoding every time.
 
     Args:
         geospatial_coordinates: The coordinates for the pixels in the image
         geospatial_bounds: The maximum extant
 
     Returns:
-        The normalized geospatial coordinates, rescaled to between -1 and 1 for the whole extant of the training area
+        The normalized geospatial coordinates, rescaled to between -1 and 1 for the whole extant of
+         the training area
 
     """
     # Normalize the X first
