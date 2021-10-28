@@ -68,7 +68,7 @@ def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
     for month in range(1, batch_size):
         datetimes.append(
             pd.date_range(
-                start="2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq=interval
+                start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq=interval
             )
         )
     datetimes.append(pd.date_range(start="2020-12-31 22:55", end="2020-12-31 23:55", freq=interval))
