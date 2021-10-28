@@ -1,19 +1,31 @@
+"""Test position encoding"""
+from copy import deepcopy
+
 import numpy as np
+import pandas as pd
+import pytest
+import torch
+from nowcasting_dataset.config.model import Configuration, InputData
+from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.utils.position_encoding import (
-    encode_modalities,
-    encode_absolute_position,
-    create_datetime_features,
-    normalize_geospatial_coordinates,
-    generate_position_encodings_for_batch,
-    determine_shape_of_encoding,
     combine_space_and_time_features,
+    create_datetime_features,
+    determine_shape_of_encoding,
+    encode_absolute_position,
+    encode_modalities,
+    generate_position_encodings_for_batch,
+    normalize_geospatial_coordinates,
 )
-from nowcasting_dataset.dataset.batch import Batch
-import pytest
-import pandas as pd
-import torch
-from copy import deepcopy
+
+
+@pytest.fixture
+def configuration():
+    """Create configuration object"""
+    con = Configuration()
+    con.input_data = InputData.set_all_to_defaults()
+    con.process.batch_size = 32
+    return con
 
 
 @pytest.mark.parametrize(
@@ -26,15 +38,17 @@ from copy import deepcopy
         ("gsp", [32, 32, 4, 32]),
     ],
 )
-def test_shape_encoding(key, expected_shape):
-    batch: Batch = Batch.fake()
+def test_shape_encoding(key, expected_shape, configuration):
+    """Test shape encoding creation"""
+    batch: Batch = Batch.fake(configuration=configuration)
     xr_dataset = getattr(batch, key)
     shape = determine_shape_of_encoding(xr_dataset)
     assert shape == expected_shape
 
 
-def test_batch_encoding():
-    batch: Batch = Batch.fake()
+def test_batch_encoding(configuration):
+    """Test batch encoding"""
+    batch: Batch = Batch.fake(configuration=configuration)
     position_encodings = generate_position_encodings_for_batch(
         batch,
         max_freq=64,
@@ -49,6 +63,7 @@ def test_batch_encoding():
 
 
 def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
+    """Create data for tests"""
     datetimes = []
     for month in range(1, batch_size):
         datetimes.append(
@@ -56,9 +71,7 @@ def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
                 start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 01:00", freq=interval
             )
         )
-    datetimes.append(
-        pd.date_range(start=f"2020-12-31 22:55", end=f"2020-12-31 23:55", freq=interval)
-    )
+    datetimes.append(pd.date_range(start="2020-12-31 22:55", end="2020-12-31 23:55", freq=interval))
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
     x = np.sort(np.random.rand(batch_size, spatial_size) * 9)
@@ -69,13 +82,14 @@ def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
 
 
 def test_datetime_feature_creation():
+    """Test datetime feature creation"""
     # Generate fake datetime data for the whole year
     datetimes = []
     for month in range(1, 12):
         datetimes.append(
             pd.date_range(start=f"2020-{month}-01 00:00", end=f"2020-{month}-01 06:00", freq="5min")
         )
-    datetimes.append(pd.date_range(start=f"2020-12-31 17:55", end=f"2020-12-31 23:55", freq="5min"))
+    datetimes.append(pd.date_range(start="2020-12-31 17:55", end="2020-12-31 23:55", freq="5min"))
     datetime_features = create_datetime_features(datetimes)
     assert len(datetime_features) == 4
     for feature in datetime_features:
@@ -85,6 +99,7 @@ def test_datetime_feature_creation():
 
 
 def test_geospatial_normalization():
+    """Test geospatial normalization"""
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
     geospatial_coordinates = []
     x = np.sort(np.random.rand(32, 128) * 9)
@@ -100,6 +115,7 @@ def test_geospatial_normalization():
 
 
 def test_encode_absolute_position():
+    """Test encoding absolute position"""
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     absolute_position_encoding = encode_absolute_position(
         shape=(12, 5, 13, 64, 64),
@@ -115,6 +131,7 @@ def test_encode_absolute_position():
 
 
 def test_combine_space_and_time_features():
+    """Test combining space and time features"""
     space_features = torch.randn(32, 66, 10, 64, 64)
     time_features = [torch.randn(32, 10) for _ in range(4)]
     shape = [32, 5, 10, 64, 64]
@@ -132,6 +149,7 @@ def test_combine_space_and_time_features():
 
 
 def test_encode_modalities():
+    """Test encoding of modalities"""
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     encoded_position = encode_modalities(
         modalities_to_encode={"NWP": torch.randn(12, 10, 13, 64, 64)},
@@ -151,6 +169,7 @@ def test_encode_modalities():
 
 
 def test_encode_multiple_modalities():
+    """Test encoding multiple modalities"""
     datetimes, geospatial_bounds, geospatial_coordinates = get_data()
     sat_datetimes, geospatial_bounds, _ = get_data(interval="30min", batch_size=12)
     pv_datetimes, geospatial_bounds, pv_geospatial_coordinates = get_data(
@@ -210,7 +229,8 @@ def test_encode_multiple_modalities():
         )
     )
     # Check that the time and space features are the same for the start and end of them
-    # Time channels are the last 4 in the encoding, so check those, first and last time values should be the same
+    # Time channels are the last 4 in the encoding, so check those,
+    # first and last time values should be the same
     # Intermediate ones should vary
     for i in range(130, 134):
         assert np.all(

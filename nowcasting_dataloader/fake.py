@@ -1,7 +1,7 @@
 """ A class to create a fake dataset """
 import torch
-
 from nowcasting_dataset.config.model import Configuration
+
 from nowcasting_dataloader.batch import BatchML
 
 

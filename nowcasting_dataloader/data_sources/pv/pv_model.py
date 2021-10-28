@@ -2,21 +2,19 @@
 import logging
 
 import numpy as np
-from pydantic import Field, validator
-
 from nowcasting_dataset.consts import (
-    Array,
-    PV_YIELD,
     PV_DATETIME_INDEX,
-    PV_SYSTEM_Y_COORDS,
-    PV_SYSTEM_X_COORDS,
-    PV_SYSTEM_ROW_NUMBER,
     PV_SYSTEM_ID,
-)
-from nowcasting_dataloader.data_sources.datasource_output import (
-    DataSourceOutputML,
+    PV_SYSTEM_ROW_NUMBER,
+    PV_SYSTEM_X_COORDS,
+    PV_SYSTEM_Y_COORDS,
+    PV_YIELD,
+    Array,
 )
 from nowcasting_dataset.time import make_random_time_vectors
+from pydantic import Field, validator
+
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +37,8 @@ class PVML(DataSourceOutputML):
 
     pv_datetime_index: Array = Field(
         ...,
-        description="The datetime associated with the pv system data. shape = [batch_size, ] sequence length,",
+        description="The datetime associated with the pv system data. "
+        "shape = [batch_size, ] sequence length,",
     )
 
     pv_system_x_coords: Array = Field(

@@ -4,24 +4,24 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from pydantic import BaseModel, Field
-
 from nowcasting_dataset.config.model import Configuration
+from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.dataset.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )
 from nowcasting_dataset.time import make_random_time_vectors
-from nowcasting_dataset.dataset.batch import Batch
+from pydantic import BaseModel, Field
+
 from nowcasting_dataloader.data_sources import (
-    TopographicML,
-    SatelliteML,
-    MetadataML,
-    PVML,
-    SunML,
     GSPML,
     NWPML,
+    PVML,
     DatetimeML,
+    MetadataML,
+    SatelliteML,
+    SunML,
+    TopographicML,
 )
 
 _LOG = logging.getLogger(__name__)
@@ -109,6 +109,12 @@ class BatchML(Example):
                 seq_length_5=input_data.default_seq_length_5_minutes,
                 n_pv_systems_per_batch=128,
                 time_5=time_5,
+            ),
+            gsp=GSPML.fake(
+                process.batch_size,
+                seq_length_30=input_data.default_seq_length_5_minutes // 6,
+                n_gsp_per_batch=32,
+                time_30=time_30,
             ),
             sun=SunML.fake(
                 batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes

@@ -1,32 +1,22 @@
 """ Dataset and functions"""
 import logging
-import os
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Union
 
 import numpy as np
-import pandas as pd
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
+    DATETIME_FEATURE_NAMES,
     GSP_YIELD,
-    GSP_DATETIME_INDEX,
-    SATELLITE_DATA,
     NWP_DATA,
-    PV_YIELD,
-    SUN_ELEVATION_ANGLE,
-    SUN_AZIMUTH_ANGLE,
-    SATELLITE_DATETIME_INDEX,
-    NWP_TARGET_TIME,
-    PV_DATETIME_INDEX,
-    DEFAULT_REQUIRED_KEYS,
-    TOPOGRAPHIC_DATA,
-    TOPOGRAPHIC_X_COORDS,
-    TOPOGRAPHIC_Y_COORDS,
     NWP_X_COORDS,
     NWP_Y_COORDS,
-    SATELLITE_Y_COORDS,
+    SATELLITE_DATA,
+    SATELLITE_DATETIME_INDEX,
     SATELLITE_X_COORDS,
-    DATETIME_FEATURE_NAMES,
+    SATELLITE_Y_COORDS,
+    TOPOGRAPHIC_DATA,
 )
+
 from nowcasting_dataloader.datasets import NetCDFDataset
 
 logger = logging.getLogger(__name__)
@@ -86,7 +76,7 @@ class SatFlowDataset(NetCDFDataset):
 
     def __getitem__(self, batch_idx: int) -> Tuple[dict, dict]:
         """
-        Satflow extension for the dataloader, splitting up the past and future images/data to give to the model
+        Satflow extension for the dataloader
 
         Args:
             batch_idx: Batch ID to load

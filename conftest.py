@@ -1,16 +1,15 @@
 """Configure PyTest"""
 import os
-from pathlib import Path
-
-import pytest
 
 import nowcasting_dataset
-import nowcasting_dataloader
+import pytest
 from nowcasting_dataset.config.load import load_yaml_configuration
 from nowcasting_dataset.dataset.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )
+
+import nowcasting_dataloader
 
 pytest.IMAGE_SIZE_PIXELS = 128
 
@@ -20,6 +19,13 @@ register_xr_data_set_to_tensor()
 
 
 def pytest_addoption(parser):
+    """
+    Setup pytest for cloud data
+
+    Args:
+        parser: Parser
+
+    """
     parser.addoption(
         "--use_cloud_data",
         action="store_true",
@@ -30,11 +36,13 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def use_cloud_data(request):
+    """Whether to use cloud data"""
     return request.config.getoption("--use_cloud_data")
 
 
 @pytest.fixture
 def configuration():
+    """Get the GCP configuration and return it"""
     filename = os.path.join(os.path.dirname(nowcasting_dataset.__file__), "config", "gcp.yaml")
     configuration = load_yaml_configuration(filename)
 
@@ -43,4 +51,5 @@ def configuration():
 
 @pytest.fixture
 def test_data_folder():
+    """Get the test data folder"""
     return os.path.join(os.path.dirname(nowcasting_dataloader.__file__), "../tests/data")

@@ -1,14 +1,11 @@
 """ Model for output of datetime data """
 import numpy as np
 import xarray as xr
+from nowcasting_dataset.consts import DATETIME_FEATURE_NAMES, Array
+from nowcasting_dataset.utils import coord_to_range
 from pydantic import validator
 
-from nowcasting_dataset.consts import Array, DATETIME_FEATURE_NAMES
-from nowcasting_dataloader.data_sources.datasource_output import (
-    DataSourceOutputML,
-)
-
-from nowcasting_dataset.utils import coord_to_range
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 
 class DatetimeML(DataSourceOutputML):

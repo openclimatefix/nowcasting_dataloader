@@ -2,20 +2,18 @@
 import logging
 
 import numpy as np
-from pydantic import Field, validator
-
-from nowcasting_dataset.consts import Array
 from nowcasting_dataset.consts import (
+    GSP_DATETIME_INDEX,
     GSP_ID,
-    GSP_YIELD,
     GSP_X_COORDS,
     GSP_Y_COORDS,
-    GSP_DATETIME_INDEX,
-)
-from nowcasting_dataloader.data_sources.datasource_output import (
-    DataSourceOutputML,
+    GSP_YIELD,
+    Array,
 )
 from nowcasting_dataset.time import make_random_time_vectors
+from pydantic import Field, validator
+
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +35,8 @@ class GSPML(DataSourceOutputML):
 
     gsp_datetime_index: Array = Field(
         ...,
-        description="The datetime associated with the gsp data. shape = [batch_size, ] sequence length,",
+        description="The datetime associated with the gsp data. "
+        "shape = [batch_size, ] sequence length,",
     )
 
     gsp_x_coords: Array = Field(
