@@ -26,8 +26,8 @@ def test_subselect_date(test_data_folder, configuration):
         forecast_minutes=10,
     )
 
-    assert batch.satellite.data.shape == (32, 5, 64, 64, 12)
-    assert batch.nwp.data.shape == (32, 5, 64, 64, 10)
+    assert batch.satellite.data.shape == (4, 5, 64, 64, 12)
+    assert batch.nwp.data.shape == (4, 5, 64, 64, 10)
 
 
 #
@@ -41,5 +41,5 @@ def test_subselect_date_with_to_dt(test_data_folder, configuration):
         forecast_minutes=10,
     )
 
-    assert batch.satellite.data.shape == (32, 5, 64, 64, 12)
-    assert batch.nwp.data.shape == (32, 5, 64, 64, 10)
+    assert batch.satellite.data.shape == (4, 5, 64, 64, 12)
+    assert batch.nwp.data.shape == (4, 5, 64, 64, 10)

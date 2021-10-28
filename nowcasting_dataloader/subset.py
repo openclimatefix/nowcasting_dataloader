@@ -39,7 +39,7 @@ def subselect_data(
     # We in fact only need this from the first example in each batch
     if current_timestep_index is None:
         # t0_dt or if not available use a different datetime index
-        t0_dt_of_first_example = batch.metadata.t0_dt[0].values
+        t0_dt_of_first_example = pd.Timestamp(batch.metadata.t0_dt[0].values[0])
     else:
         if batch.satellite is not None:
             t0_dt_of_first_example = batch.satellite.time[0, current_timestep_index].values
@@ -129,12 +129,11 @@ def select_time_period(
     logger.debug(f"New end time for first example is {end_time_of_first_example}")
 
     if hasattr(x, "time"):
-
-        time_of_first_example = pd.to_datetime(x.time[0])
+        time_of_first_example = pd.to_datetime(x.time[0].values)
 
     else:
         # for nwp, maybe reaname
-        time_of_first_example = pd.to_datetime(x.target_time[0])
+        time_of_first_example = pd.to_datetime(x.target_time[0].values)
 
     # find the start and end index, that we will then use to slice the data
     start_i, end_i = np.searchsorted(
