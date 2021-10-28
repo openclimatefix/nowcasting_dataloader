@@ -110,6 +110,12 @@ class BatchML(Example):
                 n_pv_systems_per_batch=128,
                 time_5=time_5,
             ),
+            gsp=GSPML.fake(
+                process.batch_size,
+                seq_length_30=input_data.default_seq_length_5_minutes // 6,
+                n_gsp_per_batch=32,
+                time_30=time_30,
+            ),
             sun=SunML.fake(
                 batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
             ),
