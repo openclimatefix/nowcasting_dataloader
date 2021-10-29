@@ -266,7 +266,7 @@ def test_encode_multiple_modalities():
     # Time channels are the last 4 in the encoding, so check those,
     # first and last time values should be the same
     # Intermediate ones should vary
-    for i in range(130, 134):
+    for i in range(130, 135):
         assert np.all(
             np.isclose(
                 encoded_position["PV_position_encoding"][:, i, 0, 0, 0],
