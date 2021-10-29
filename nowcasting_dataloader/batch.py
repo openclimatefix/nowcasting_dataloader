@@ -97,7 +97,7 @@ class BatchML(Example):
                 process.batch_size,
                 input_data.default_seq_length_5_minutes,
                 input_data.satellite.satellite_image_size_pixels,
-                len(input_data.satellite.sat_channels),
+                len(input_data.satellite.satellite_channels),
                 time_5=time_5,
             ),
             topographic=TopographicML.fake(
