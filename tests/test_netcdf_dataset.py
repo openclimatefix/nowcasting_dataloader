@@ -9,14 +9,7 @@ import plotly.graph_objects as go
 import pytest
 import torch
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import (
-    GSP_DATETIME_INDEX,
-    NWP_DATA,
-    NWP_TARGET_TIME,
-    PV_YIELD,
-    SATELLITE_DATA,
-    SATELLITE_DATETIME_INDEX,
-)
+from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
 
 import nowcasting_dataloader
 from nowcasting_dataloader.batch import BatchML
@@ -39,7 +32,6 @@ def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
         cloud="local",
         history_minutes=10,
         forecast_minutes=10,
-        required_keys=[NWP_DATA, NWP_TARGET_TIME, SATELLITE_DATA, SATELLITE_DATETIME_INDEX],
         configuration=configuration,
     )
 
