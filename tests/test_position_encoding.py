@@ -144,6 +144,10 @@ def test_encode_absolute_position():
         geospatial_bounds=geospatial_bounds,
         geospatial_coordinates=geospatial_coordinates,
         datetimes=datetimes,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
@@ -178,6 +182,10 @@ def test_encode_modalities():
         datetimes={"NWP": datetimes},
         geospatial_coordinates={"NWP": geospatial_coordinates},
         geospatial_bounds=geospatial_bounds,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
@@ -212,6 +220,10 @@ def test_encode_multiple_modalities():
             "PV": pv_geospatial_coordinates,
         },
         geospatial_bounds=geospatial_bounds,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
