@@ -1,3 +1,4 @@
+"""Test NetCDF Dataset"""
 import os
 import tempfile
 from pathlib import Path
@@ -7,29 +8,23 @@ import plotly
 import plotly.graph_objects as go
 import pytest
 import torch
-
-import nowcasting_dataloader
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
-    SATELLITE_X_COORDS,
-    SATELLITE_Y_COORDS,
-    SATELLITE_DATA,
-    NWP_DATA,
-    SATELLITE_DATETIME_INDEX,
-    NWP_TARGET_TIME,
-    NWP_Y_COORDS,
-    NWP_X_COORDS,
-    PV_YIELD,
-    GSP_YIELD,
     GSP_DATETIME_INDEX,
-    T0_DT,
+    NWP_DATA,
+    NWP_TARGET_TIME,
+    PV_YIELD,
+    SATELLITE_DATA,
+    SATELLITE_DATETIME_INDEX,
 )
 
+import nowcasting_dataloader
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 
 
 def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
+    """Test netcdf locally"""
     DATA_PATH = os.path.join(
         os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch"
     )
@@ -73,6 +68,13 @@ def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     # Sat is in 5min increments, so should have 2 history + current + 2 future
     assert sat_data.shape[1] == 5
     assert batch_ml.nwp.data.shape == (4, 5, 64, 64, 1)
+    assert batch_ml.topographic.topo_data.shape == (4, 1, 64, 64)
+    assert batch_ml.metadata.batch_size == 4
+    assert batch_ml.metadata.t0_dt.shape == (4, 1)
+    assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
+    assert batch_ml.gsp.gsp_yield.shape == (4, 5, 32)
+    assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
+    assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
 
     # Make sure file isn't deleted!
     assert os.path.exists(os.path.join(DATA_PATH, "metadata/0.nc"))
@@ -80,6 +82,7 @@ def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
 
 @pytest.mark.skip("CD does not have access to GCS")
 def test_get_dataloaders_gcp(configuration: Configuration):
+    """Test dataloader on GCP"""
     DATA_PATH = "gs://solar-pv-nowcasting-data/prepared_ML_training_data/v6/"
     TEMP_PATH = "../nowcasting_dataset"
 
@@ -120,7 +123,7 @@ def test_get_dataloaders_gcp(configuration: Configuration):
 
 @pytest.mark.skip("CD does not have access to AWS")
 def test_get_dataloaders_aws(configuration: Configuration):
-
+    """Test dataloader on AWS"""
     with tempfile.TemporaryDirectory() as tmpdirname:
         TEMP_PATH = Path(tmpdirname)
         DATA_PATH = "prepared_ML_training_data/v4/"
@@ -157,7 +160,7 @@ def test_get_dataloaders_aws(configuration: Configuration):
 
 @pytest.mark.skip("CD does not have access to GCP")
 def test_required_keys_gcp(configuration: Configuration):
-
+    """More test on GCP dataloader"""
     DATA_PATH = "gs://solar-pv-nowcasting-data/prepared_ML_training_data/v6/"
     TEMP_PATH = "../nowcasting_dataset"
     if os.path.isdir(os.path.join(TEMP_PATH, "train")):
@@ -196,7 +199,7 @@ def test_required_keys_gcp(configuration: Configuration):
 
 @pytest.mark.skip("CD does not have access to GCP")
 def test_subsetting_gcp(configuration: Configuration):
-
+    """Test subsetting GCP dataloader"""
     DATA_PATH = "gs://solar-pv-nowcasting-data/prepared_ML_training_data/v5/"
     TEMP_PATH = "../nowcasting_dataset"
     if os.path.isdir(os.path.join(TEMP_PATH, "train")):
