@@ -300,6 +300,57 @@ def normalize_geospatial_coordinates(
     return encoded_position
 
 
+def encode_year(
+    years: List[datetime.datetime],
+    method="ordinal",
+    time_range: Tuple[datetime.datetime, datetime.datetime] = (
+        datetime.datetime(year=2016, day=1, month=1),
+        datetime.datetime(year=2021, day=31, month=12),
+    ),
+) -> torch.Tensor:
+    """
+    Encode the year of the example, using various methods
+
+    Args:
+        year: The year to encode
+        method: The method to use, one if 'ordinal' for ordinal one-hot encoding,
+            or 'fourier' encode
+        time_range: List of start_year, end_year datetimes to normalize against
+
+    Returns:
+        Tensor containing the encoding for the year
+    """
+
+    assert method in [
+        "ordinal",
+        "fourier",
+    ], f"method must be one of 'ordinal' or 'fourier' not {method}"
+
+    number_of_years: float = int(
+        np.round((time_range[1] - time_range[0]).days / datetime.timedelta(days=365))
+    )
+    year_encoding = []
+    if method == "ordinal":
+        for batch_idx in range(len(years)):
+            example_year_index = int(
+                np.round((years[batch_idx] - time_range[0]).days / datetime.timedelta(days=366))
+            )
+            encoding = torch.zeros(number_of_years, dtype=torch.int8)
+            encoding[:example_year_index] = 1
+            year_encoding.append(encoding)
+    elif method == "fourier":
+        for batch_idx in range(len(years)):
+            encoding = (years[batch_idx] - time_range[0]).days / (
+                time_range[1] - time_range[0]
+            ).days
+            # Rescale between -1 and 1
+            encoding *= 2
+            encoding -= 1
+            year_encoding.append(encoding)
+
+    return torch.as_tensor(year_encoding)
+
+
 def create_datetime_features(
     datetimes: List[List[datetime.datetime]],
 ) -> List[torch.Tensor]:
@@ -320,7 +371,7 @@ def create_datetime_features(
         for index in datetimes[batch_idx]:
             time_index = pd.Timestamp(index)
             hours.append((time_index.hour + (time_index.minute / 60) / 24))
-            days.append((time_index.timetuple().tm_yday / 365))
+            days.append((time_index.timetuple().tm_yday / 366))  # To take care of leap years
         hour_of_day.append(hours)
         day_of_year.append(days)
 
