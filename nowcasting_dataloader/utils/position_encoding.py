@@ -218,7 +218,11 @@ def encode_absolute_position(
 
     if datetimes is not None:
         datetime_features = create_datetime_features(datetimes)
-
+        # Add year feature
+        year_features = encode_year(datetimes)
+        # Repeat
+        year_features = einops.repeat(year_features, "b t -> b (repeat t)", repeat=shape[TIME_DIM])
+        datetime_features.append(year_features)
         absolute_position_encoding = combine_space_and_time_features(
             absolute_position_encoding, datetime_features=datetime_features, shape=shape
         )
@@ -301,54 +305,34 @@ def normalize_geospatial_coordinates(
 
 
 def encode_year(
-    years: List[datetime.datetime],
-    method="ordinal",
+    years: List[List[datetime.datetime]],
     time_range: Tuple[datetime.datetime, datetime.datetime] = (
         datetime.datetime(year=2016, day=1, month=1),
         datetime.datetime(year=2021, day=31, month=12),
     ),
 ) -> torch.Tensor:
     """
-    Encode the year of the example, using various methods
+    Encode the year of the example, normalizing between the start and end date
 
     Args:
         year: The year to encode
-        method: The method to use, one if 'ordinal' for ordinal one-hot encoding,
-            or 'fourier' encode
         time_range: List of start_year, end_year datetimes to normalize against
 
     Returns:
         Tensor containing the encoding for the year
     """
 
-    assert method in [
-        "ordinal",
-        "fourier",
-    ], f"method must be one of 'ordinal' or 'fourier' not {method}"
-
-    number_of_years: float = int(
-        np.round((time_range[1] - time_range[0]).days / datetime.timedelta(days=365))
-    )
     year_encoding = []
-    if method == "ordinal":
-        for batch_idx in range(len(years)):
-            example_year_index = int(
-                np.round((years[batch_idx] - time_range[0]).days / datetime.timedelta(days=366))
-            )
-            encoding = torch.zeros(number_of_years, dtype=torch.int8)
-            encoding[:example_year_index] = 1
-            year_encoding.append(encoding)
-    elif method == "fourier":
-        for batch_idx in range(len(years)):
-            encoding = (years[batch_idx] - time_range[0]).days / (
-                time_range[1] - time_range[0]
-            ).days
-            # Rescale between -1 and 1
-            encoding *= 2
-            encoding -= 1
-            year_encoding.append(encoding)
-
-    return torch.as_tensor(year_encoding)
+    for batch_idx in range(len(years)):
+        encoding = (pd.Timestamp(years[batch_idx][0]).year - time_range[0].year) / (
+            time_range[1].year - time_range[0].year
+        )
+        # Rescale between -1 and 1
+        encoding *= 2
+        encoding -= 1
+        year_encoding.append(torch.as_tensor([encoding]))
+    year_encoding = torch.stack(year_encoding, dim=0)
+    return year_encoding
 
 
 def create_datetime_features(
