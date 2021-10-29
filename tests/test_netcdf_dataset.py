@@ -8,7 +8,7 @@ import plotly
 import plotly.graph_objects as go
 import pytest
 import torch
-from nowcasting_dataset.config.model import Configuration
+from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
 
 import nowcasting_dataloader
@@ -18,6 +18,13 @@ from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 
 def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     """Test netcdf locally"""
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.process.batch_size = 4
+    c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
+    c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:1]
+    configuration = c
+
     DATA_PATH = os.path.join(
         os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch"
     )
