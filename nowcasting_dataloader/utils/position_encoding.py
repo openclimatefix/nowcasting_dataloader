@@ -59,7 +59,9 @@ def get_seviri_rss_bounds() -> Dict[str, float]:
     }
 
 
-def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, torch.Tensor]:
+def generate_position_encodings_for_batch(
+    batch: Batch, time_range: Optional[Tuple[datetime.datetime, datetime.datetime]] = None, **kwargs
+) -> dict[str, torch.Tensor]:
     """
     Generates positional encodings and returns them as a dictionary
 
@@ -67,6 +69,8 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
 
     Args:
         batch: Batch object holding the data
+        time_range: List of start_year, end_year datetimes to normalize against,
+            time_range[0].year must be less than time_range[1].year
 
     Returns:
         Dictionary containing the keys of the modalities in the Batch + '_position_encoding'
@@ -97,6 +101,7 @@ def generate_position_encodings_for_batch(batch: Batch, **kwargs) -> dict[str, t
                     geospatial_coordinates=geospatial_coordinates,
                     datetimes=datetimes,
                     geospatial_bounds=get_seviri_rss_bounds(),
+                    time_range=time_range,
                     **kwargs,
                 )
 
@@ -137,6 +142,7 @@ def encode_modalities(
     datetimes: Dict[str, List[datetime.datetime]],
     geospatial_coordinates: Dict[str, Tuple[np.ndarray, np.ndarray]],
     geospatial_bounds: Dict[str, float],
+    time_range: Optional[Tuple[datetime.datetime, datetime.datetime]] = None,
     **kwargs,
 ) -> dict[str, torch.Tensor]:
     """
@@ -159,6 +165,8 @@ def encode_modalities(
         geospatial_bounds: Max extant of the area where examples could be drawn from, used for
             normalizing coordinates within an area of interest
             in the format of a dictionary with the keys {'x_min', 'x_max', 'y_min', 'y_max'}
+        time_range: List of start_year, end_year datetimes to normalize against,
+            time_range[0].year must be less than time_range[1].year
         kwargs: Passed to fourier_encode
 
     Returns:
@@ -173,6 +181,7 @@ def encode_modalities(
             geospatial_coordinates=geospatial_coordinates[key],
             datetimes=datetimes[key],
             geospatial_bounds=geospatial_bounds,
+            time_range=time_range,
             **kwargs,
         )
     # Update original dictionary
@@ -185,6 +194,7 @@ def encode_absolute_position(
     geospatial_coordinates: List[np.ndarray],
     geospatial_bounds: Dict[str, float],
     datetimes: Optional[List[datetime.datetime]] = None,
+    time_range: Optional[Tuple[datetime.datetime, datetime.datetime]] = None,
     **kwargs,
 ) -> torch.Tensor:
     """
@@ -199,6 +209,8 @@ def encode_absolute_position(
         datetimes: Time of day and date as a list of datetimes, one for each timestep
         geospatial_bounds: The geospatial bounds of the area where the examples come from, e.g.
             the coordinates of the area covered by the SEVIRI RSS image
+        time_range: List of start_year, end_year datetimes to normalize against,
+            time_range[0].year must be less than time_range[1].year
         **kwargs:
 
     Returns:
@@ -218,7 +230,14 @@ def encode_absolute_position(
 
     if datetimes is not None:
         datetime_features = create_datetime_features(datetimes)
-
+        if time_range is not None:
+            # Add year feature
+            year_features = encode_year(datetimes, time_range)
+            # Repeat
+            year_features = einops.repeat(
+                year_features, "b t -> b (repeat t)", repeat=shape[TIME_DIM]
+            )
+            datetime_features.append(year_features)
         absolute_position_encoding = combine_space_and_time_features(
             absolute_position_encoding, datetime_features=datetime_features, shape=shape
         )
@@ -300,6 +319,42 @@ def normalize_geospatial_coordinates(
     return encoded_position
 
 
+def encode_year(
+    datetimes: List[List[datetime.datetime]],
+    time_range: Tuple[datetime.datetime, datetime.datetime],
+) -> torch.Tensor:
+    """
+    Encode the year of each example in the batch, normalizing between the start and end date
+
+    Args:
+        datetimes: The datetimes for all the examples in the batch, in format
+            dateimes[batch_idx][timestep_idx]
+        time_range: List of start_year, end_year datetimes to normalize against,
+            time_range[0].year must be less than time_range[1].year
+
+    Returns:
+        Tensor containing the encoding for the year of the first timestep in each example
+            This should be correct as each example covers a tiny part of a year, and since
+            we do not predict at night, there should be no examples covering two years
+    """
+
+    assert time_range[0].year < time_range[1].year, (
+        "First datetime must have a lower year than " "the second"
+    )
+
+    year_encoding = []
+    for batch_idx in range(len(datetimes)):
+        encoding = (pd.Timestamp(datetimes[batch_idx][0]).year - time_range[0].year) / (
+            time_range[1].year - time_range[0].year
+        )
+        # Rescale between -1 and 1
+        encoding *= 2
+        encoding -= 1
+        year_encoding.append(torch.as_tensor([encoding]))
+    year_encoding = torch.stack(year_encoding, dim=0)
+    return year_encoding
+
+
 def create_datetime_features(
     datetimes: List[List[datetime.datetime]],
 ) -> List[torch.Tensor]:
@@ -320,7 +375,7 @@ def create_datetime_features(
         for index in datetimes[batch_idx]:
             time_index = pd.Timestamp(index)
             hours.append((time_index.hour + (time_index.minute / 60) / 24))
-            days.append((time_index.timetuple().tm_yday / 365))
+            days.append((time_index.timetuple().tm_yday / 366))  # To take care of leap years
         hour_of_day.append(hours)
         day_of_year.append(days)
 

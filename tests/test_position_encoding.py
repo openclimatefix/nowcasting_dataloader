@@ -1,4 +1,5 @@
 """Test position encoding"""
+import datetime
 from copy import deepcopy
 
 import numpy as np
@@ -14,6 +15,7 @@ from nowcasting_dataloader.utils.position_encoding import (
     determine_shape_of_encoding,
     encode_absolute_position,
     encode_modalities,
+    encode_year,
     generate_position_encodings_for_batch,
     normalize_geospatial_coordinates,
 )
@@ -98,6 +100,26 @@ def test_datetime_feature_creation():
         assert torch.max(feature) <= 1.0
 
 
+def test_encode_year_fourier():
+    """Test year fourier encoding"""
+    datetimes = []
+    for year in range(2016, 2022):
+        datetimes.append(
+            pd.date_range(start=f"{year}-01-01 00:00", end=f"{year}-01-01 01:00", freq="5min")
+        )
+    datetimes.append(pd.date_range(start="2020-12-31 22:55", end="2020-12-31 23:55", freq="5min"))
+    year_encoding = encode_year(
+        datetimes,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
+    )
+    assert year_encoding.size() == (7, 1)
+    assert torch.min(year_encoding) >= -1.0
+    assert torch.max(year_encoding) <= 1.0
+
+
 def test_geospatial_normalization():
     """Test geospatial normalization"""
     geospatial_bounds = {"x_min": -2900.0, "y_min": -20, "x_max": 230000, "y_max": 670430}
@@ -122,10 +144,14 @@ def test_encode_absolute_position():
         geospatial_bounds=geospatial_bounds,
         geospatial_coordinates=geospatial_coordinates,
         datetimes=datetimes,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
-    assert absolute_position_encoding.size() == (12, 134, 13, 64, 64)
+    assert absolute_position_encoding.size() == (12, 135, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
 
@@ -156,16 +182,20 @@ def test_encode_modalities():
         datetimes={"NWP": datetimes},
         geospatial_coordinates={"NWP": geospatial_coordinates},
         geospatial_bounds=geospatial_bounds,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 134, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 135, 13, 64, 64)
     combined = torch.cat(
         [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
     )
-    assert combined.size() == (12, 144, 13, 64, 64)
+    assert combined.size() == (12, 145, 13, 64, 64)
 
 
 def test_encode_multiple_modalities():
@@ -190,18 +220,22 @@ def test_encode_multiple_modalities():
             "PV": pv_geospatial_coordinates,
         },
         geospatial_bounds=geospatial_bounds,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
         max_freq=128,
         num_bands=32,
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 134, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 135, 13, 64, 64)
     assert "Sat" in encoded_position.keys()
     assert "Sat_position_encoding" in encoded_position.keys()
-    assert encoded_position["Sat_position_encoding"].size() == (12, 134, 3, 64, 64)
+    assert encoded_position["Sat_position_encoding"].size() == (12, 135, 3, 64, 64)
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
-    assert encoded_position["PV_position_encoding"].size() == (12, 134, 5, 1, 1)
+    assert encoded_position["PV_position_encoding"].size() == (12, 135, 5, 1, 1)
 
     # Check that time and space features match for NWP and Sat when the times line up
     assert np.all(
@@ -232,7 +266,7 @@ def test_encode_multiple_modalities():
     # Time channels are the last 4 in the encoding, so check those,
     # first and last time values should be the same
     # Intermediate ones should vary
-    for i in range(130, 134):
+    for i in range(130, 135):
         assert np.all(
             np.isclose(
                 encoded_position["PV_position_encoding"][:, i, 0, 0, 0],
