@@ -1,4 +1,5 @@
 """Test position encoding"""
+import datetime
 from copy import deepcopy
 
 import numpy as np
@@ -107,7 +108,13 @@ def test_encode_year_fourier():
             pd.date_range(start=f"{year}-01-01 00:00", end=f"{year}-01-01 01:00", freq="5min")
         )
     datetimes.append(pd.date_range(start="2020-12-31 22:55", end="2020-12-31 23:55", freq="5min"))
-    year_encoding = encode_year(datetimes)
+    year_encoding = encode_year(
+        datetimes,
+        time_range=(
+            datetime.datetime(year=2016, month=1, day=1),
+            datetime.datetime(year=2021, month=12, day=31),
+        ),
+    )
     assert year_encoding.size() == (7, 1)
     assert torch.min(year_encoding) >= -1.0
     assert torch.max(year_encoding) <= 1.0
