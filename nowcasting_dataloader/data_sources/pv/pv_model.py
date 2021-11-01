@@ -88,14 +88,14 @@ class PVML(DataSourceOutputML):
                 batch_size,
                 seq_length_5,
                 n_pv_systems_per_batch,
-            ),
+            ).astype(np.float32),
             pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
             pv_system_row_number=np.sort(
                 np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
             ),
             pv_datetime_index=time_5,
-            pv_system_x_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch)),
-            pv_system_y_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch))[
+            pv_system_x_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)),
+            pv_system_y_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32))[
                 :, ::-1
             ].copy(),  # copy is needed as torch doesnt not support negative strides
         )
@@ -107,15 +107,16 @@ class PVML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
-        if PV_YIELD in xr_dataset.keys():
-            return PVML(
-                batch_size=xr_dataset[PV_YIELD].shape[0],
-                pv_yield=xr_dataset[PV_YIELD],
-                pv_system_id=xr_dataset[PV_SYSTEM_ID],
-                pv_system_row_number=xr_dataset[PV_SYSTEM_ROW_NUMBER],
-                pv_datetime_index=xr_dataset[PV_DATETIME_INDEX],
-                pv_system_x_coords=xr_dataset[PV_SYSTEM_X_COORDS],
-                pv_system_y_coords=xr_dataset[PV_SYSTEM_Y_COORDS],
-            )
-        else:
-            return None
+
+        print(xr_dataset)
+
+        return PVML(
+            batch_size=xr_dataset.data.shape[0],
+            pv_yield=xr_dataset.data,
+            pv_system_id=xr_dataset.id,
+            pv_system_row_number=xr_dataset.id, # TODO
+            pv_datetime_index=xr_dataset.time,
+            pv_system_x_coords=xr_dataset.x_coords,
+            pv_system_y_coords=xr_dataset.y_coords,
+        )
+

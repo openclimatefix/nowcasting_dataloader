@@ -59,11 +59,11 @@ class SunML(DataSourceOutputML):
             sun_azimuth_angle=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             sun_elevation_angle=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             sun_datetime_index=time_5,
         )
 

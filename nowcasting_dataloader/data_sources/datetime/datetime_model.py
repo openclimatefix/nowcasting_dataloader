@@ -48,19 +48,19 @@ class DatetimeML(DataSourceOutputML):
             hour_of_day_sin=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             hour_of_day_cos=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             day_of_year_sin=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             day_of_year_cos=np.random.randn(
                 batch_size,
                 seq_length_5,
-            ),
+            ).astype(np.float32),
             datetime_index=np.sort(np.random.randn(batch_size, seq_length_5))[:, ::-1].copy(),
             # copy is needed as torch doesnt not support negative strides
         )

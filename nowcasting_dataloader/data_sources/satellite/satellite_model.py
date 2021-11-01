@@ -95,7 +95,7 @@ class SatelliteML(DataSourceOutputML):
                 satellite_image_size_pixels,
                 satellite_image_size_pixels,
                 number_sat_channels,
-            ),
+            ).astype(np.float32),
             x=np.sort(np.random.randn(batch_size, satellite_image_size_pixels)),
             y=np.sort(np.random.randn(batch_size, satellite_image_size_pixels))[:, ::-1].copy()
             # copy is needed as torch doesnt not support negative strides
