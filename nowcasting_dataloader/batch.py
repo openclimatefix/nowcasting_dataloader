@@ -84,7 +84,9 @@ class BatchML(Example):
         process = configuration.process
         input_data = configuration.input_data
 
-        seq_length_30 = int((input_data.default_history_minutes + input_data.default_forecast_minutes) / 30 + 1)
+        seq_length_30 = int(
+            (input_data.default_history_minutes + input_data.default_forecast_minutes) / 30 + 1
+        )
 
         t0_dt, time_5, time_30 = make_random_time_vectors(
             batch_size=process.batch_size,
