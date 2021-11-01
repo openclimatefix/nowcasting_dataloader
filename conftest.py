@@ -4,7 +4,7 @@ import os
 import nowcasting_dataset
 import pytest
 from nowcasting_dataset.config.load import load_yaml_configuration
-from nowcasting_dataset.dataset.xr_utils import (
+from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )

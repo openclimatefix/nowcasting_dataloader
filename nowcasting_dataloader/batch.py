@@ -6,7 +6,7 @@ from typing import Optional
 
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataset.dataset.xr_utils import (
+from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )
