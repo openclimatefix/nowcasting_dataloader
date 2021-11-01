@@ -74,12 +74,11 @@ class SunML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
-        if SUN_AZIMUTH_ANGLE in xr_dataset.keys():
-            return SunML(
-                batch_size=xr_dataset[SUN_AZIMUTH_ANGLE].shape[0],
-                sun_azimuth_angle=xr_dataset[SUN_AZIMUTH_ANGLE],
-                sun_elevation_angle=xr_dataset[SUN_ELEVATION_ANGLE],
-                sun_datetime_index=xr_dataset["sun_datetime_index"],
-            )
-        else:
-            return None
+
+        sun_batch_ml = xr_dataset.torch.to_tensor(["azimuth", "time", "elevation"])
+
+        sun_batch_ml["sun_datetime_index"] = sun_batch_ml.pop("time")
+        sun_batch_ml[SUN_AZIMUTH_ANGLE] = sun_batch_ml.pop("azimuth")
+        sun_batch_ml[SUN_ELEVATION_ANGLE] = sun_batch_ml.pop("elevation")
+
+        return SunML(**sun_batch_ml)
