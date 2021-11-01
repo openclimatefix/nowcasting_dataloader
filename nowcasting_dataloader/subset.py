@@ -90,7 +90,13 @@ def subselect_data(
             t0_dt_of_first_example=t0_dt_of_first_example,
         )
 
-    # DATETIME TODO
+    if batch.optical_flow is not None:
+        batch.optical_flow = select_time_period(
+            x=batch.optical_flow,
+            history_minutes=history_minutes,
+            forecast_minutes=forecast_minutes,
+            t0_dt_of_first_example=t0_dt_of_first_example,
+        )
 
     return batch
 
