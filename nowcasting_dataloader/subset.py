@@ -141,4 +141,13 @@ def select_time_period(
     )
 
     # slice all the data
-    return x.where(((x.time_index >= start_i) & (x.time_index < end_i)), drop=True)
+    y = x.where(((x.time_index >= start_i) & (x.time_index < end_i)), drop=True)
+    
+    # the `where` statement seems to add extra dimension to data variables, 
+    # if they don't originally have `time_index` dimension
+    for key in y.keys():
+        print(key)
+        if 'time_index' not in getattr(x, key).dims:
+            y.__setitem__(key, getattr(x, key))
+            
+    return y

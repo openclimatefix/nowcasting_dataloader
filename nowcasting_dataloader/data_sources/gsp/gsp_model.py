@@ -112,9 +112,6 @@ class GSPML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        for coord in ["x_coords", "y_coords"]:
-            xr_dataset[coord] = xr_dataset[coord].transpose("example", "time_index", "id_index")
-
         gsp_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
 
         gsp_batch_ml[GSP_YIELD] = gsp_batch_ml.pop("data")

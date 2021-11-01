@@ -82,8 +82,6 @@ class TopographicML(DataSourceOutputML):
         topographic_batch_ml["topo_x_coords"] = topographic_batch_ml.pop("x")
         topographic_batch_ml["topo_y_coords"] = topographic_batch_ml.pop("y")
 
-        print(topographic_batch_ml)
-
         return TopographicML(**topographic_batch_ml)
 
     def normalize(self):
