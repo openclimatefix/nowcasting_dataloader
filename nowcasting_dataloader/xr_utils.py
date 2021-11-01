@@ -2,7 +2,7 @@
 
 1. xr array and xr dataset --> to torch functions
 """
-from typing import Any, List
+from typing import List
 
 import numpy as np
 import torch
@@ -53,6 +53,7 @@ def register_xr_data_set_to_tensor():
                     torch_dict[dim] = v.torch.to_tensor()
 
                 return torch_dict
+
 
 register_xr_data_array_to_tensor()
 register_xr_data_set_to_tensor()
