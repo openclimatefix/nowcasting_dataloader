@@ -6,10 +6,6 @@ from typing import Optional
 
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataloader.xr_utils import (
-    register_xr_data_array_to_tensor,
-    register_xr_data_set_to_tensor,
-)
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import BaseModel, Field
 
@@ -22,6 +18,10 @@ from nowcasting_dataloader.data_sources import (
     SatelliteML,
     SunML,
     TopographicML,
+)
+from nowcasting_dataloader.xr_utils import (
+    register_xr_data_array_to_tensor,
+    register_xr_data_set_to_tensor,
 )
 
 _LOG = logging.getLogger(__name__)
