@@ -132,7 +132,7 @@ def select_time_period(
         time_of_first_example = pd.to_datetime(x.time[0].values)
 
     else:
-        # for nwp, maybe reaname
+        # for nwp, maybe rename
         time_of_first_example = pd.to_datetime(x.target_time[0].values)
 
     # find the start and end index, that we will then use to slice the data
@@ -146,7 +146,6 @@ def select_time_period(
     # the `where` statement seems to add extra dimension to data variables,
     # if they don't originally have `time_index` dimension
     for key in y.keys():
-        print(key)
         if "time_index" not in getattr(x, key).dims:
             y.__setitem__(key, getattr(x, key))
 

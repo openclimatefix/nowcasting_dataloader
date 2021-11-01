@@ -72,7 +72,6 @@ class GSPML(DataSourceOutputML):
     @validator("gsp_x_coords")
     def x_coordinates_shape(cls, v, values):
         """Validate 'gsp_x_coords'"""
-        print(v.shape)
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         return v
 
@@ -96,11 +95,13 @@ class GSPML(DataSourceOutputML):
                 batch_size,
                 seq_length_30,
                 n_gsp_per_batch,
-            ),
+            ).astype(np.float32),
             gsp_id=np.sort(np.random.randint(0, 340, (batch_size, n_gsp_per_batch))),
             gsp_datetime_index=time_30,
-            gsp_x_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch)),
-            gsp_y_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch))[:, ::-1].copy(),
+            gsp_x_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32)),
+            gsp_y_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32))[
+                :, ::-1
+            ].copy(),
         )
         # copy is needed as torch doesnt not support negative strides
 

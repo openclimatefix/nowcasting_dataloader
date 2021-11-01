@@ -65,8 +65,6 @@ class PVML(DataSourceOutputML):
     @validator("pv_system_x_coords")
     def x_coordinates_shape(cls, v, values):
         """Validate 'pv_system_x_coords'"""
-        print(v.shape)
-        print(values["pv_yield"].shape)
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
 
@@ -90,14 +88,18 @@ class PVML(DataSourceOutputML):
                 batch_size,
                 seq_length_5,
                 n_pv_systems_per_batch,
-            ),
+            ).astype(np.float32),
             pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
             pv_system_row_number=np.sort(
                 np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
             ),
             pv_datetime_index=time_5,
-            pv_system_x_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch)),
-            pv_system_y_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch))[
+            pv_system_x_coords=np.sort(
+                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
+            ),
+            pv_system_y_coords=np.sort(
+                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
+            )[
                 :, ::-1
             ].copy(),  # copy is needed as torch doesnt not support negative strides
         )

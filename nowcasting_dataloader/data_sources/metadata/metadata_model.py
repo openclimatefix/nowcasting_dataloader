@@ -38,10 +38,10 @@ class MetadataML(DataSourceOutputML):
             t0_dt=t0_dt,
             x_meters_center=np.random.randn(
                 batch_size,
-            ),
+            ).astype(np.float32),
             y_meters_center=np.random.randn(
                 batch_size,
-            ),
+            ).astype(np.float32),
             object_at_center_label=np.array([1] * batch_size),
         )
 

@@ -16,6 +16,8 @@ from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 
 
+torch.set_default_dtype(torch.float32)
+
 def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     """Test netcdf locally"""
     c = Configuration()
@@ -72,6 +74,9 @@ def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
     assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
     assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
+    
+    assert type(batch_ml.nwp.data) == torch.Tensor
+    assert batch_ml.nwp.data[0,0,0,0,0].dtype == torch.float32
 
     # Make sure file isn't deleted!
     assert os.path.exists(os.path.join(DATA_PATH, "metadata/0.nc"))
