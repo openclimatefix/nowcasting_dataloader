@@ -110,17 +110,16 @@ class PVML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        for coord in ['x_coords','y_coords']:
+        for coord in ["x_coords", "y_coords"]:
             xr_dataset[coord] = xr_dataset[coord].transpose("example", "time_index", "id_index")
 
         pv_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
 
-        pv_batch_ml["pv_yield"] = pv_batch_ml.pop("data")
-        pv_batch_ml["pv_system_id"] = pv_batch_ml["id"]
-        pv_batch_ml["pv_system_row_number"] = pv_batch_ml.pop("id")
-        pv_batch_ml["pv_datetime_index"] = pv_batch_ml.pop("time")
-        pv_batch_ml["pv_system_x_coords"] = pv_batch_ml.pop("x_coords")
-        pv_batch_ml["pv_system_y_coords"] = pv_batch_ml.pop("y_coords")
+        pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("data")
+        pv_batch_ml[PV_SYSTEM_ID] = pv_batch_ml["id"]
+        pv_batch_ml[PV_SYSTEM_ROW_NUMBER] = pv_batch_ml.pop("id")
+        pv_batch_ml[PV_DATETIME_INDEX] = pv_batch_ml.pop("time")
+        pv_batch_ml[PV_SYSTEM_X_COORDS] = pv_batch_ml.pop("x_coords")
+        pv_batch_ml[PV_SYSTEM_Y_COORDS] = pv_batch_ml.pop("y_coords")
 
         return PVML(**pv_batch_ml)
-

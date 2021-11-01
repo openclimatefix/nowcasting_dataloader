@@ -64,7 +64,7 @@ class GSPML(DataSourceOutputML):
 
     @validator("gsp_yield")
     def gsp_yield_shape(cls, v, values):
-        """Validate 'gsp_yield'"""   
+        """Validate 'gsp_yield'"""
         assert len(v.shape) == 3
 
         return v
@@ -111,17 +111,17 @@ class GSPML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
-        
-        for coord in ['x_coords','y_coords']:
+
+        for coord in ["x_coords", "y_coords"]:
             xr_dataset[coord] = xr_dataset[coord].transpose("example", "time_index", "id_index")
 
         gsp_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
 
-        gsp_batch_ml["gsp_yield"] = gsp_batch_ml.pop("data")
-        gsp_batch_ml["gsp_id"] = gsp_batch_ml.pop("id")
-        gsp_batch_ml["gsp_datetime_index"] = gsp_batch_ml.pop("time")
-        gsp_batch_ml["gsp_x_coords"] = gsp_batch_ml.pop("x_coords")
-        gsp_batch_ml["gsp_y_coords"] = gsp_batch_ml.pop("y_coords")
-        gsp_batch_ml["batch_size"] = gsp_batch_ml["gsp_yield"].shape[0]
-        
+        gsp_batch_ml[GSP_YIELD] = gsp_batch_ml.pop("data")
+        gsp_batch_ml[GSP_ID] = gsp_batch_ml.pop("id")
+        gsp_batch_ml[GSP_DATETIME_INDEX] = gsp_batch_ml.pop("time")
+        gsp_batch_ml[GSP_X_COORDS] = gsp_batch_ml.pop("x_coords")
+        gsp_batch_ml[GSP_Y_COORDS] = gsp_batch_ml.pop("y_coords")
+        gsp_batch_ml["batch_size"] = gsp_batch_ml[GSP_YIELD].shape[0]
+
         return GSPML(**gsp_batch_ml)

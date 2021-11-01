@@ -78,7 +78,7 @@ class SunML(DataSourceOutputML):
         sun_batch_ml = xr_dataset.torch.to_tensor(["azimuth", "time", "elevation"])
 
         sun_batch_ml["sun_datetime_index"] = sun_batch_ml.pop("time")
-        sun_batch_ml["sun_azimuth_angle"] = sun_batch_ml.pop("azimuth")
-        sun_batch_ml["sun_elevation_angle"] = sun_batch_ml.pop("elevation")
+        sun_batch_ml[SUN_AZIMUTH_ANGLE] = sun_batch_ml.pop("azimuth")
+        sun_batch_ml[SUN_ELEVATION_ANGLE] = sun_batch_ml.pop("elevation")
 
         return SunML(**sun_batch_ml)

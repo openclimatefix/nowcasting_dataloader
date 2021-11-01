@@ -78,7 +78,7 @@ class TopographicML(DataSourceOutputML):
 
         topographic_batch_ml = xr_dataset.torch.to_tensor(["data", "x", "y"])
 
-        topographic_batch_ml["topo_data"] = topographic_batch_ml.pop("data")
+        topographic_batch_ml[TOPOGRAPHIC_DATA] = topographic_batch_ml.pop("data")
         topographic_batch_ml["topo_x_coords"] = topographic_batch_ml.pop("x")
         topographic_batch_ml["topo_y_coords"] = topographic_batch_ml.pop("y")
 
