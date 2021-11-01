@@ -14,6 +14,7 @@ from nowcasting_dataloader.data_sources import (
     NWPML,
     PVML,
     MetadataML,
+    OpticalFlowML,
     SatelliteML,
     SunML,
     TopographicML,
@@ -39,6 +40,7 @@ class Example(BaseModel):
     metadata: Optional[MetadataML]
     satellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
+    optical_flow: Optional[OpticalFlowML]
     pv: Optional[PVML]
     sun: Optional[SunML]
     gsp: Optional[GSPML]
@@ -50,6 +52,7 @@ class Example(BaseModel):
         return [
             self.satellite,
             self.topographic,
+            self.optical_flow,
             self.pv,
             self.sun,
             self.gsp,

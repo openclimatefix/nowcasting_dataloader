@@ -44,6 +44,7 @@ class OpticalFlowML(DataSourceOutputML):
     @staticmethod
     def fake(batch_size=32, seq_length_5=19, satellite_image_size_pixels=64, time_5=None):
         """Create fake data"""
+        # TODO Make it only for the future
         if time_5 is None:
             _, time_5, _ = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
@@ -78,7 +79,3 @@ class OpticalFlowML(DataSourceOutputML):
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
         return OpticalFlowML(**satellite_batch_ml)
-
-    def normalize(self):
-        """Normalize the satellite data"""
-        pass
