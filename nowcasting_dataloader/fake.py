@@ -38,6 +38,6 @@ class FakeDataset(torch.utils.data.Dataset):
         Returns: Dictionary of random data
 
         """
-        x = BatchML.fake(configuration=self.configuration)
+        x: BatchML = BatchML.fake(configuration=self.configuration)
 
         return x.dict()

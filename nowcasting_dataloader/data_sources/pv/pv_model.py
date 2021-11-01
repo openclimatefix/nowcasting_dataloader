@@ -65,6 +65,8 @@ class PVML(DataSourceOutputML):
     @validator("pv_system_x_coords")
     def x_coordinates_shape(cls, v, values):
         """Validate 'pv_system_x_coords'"""
+        print(v.shape)
+        print(values["pv_yield"].shape)
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
 
@@ -107,15 +109,18 @@ class PVML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
-        if PV_YIELD in xr_dataset.keys():
-            return PVML(
-                batch_size=xr_dataset[PV_YIELD].shape[0],
-                pv_yield=xr_dataset[PV_YIELD],
-                pv_system_id=xr_dataset[PV_SYSTEM_ID],
-                pv_system_row_number=xr_dataset[PV_SYSTEM_ROW_NUMBER],
-                pv_datetime_index=xr_dataset[PV_DATETIME_INDEX],
-                pv_system_x_coords=xr_dataset[PV_SYSTEM_X_COORDS],
-                pv_system_y_coords=xr_dataset[PV_SYSTEM_Y_COORDS],
-            )
-        else:
-            return None
+
+        for coord in ['x_coords','y_coords']:
+            xr_dataset[coord] = xr_dataset[coord].transpose("example", "time_index", "id_index")
+
+        pv_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
+
+        pv_batch_ml["pv_yield"] = pv_batch_ml.pop("data")
+        pv_batch_ml["pv_system_id"] = pv_batch_ml["id"]
+        pv_batch_ml["pv_system_row_number"] = pv_batch_ml.pop("id")
+        pv_batch_ml["pv_datetime_index"] = pv_batch_ml.pop("time")
+        pv_batch_ml["pv_system_x_coords"] = pv_batch_ml.pop("x_coords")
+        pv_batch_ml["pv_system_y_coords"] = pv_batch_ml.pop("y_coords")
+
+        return PVML(**pv_batch_ml)
+

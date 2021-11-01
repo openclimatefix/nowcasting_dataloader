@@ -75,12 +75,16 @@ class TopographicML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
-        return TopographicML(
-            batch_size=xr_dataset.data.shape[0],
-            topo_data=xr_dataset.data,
-            topo_x_coords=xr_dataset.x,
-            topo_y_coords=xr_dataset.y,
-        )
+
+        topographic_batch_ml = xr_dataset.torch.to_tensor(["data", "x", "y"])
+
+        topographic_batch_ml["topo_data"] = topographic_batch_ml.pop("data")
+        topographic_batch_ml["topo_x_coords"] = topographic_batch_ml.pop("x")
+        topographic_batch_ml["topo_y_coords"] = topographic_batch_ml.pop("y")
+
+        print(topographic_batch_ml)
+
+        return TopographicML(**topographic_batch_ml)
 
     def normalize(self):
         """Normalize the topological data"""
