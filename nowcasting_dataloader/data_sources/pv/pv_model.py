@@ -65,8 +65,6 @@ class PVML(DataSourceOutputML):
     @validator("pv_system_x_coords")
     def x_coordinates_shape(cls, v, values):
         """Validate 'pv_system_x_coords'"""
-        print(v.shape)
-        print(values["pv_yield"].shape)
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
 

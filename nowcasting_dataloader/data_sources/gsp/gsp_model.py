@@ -72,7 +72,6 @@ class GSPML(DataSourceOutputML):
     @validator("gsp_x_coords")
     def x_coordinates_shape(cls, v, values):
         """Validate 'gsp_x_coords'"""
-        print(v.shape)
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         return v
 
