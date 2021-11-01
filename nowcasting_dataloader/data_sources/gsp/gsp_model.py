@@ -100,7 +100,9 @@ class GSPML(DataSourceOutputML):
             gsp_id=np.sort(np.random.randint(0, 340, (batch_size, n_gsp_per_batch))),
             gsp_datetime_index=time_30,
             gsp_x_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32)),
-            gsp_y_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32))[:, ::-1].copy(),
+            gsp_y_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32))[
+                :, ::-1
+            ].copy(),
         )
         # copy is needed as torch doesnt not support negative strides
 

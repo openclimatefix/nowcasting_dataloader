@@ -67,8 +67,12 @@ class TopographicML(DataSourceOutputML):
                 image_size_pixels,
                 image_size_pixels,
             ).astype(np.float32),
-            topo_x_coords=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32)),
-            topo_y_coords=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32))[:, ::-1].copy(),
+            topo_x_coords=np.sort(
+                np.random.randn(batch_size, image_size_pixels).astype(np.float32)
+            ),
+            topo_y_coords=np.sort(
+                np.random.randn(batch_size, image_size_pixels).astype(np.float32)
+            )[:, ::-1].copy(),
             # copy is needed as torch doesnt not support negative strides
         )
 

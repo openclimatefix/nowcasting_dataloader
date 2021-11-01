@@ -101,7 +101,9 @@ class NWPML(DataSourceOutputML):
                 number_nwp_channels,
             ).astype(np.float32),
             x=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32)),
-            y=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32))[:, ::-1].copy()
+            y=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32))[
+                :, ::-1
+            ].copy()
             # copy is needed as torch doesnt not support negative strides
             ,
             target_time=time_5,

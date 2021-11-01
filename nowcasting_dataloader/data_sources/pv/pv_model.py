@@ -96,8 +96,12 @@ class PVML(DataSourceOutputML):
                 np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
             ),
             pv_datetime_index=time_5,
-            pv_system_x_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)),
-            pv_system_y_coords=np.sort(np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32))[
+            pv_system_x_coords=np.sort(
+                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
+            ),
+            pv_system_y_coords=np.sort(
+                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
+            )[
                 :, ::-1
             ].copy(),  # copy is needed as torch doesnt not support negative strides
         )
