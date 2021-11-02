@@ -2,7 +2,6 @@
 import numpy as np
 import xarray as xr
 from nowcasting_dataset.consts import DATETIME_FEATURE_NAMES, Array
-from nowcasting_dataset.utils import coord_to_range
 from pydantic import validator
 
 from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
@@ -65,25 +64,25 @@ class DatetimeML(DataSourceOutputML):
             # copy is needed as torch doesnt not support negative strides
         )
 
-    def to_xr_dataset(self, _):
-        """Make a xr dataset"""
-        individual_datasets = []
-        for name in DATETIME_FEATURE_NAMES:
-
-            var = self.__getattribute__(name)
-
-            data = xr.DataArray(
-                var,
-                dims=["time"],
-                coords={"time": self.datetime_index},
-                name=name,
-            )
-
-            ds = data.to_dataset()
-            ds = coord_to_range(ds, "time", prefix=None)
-            individual_datasets.append(ds)
-
-        return xr.merge(individual_datasets)
+    # def to_xr_dataset(self, _):
+    #     """Make a xr dataset"""
+    #     individual_datasets = []
+    #     for name in DATETIME_FEATURE_NAMES:
+    # 
+    #         var = self.__getattribute__(name)
+    # 
+    #         data = xr.DataArray(
+    #             var,
+    #             dims=["time"],
+    #             coords={"time": self.datetime_index},
+    #             name=name,
+    #         )
+    # 
+    #         ds = data.to_dataset()
+    #         ds = coord_to_range(ds, "time", prefix=None)
+    #         individual_datasets.append(ds)
+    # 
+    #     return xr.merge(individual_datasets)
 
     @staticmethod
     def from_xr_dataset(xr_dataset):

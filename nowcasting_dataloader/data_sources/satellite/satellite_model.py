@@ -113,6 +113,14 @@ class SatelliteML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model."""
+
+        channels = xr_dataset.channels
+
+        if type(channels.data[0, 0]) == str:
+            # create a list of integers and repeat over the examples in the batch,
+            # instead of the channel strings
+            xr_dataset.channels.data = np.tile(np.array(range(0, channels.shape[1])), (channels.shape[0], 1))
+
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
         return SatelliteML(**satellite_batch_ml)
