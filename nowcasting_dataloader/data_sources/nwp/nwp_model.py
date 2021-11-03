@@ -9,7 +9,10 @@ from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
-from nowcasting_dataloader.utils.dims import re_order_dims
+from nowcasting_dataloader.xr_utils import re_order_dims, map_channels_names_to_indexes
+from nowcasting_dataset.consts import NWP_VARIABLE_NAMES
+
+channels_mapping = {key: i for i, key in enumerate(NWP_VARIABLE_NAMES)}
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +123,9 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model with tensors"""
+        
+        # change channel names to indexes
+        xr_dataset = map_channels_names_to_indexes(xr_dataset, channels_mapping)
 
         # make sure dims are the in the correct order
         xr_dataset = re_order_dims(xr_dataset)
