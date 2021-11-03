@@ -9,8 +9,37 @@ import torch
 import xarray as xr
 
 
+def map_channels_names_to_indexes(xr_dataset: xr.Dataset, channels_mapping: dict):
+    """
+    Map channel names to indexes
+
+    xr_dataset.channels = [['HRV', 'IR_016'],
+       ['HRV', 'IR_016'],
+       ['HRV', 'IR_016'],
+       ['HRV', 'IR_016']]
+
+    will be changed to
+
+    xr_dataset.channels = [[0, 1],
+       [0, 1],
+       [0, 1],
+       [0, 1]]
+
+    """
+    # map channels to indexes
+    mapping_np = np.vectorize(channels_mapping.__getitem__)(xr_dataset.channels.values)
+
+    # make data array
+    channels_xr = xr.DataArray(mapping_np, dims=xr_dataset.channels.dims)
+
+    # set data array
+    xr_dataset.__setitem__("channels", channels_xr)
+
+    return xr_dataset
+
+
 def register_xr_data_array_to_tensor():
-    """ Add torch object to data array """
+    """Add torch object to data array"""
     if not hasattr(xr.DataArray, "torch"):
 
         @xr.register_dataarray_accessor("torch")
@@ -33,7 +62,7 @@ def register_xr_data_array_to_tensor():
 
 
 def register_xr_data_set_to_tensor():
-    """ Add torch object to dataset """
+    """Add torch object to dataset"""
     if not hasattr(xr.Dataset, "torch"):
 
         @xr.register_dataset_accessor("torch")
@@ -57,3 +86,15 @@ def register_xr_data_set_to_tensor():
 
 register_xr_data_array_to_tensor()
 register_xr_data_set_to_tensor()
+
+
+def re_order_dims(xr_dataset: xr.Dataset):
+    """
+    Re order dims to B,C,T,H,W
+    """
+    expected_dims_order = ("example", "channels_index", "time_index", "y_index", "x_index")
+
+    if xr_dataset.data.dims != expected_dims_order:
+        xr_dataset.__setitem__("data", xr_dataset.data.transpose(*expected_dims_order))
+
+    return xr_dataset
