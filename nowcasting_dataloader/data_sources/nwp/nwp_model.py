@@ -7,6 +7,7 @@ import numpy as np
 import xarray as xr
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
+from typing import Optional
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 from nowcasting_dataloader.xr_utils import re_order_dims, map_channels_names_to_indexes
@@ -78,7 +79,7 @@ class NWPML(DataSourceOutputML):
 
     init_time: Array = Field(..., description="The time when the nwp forecast was made")
 
-    channels: Array = Field(..., description="List of the nwp channels")
+    channels: Optional[Array] = Field(None, description="List of the nwp channels")
 
     @staticmethod
     def fake(
@@ -123,16 +124,13 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model with tensors"""
-        
-        # change channel names to indexes
-        xr_dataset = map_channels_names_to_indexes(xr_dataset, channels_mapping)
 
         # make sure dims are the in the correct order
         xr_dataset = re_order_dims(xr_dataset)
 
         # convert to torch dict
         nwp_batch_ml = xr_dataset.torch.to_tensor(
-            ["data", "time", "init_time", "x", "y", "channels"]
+            ["data", "time", "init_time", "x", "y"]
         )
 
         # make into Model
