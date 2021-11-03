@@ -119,9 +119,7 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model with tensors"""
-        
-        print(xr_dataset)
-        
+
         nwp_batch_ml = xr_dataset.torch.to_tensor(
             ["data", "time", "init_time", "x", "y", "channels"]
         )
