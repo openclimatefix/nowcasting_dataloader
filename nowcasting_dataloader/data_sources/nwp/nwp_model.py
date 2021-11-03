@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 import logging
+from typing import Optional
 
 import numpy as np
 import xarray as xr
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
-from typing import Optional
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 from nowcasting_dataloader.xr_utils import re_order_dims
-from nowcasting_dataset.consts import NWP_VARIABLE_NAMES
-
-channels_mapping = {key: i for i, key in enumerate(NWP_VARIABLE_NAMES)}
 
 logger = logging.getLogger(__name__)
 
