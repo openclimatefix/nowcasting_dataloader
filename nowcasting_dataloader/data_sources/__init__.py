@@ -1,5 +1,4 @@
 """ Various DataSources """
-from .datetime.datetime_model import DatetimeML
 from .gsp.gsp_model import GSPML
 from .metadata.metadata_model import MetadataML
 from .nwp.nwp_model import NWPML

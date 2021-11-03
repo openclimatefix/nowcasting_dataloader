@@ -13,7 +13,6 @@ from nowcasting_dataloader.data_sources import (
     GSPML,
     NWPML,
     PVML,
-    DatetimeML,
     MetadataML,
     SatelliteML,
     SunML,
@@ -44,7 +43,6 @@ class Example(BaseModel):
     sun: Optional[SunML]
     gsp: Optional[GSPML]
     nwp: Optional[NWPML]
-    datetime: Optional[DatetimeML]
 
     @property
     def data_sources(self):
@@ -56,7 +54,6 @@ class Example(BaseModel):
             self.sun,
             self.gsp,
             self.nwp,
-            self.datetime,
             self.metadata,
         ]
 
@@ -129,9 +126,6 @@ class BatchML(Example):
                 image_size_pixels=input_data.nwp.nwp_image_size_pixels,
                 number_nwp_channels=len(input_data.nwp.nwp_channels),
                 time_5=time_5,
-            ),
-            datetime=DatetimeML.fake(
-                batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
             ),
         )
 
