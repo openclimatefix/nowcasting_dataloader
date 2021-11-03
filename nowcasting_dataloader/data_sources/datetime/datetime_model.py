@@ -1,9 +1,8 @@
 """ Model for output of datetime data """
 import numpy as np
-from nowcasting_dataset.consts import Array
 from pydantic import validator
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML, Array
 
 
 class DatetimeML(DataSourceOutputML):
