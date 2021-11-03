@@ -95,10 +95,10 @@ class NWPML(DataSourceOutputML):
             batch_size=batch_size,
             data=np.random.randn(
                 batch_size,
+                number_nwp_channels,
                 seq_length_5,
                 image_size_pixels,
                 image_size_pixels,
-                number_nwp_channels,
             ).astype(np.float32),
             x=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32)),
             y=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32))[
