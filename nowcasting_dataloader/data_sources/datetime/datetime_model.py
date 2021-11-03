@@ -2,7 +2,7 @@
 import numpy as np
 from pydantic import validator
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML, Array
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 
 class DatetimeML(DataSourceOutputML):

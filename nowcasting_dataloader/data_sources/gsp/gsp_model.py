@@ -12,7 +12,7 @@ from nowcasting_dataset.consts import (
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML, Array
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 

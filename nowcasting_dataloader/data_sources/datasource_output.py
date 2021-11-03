@@ -5,8 +5,8 @@ import logging
 from typing import List, Union
 
 import numpy as np
-import xarray as xr
 import torch
+import xarray as xr
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
