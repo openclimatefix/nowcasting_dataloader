@@ -9,6 +9,7 @@ from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
+from nowcasting_dataloader.utils.dims import re_order_dims
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +121,15 @@ class NWPML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model with tensors"""
 
+        # make sure dims are the in the correct order
+        xr_dataset = re_order_dims(xr_dataset)
+
+        # convert to torch dict
         nwp_batch_ml = xr_dataset.torch.to_tensor(
             ["data", "time", "init_time", "x", "y", "channels"]
         )
 
+        # make into Model
         return NWPML(**nwp_batch_ml)
 
     def normalize(self):

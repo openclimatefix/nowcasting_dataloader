@@ -9,6 +9,7 @@ from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
+from nowcasting_dataloader.utils.dims import re_order_dims
 
 logger = logging.getLogger(__name__)
 
@@ -113,8 +114,13 @@ class SatelliteML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model."""
 
+        # make sure the dims are in the correct order
+        xr_dataset = re_order_dims(xr_dataset)
+
+        # convert to torch dictionary
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
+        # move to Modle
         return SatelliteML(**satellite_batch_ml)
 
     def normalize(self):
