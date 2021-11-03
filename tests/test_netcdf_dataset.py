@@ -29,17 +29,13 @@ def test_netcdf_dataset_local_using_configuration():
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:1]
     configuration = c
 
-    import tempfile
-
     with tempfile.TemporaryDirectory() as tmpdirname:
 
-        dir_name = tmpdirname
-
         f = Batch.fake(configuration=c)
-        f.save_netcdf(batch_i=0, path=Path(f"{dir_name}"))
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
-        DATA_PATH = dir_name
-        TEMP_PATH = dir_name
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
 
         train_dataset = NetCDFDataset(
             1,
