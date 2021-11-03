@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import List, Union
 
 import numpy as np
+import torch
+import xarray as xr
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+Array = Union[xr.DataArray, np.ndarray, torch.Tensor]
 
 
 class DataSourceOutputML(BaseModel):

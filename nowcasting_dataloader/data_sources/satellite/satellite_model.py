@@ -5,11 +5,10 @@ import logging
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.consts import Array
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +112,7 @@ class SatelliteML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model."""
+
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y", "channels"])
 
         return SatelliteML(**satellite_batch_ml)

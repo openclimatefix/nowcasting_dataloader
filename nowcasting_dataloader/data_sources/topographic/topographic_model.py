@@ -2,10 +2,10 @@
 import logging
 
 import numpy as np
-from nowcasting_dataset.consts import TOPOGRAPHIC_DATA, Array
+from nowcasting_dataset.consts import TOPOGRAPHIC_DATA
 from pydantic import Field, validator
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 

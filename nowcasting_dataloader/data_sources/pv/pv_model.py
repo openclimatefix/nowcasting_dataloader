@@ -9,12 +9,11 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_X_COORDS,
     PV_SYSTEM_Y_COORDS,
     PV_YIELD,
-    Array,
 )
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,10 @@ import logging
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.consts import Array
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
-from nowcasting_dataloader.data_sources.datasource_output import DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +65,7 @@ class NWPML(DataSourceOutputML):
         "Shape: [batch_size,] height",
     )
 
-    target_time: Array = Field(
+    time: Array = Field(
         ...,
         description="Time index of nwp data at 5 minutes past the hour {0, 5, ..., 55}. "
         "Datetimes become Unix epochs (UTC) represented as int64 just before being"
@@ -106,7 +105,7 @@ class NWPML(DataSourceOutputML):
             ].copy()
             # copy is needed as torch doesnt not support negative strides
             ,
-            target_time=time_5,
+            time=time_5,
             init_time=time_5[0],
             channels=np.array([list(range(number_nwp_channels)) for _ in range(batch_size)]),
         )
@@ -120,8 +119,9 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def from_xr_dataset(xr_dataset: xr.Dataset):
         """Change xr dataset to model with tensors"""
+
         nwp_batch_ml = xr_dataset.torch.to_tensor(
-            ["data", "target_time", "init_time", "x", "y", "channels"]
+            ["data", "time", "init_time", "x", "y", "channels"]
         )
 
         return NWPML(**nwp_batch_ml)
