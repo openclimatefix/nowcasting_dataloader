@@ -10,7 +10,7 @@ from pydantic import Field
 from typing import Optional
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
-from nowcasting_dataloader.xr_utils import re_order_dims, map_channels_names_to_indexes
+from nowcasting_dataloader.xr_utils import re_order_dims
 from nowcasting_dataset.consts import NWP_VARIABLE_NAMES
 
 channels_mapping = {key: i for i, key in enumerate(NWP_VARIABLE_NAMES)}
