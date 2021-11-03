@@ -14,11 +14,13 @@ from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SA
 import nowcasting_dataloader
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
+from nowcasting_dataset.dataset.batch import Batch
 
 
 torch.set_default_dtype(torch.float32)
 
-def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
+
+def test_netcdf_dataset_local_using_configuration():
     """Test netcdf locally"""
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
@@ -27,59 +29,60 @@ def test_netcdf_dataset_local_using_configuration(configuration: Configuration):
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:1]
     configuration = c
 
-    DATA_PATH = os.path.join(
-        os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch"
-    )
-    TEMP_PATH = os.path.join(
-        os.path.dirname(nowcasting_dataloader.__file__), "../tests", "data", "batch", "temp"
-    )
+    with tempfile.TemporaryDirectory() as tmpdirname:
 
-    train_dataset = NetCDFDataset(
-        1,
-        DATA_PATH,
-        TEMP_PATH,
-        cloud="local",
-        history_minutes=10,
-        forecast_minutes=10,
-        configuration=configuration,
-    )
+        f = Batch.fake(configuration=c)
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
-    dataloader_config = dict(
-        pin_memory=True,
-        num_workers=1,
-        prefetch_factor=1,
-        worker_init_fn=worker_init_fn,
-        persistent_workers=True,
-        # Disable automatic batching because dataset
-        # returns complete batches.
-        batch_size=None,
-    )
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
 
-    _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+        train_dataset = NetCDFDataset(
+            1,
+            DATA_PATH,
+            TEMP_PATH,
+            cloud="local",
+            history_minutes=10,
+            forecast_minutes=10,
+            configuration=configuration,
+        )
 
-    train_dataset.per_worker_init(1)
-    t = iter(train_dataset)
-    data = next(t)
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+        )
 
-    batch_ml = BatchML(**data)
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 
-    sat_data = batch_ml.satellite.data
-    # TODO
-    # Sat is in 5min increments, so should have 2 history + current + 2 future
-    assert sat_data.shape[1] == 5
-    assert batch_ml.nwp.data.shape == (4, 5, 64, 64, 1)
-    assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
-    assert batch_ml.metadata.t0_dt.shape == (4,1)
-    assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
-    assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
-    assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
-    assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
-    
-    assert type(batch_ml.nwp.data) == torch.Tensor
-    assert batch_ml.nwp.data[0,0,0,0,0].dtype == torch.float32
+        train_dataset.per_worker_init(1)
+        t = iter(train_dataset)
+        data = next(t)
 
-    # Make sure file isn't deleted!
-    assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
+        batch_ml = BatchML(**data)
+
+        sat_data = batch_ml.satellite.data
+        # TODO
+        # Sat is in 5min increments, so should have 2 history + current + 2 future
+        assert sat_data.shape[1] == 5
+        assert batch_ml.nwp.data.shape == (4, 5, 64, 64, 1)
+        assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
+        assert batch_ml.metadata.t0_dt.shape == (4,1)
+        assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
+        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
+        assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
+
+        assert type(batch_ml.nwp.data) == torch.Tensor
+        assert batch_ml.nwp.data[0,0,0,0,0].dtype == torch.float32
+
+        # Make sure file isn't deleted!
+        assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
 
 
 @pytest.mark.skip("CD does not have access to GCS")
