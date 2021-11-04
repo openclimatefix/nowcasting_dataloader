@@ -4,6 +4,7 @@ import logging
 import cv2
 import numpy as np
 import pandas as pd
+import torch
 import xarray as xr
 from nowcasting_dataset.dataset.batch import Batch
 
@@ -13,8 +14,8 @@ IMAGE_BUFFER_SIZE = 16
 
 
 def compute_optical_flow_for_batch(
-    batch: Batch, previous_timestep_for_flow: int, final_image_size_pixels: int
-) -> Batch:
+    batch: Batch, final_image_size_pixels: int
+) -> dict[str, torch.Tensor]:
     """
     Computes the optical flow for satellite images in the batch
 
@@ -24,25 +25,32 @@ def compute_optical_flow_for_batch(
         batch: Batch containing at least metadata and satellite data
 
     Returns:
-        Batch with the optical flow added
+        Optical Flow predictions
     """
 
-    assert batch.satellite is not None, (
-        "Satellite data does not exist in batch, required for " "optical flow"
-    )
+    assert (
+        batch.satellite is not None
+    ), "Satellite data does not exist in batch, required for optical flow"
     assert batch.metadata is not None, "Metadata does not exist in batch, required for optical flow"
 
     # Only do optical flow for satellite data
+    optical_flow_predictions = []
     for i in range(batch.batch_size):
-        satellite_data = batch.satellite[i]
+        satellite_data = batch.satellite.sel(example=i)
         t0_dt = batch.metadata.t0_dt.values[i]
-        batch.optical_flow = _compute_and_return_optical_flow(satellite_data, t0_dt)
-
-    return batch
+        optical_flow_predictions.append(
+            _compute_and_return_optical_flow(
+                satellite_data, t0_dt=t0_dt, final_image_size_pixels=final_image_size_pixels
+            )
+        )
+    # Convert to torch Tensor
+    optical_flow_predictions = torch.stack(optical_flow_predictions, dim=0)
+    return {"optical_flow": optical_flow_predictions}
 
 
 def _compute_previous_timestep(
-    satellite_data: xr.DataArray, t0_dt: pd.Timestamp, previous_timestep_for_flow: int
+    satellite_data: xr.DataArray,
+    t0_dt: pd.Timestamp,
 ) -> pd.Timestamp:
     """
     Get timestamp of previous
@@ -55,9 +63,7 @@ def _compute_previous_timestep(
         The previous timesteps
     """
     satellite_data = satellite_data.where(satellite_data.time <= t0_dt, drop=True)
-    return satellite_data.isel(
-        time=len(satellite_data.time) - previous_timestep_for_flow
-    ).time.values
+    return satellite_data.isel(time_index=len(satellite_data.time_index) - 1).time.values
 
 
 def _get_number_future_timesteps(satellite_data: xr.DataArray, t0_dt: pd.Timestamp) -> int:
@@ -72,15 +78,14 @@ def _get_number_future_timesteps(satellite_data: xr.DataArray, t0_dt: pd.Timesta
         The number of future timesteps
     """
     satellite_data = satellite_data.where(satellite_data.time > t0_dt, drop=True)
-    return len(satellite_data.coords["time"])
+    return len(satellite_data.coords["time_index"])
 
 
 def _compute_and_return_optical_flow(
     satellite_data: xr.DataArray,
     t0_dt: pd.Timestamp,
-    previous_timestep_for_flow: int,
     final_image_size_pixels: int,
-) -> xr.DataArray:
+) -> torch.Tensor:
     """
     Compute and return optical flow predictions for the example
 
@@ -89,20 +94,24 @@ def _compute_and_return_optical_flow(
         t0_dt: t0 timestamp
 
     Returns:
-        The xr.DataArray with the optical flow predictions for t0 to forecast horizon
+        The Tensor with the optical flow predictions for t0 to forecast horizon
     """
 
     prediction_dictionary = {}
     # Get the previous timestamp
     previous_timestamp = _compute_previous_timestep(
-        satellite_data, t0_dt=t0_dt, previous_timestep_for_flow=previous_timestep_for_flow
+        satellite_data,
+        t0_dt=t0_dt,
     )
     for prediction_timestep in range(_get_number_future_timesteps(satellite_data, t0_dt)):
         predictions = []
-        for channel in satellite_data.coords["channels"]:
-            channel_images = satellite_data.sel(channels=channel)
-            t0_image = channel_images.sel(time=t0_dt).values
-            previous_image = channel_images.sel(time=previous_timestamp).values
+        for channel in satellite_data.coords["channels_index"]:
+            channel_images = satellite_data.sel(channels_index=channel)
+            # Extra 1 in shape from time dimension, so removing that dimension
+            t0_image = channel_images.where(channel_images.time == t0_dt, drop=True).data.values[0]
+            previous_image = channel_images.where(
+                channel_images.time == previous_timestamp, drop=True
+            ).data.values[0]
             optical_flow = _compute_optical_flow(t0_image, previous_image)
             # Do predictions now
             flow = optical_flow * prediction_timestep
@@ -114,54 +123,14 @@ def _compute_and_return_optical_flow(
             )
             predictions.append(warped_image)
         # Add the block of predictions for all channels
-        prediction_dictionary[prediction_timestep] = np.concatenate(predictions, axis=-1)
-    # Make a block of T, H, W, C ordering
-    prediction = np.stack([prediction_dictionary[k] for k in prediction_dictionary.keys()], axis=0)
-    if len(satellite_data.coords["channels"]) == 1:
+        prediction_dictionary[prediction_timestep] = np.stack(predictions, axis=0)
+    # Make a block of C, T, H, W ordering
+    prediction = np.stack([prediction_dictionary[k] for k in prediction_dictionary.keys()], axis=1)
+    if len(satellite_data.coords["channels_index"]) == 1:
         # Only case where another channel needs to be added
         prediction = np.expand_dims(prediction, axis=-1)
     # Swap out data for the future part of the dataarray
-    dataarray = _update_dataarray_with_predictions(
-        satellite_data, predictions=prediction, t0_dt=t0_dt
-    )
-    return dataarray
-
-
-def _update_dataarray_with_predictions(
-    satellite_data: xr.DataArray,
-    predictions: np.ndarray,
-    t0_dt: pd.Timestamp,
-    final_image_size_pixels: int,
-) -> xr.DataArray:
-    """
-    Updates the dataarray with predictions
-
-     Additionally, changes the temporal size to t0+1 to forecast horizon
-
-    Args:
-        satellite_data: Satellite data
-        predictions: Predictions from the optical flow
-
-    Returns:
-        The Xarray DataArray with the optical flow predictions
-    """
-
-    # Combine all channels for a single timestep
-    satellite_data = satellite_data.where(satellite_data.time > t0_dt, drop=True)
-    # Make sure its the correct size
-    # buffer is divisble by 2
-    buffer_size = (len(satellite_data.x) - final_image_size_pixels) / 2
-    satellite_data = satellite_data.isel(
-        x=slice(buffer_size, len(satellite_data.x) - buffer_size),
-        y=slice(buffer_size, len(satellite_data.y) - buffer_size),
-    )
-    dataarray = xr.DataArray(
-        data=predictions,
-        dims=satellite_data.dims,
-        coords=satellite_data.coords,
-    )
-
-    return dataarray
+    return torch.from_numpy(prediction)
 
 
 def _compute_optical_flow(t0_image: np.ndarray, previous_image: np.ndarray) -> np.ndarray:
