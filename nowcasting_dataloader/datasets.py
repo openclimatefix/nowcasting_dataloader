@@ -71,6 +71,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
             add_optical_flow: Whether to add optical flow predictions for satellite data
+            flow_image_size_pixels: The size of the flow images in pixels
         """
         self.n_batches = n_batches
         self.src_path = src_path
