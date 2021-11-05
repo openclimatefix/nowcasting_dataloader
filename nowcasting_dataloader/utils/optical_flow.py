@@ -3,11 +3,11 @@ import logging
 from typing import Optional
 
 import cv2
+import einops
 import numpy as np
 import pandas as pd
 import torch
 import xarray as xr
-import einops
 from nowcasting_dataset.dataset.batch import Batch
 
 _LOG = logging.getLogger("nowcasting_dataset")
@@ -49,7 +49,7 @@ def compute_optical_flow_for_batch(
     # Convert to torch Tensor
     optical_flow_predictions = torch.stack(optical_flow_predictions, dim=0)
     # Return in correct format
-    optical_flow_predictions = einops.rearrange(optical_flow_predictions, 'b t h w c -> b c t h w')
+    optical_flow_predictions = einops.rearrange(optical_flow_predictions, "b t h w c -> b c t h w")
     return optical_flow_predictions
 
 
