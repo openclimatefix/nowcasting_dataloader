@@ -14,7 +14,6 @@ from nowcasting_dataloader.data_sources import (
     NWPML,
     PVML,
     MetadataML,
-    OpticalFlowML,
     SatelliteML,
     SunML,
     TopographicML,
@@ -40,7 +39,7 @@ class Example(BaseModel):
     metadata: Optional[MetadataML]
     satellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
-    optical_flow: Optional[OpticalFlowML]
+    optical_flow: Optional[SatelliteML]
     pv: Optional[PVML]
     sun: Optional[SunML]
     gsp: Optional[GSPML]
@@ -103,6 +102,12 @@ class BatchML(Example):
                 input_data.satellite.satellite_image_size_pixels,
                 len(input_data.satellite.satellite_channels),
                 time_5=time_5,
+            ),
+            optical_flow=SatelliteML.fake(
+                process.batch_size,
+                input_data.default_forecast_minutes // 5,
+                input_data.satellite.satellite_image_size_pixels,
+                len(input_data.satellite.satellite_channels),
             ),
             topographic=TopographicML.fake(
                 batch_size=process.batch_size,
