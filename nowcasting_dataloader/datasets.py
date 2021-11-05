@@ -192,9 +192,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.add_position_encoding:
             # Add position encodings
             batch.update(position_encodings)
-        if self.add_optical_flow:
-            # Add optical flow predictions
-            batch.update(optical_flow)
         return batch
 
 
