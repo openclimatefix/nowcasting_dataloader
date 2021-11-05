@@ -105,8 +105,14 @@ def _compute_and_return_optical_flow(
         satellite_data,
         t0_dt=t0_dt,
     )
-    prediction_block = np.zeros((future_timesteps, final_image_size_pixels,
-                                 final_image_size_pixels, satellite_data.sizes["channels_index"]))
+    prediction_block = np.zeros(
+        (
+            future_timesteps,
+            final_image_size_pixels,
+            final_image_size_pixels,
+            satellite_data.sizes["channels_index"],
+        )
+    )
     for prediction_timestep in range(future_timesteps):
         for channel in range(0, len(satellite_data.coords["channels_index"]), 4):
             # Optical Flow works with RGB images, so chunking channels for it to be faster
@@ -120,14 +126,14 @@ def _compute_and_return_optical_flow(
             ).data.values
             optical_flow = _compute_optical_flow(t0_image, previous_image)
             # Do predictions now
-            flow = optical_flow * prediction_timestep+1 # Otherwise first prediction would be 0
+            flow = optical_flow * prediction_timestep + 1  # Otherwise first prediction would be 0
             warped_image = _remap_image(t0_image, flow)
             warped_image = crop_center(
                 warped_image,
                 final_image_size_pixels,
                 final_image_size_pixels,
             )
-            prediction_block[prediction_timestep, :, :, channel:channel+4] = warped_image
+            prediction_block[prediction_timestep, :, :, channel : channel + 4] = warped_image
     # Swap out data for the future part of the dataarray
     return torch.from_numpy(prediction_block)
 
@@ -144,8 +150,8 @@ def _compute_optical_flow(t0_image: np.ndarray, previous_image: np.ndarray) -> n
         Optical Flow field
     """
     # Input images have to be single channel and between 0 and 1
-    image_min = np.min([t0_image,previous_image])
-    image_max = np.max([t0_image,previous_image])
+    image_min = np.min([t0_image, previous_image])
+    image_max = np.max([t0_image, previous_image])
     t0_image -= image_min
     t0_image /= image_max
     previous_image -= image_min
