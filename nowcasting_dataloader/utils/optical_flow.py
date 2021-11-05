@@ -53,7 +53,7 @@ def compute_optical_flow_for_batch(
     return optical_flow_predictions
 
 
-def _compute_previous_timestep(
+def _get_previous_timesteps(
     satellite_data: xr.DataArray,
     t0_dt: pd.Timestamp,
 ) -> xr.DataArray:
@@ -104,7 +104,7 @@ def _compute_and_return_optical_flow(
 
     # Get the previous timestamp
     future_timesteps = _get_number_future_timesteps(satellite_data, t0_dt)
-    satellite_data: xr.DataArray = _compute_previous_timestep(
+    satellite_data: xr.DataArray = _get_previous_timesteps(
         satellite_data,
         t0_dt=t0_dt,
     )
