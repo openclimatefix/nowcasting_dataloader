@@ -146,7 +146,8 @@ class BatchML(Example):
         for data_source_name in data_sources_names:
 
             data_source = BatchML.__fields__[data_source_name].type_
-
+            if not hasattr(batch, data_source_name):
+                continue
             xr_dataset = getattr(batch, data_source_name)
             if xr_dataset is not None:
 
