@@ -14,6 +14,7 @@ from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
+from nowcasting_dataloader.utils.optical_flow import compute_optical_flow_for_batch
 from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         forecast_minutes: Optional[int] = None,
         normalize: bool = False,
         add_position_encoding: bool = False,
+        add_optical_flow: bool = False,
+        flow_image_size_pixels: int = 64,
     ):
         """
         Netcdf Dataset
@@ -67,6 +70,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
+            add_optical_flow: Whether to add optical flow predictions for satellite data
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -77,6 +81,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+        self.add_optical_flow = add_optical_flow
+        self.flow_image_size_pixels = flow_image_size_pixels
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -160,8 +166,17 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
         if self.add_position_encoding:
             position_encodings = generate_position_encodings_for_batch(batch)
+
+        if self.add_optical_flow:
+            optical_flow: torch.Tensor = compute_optical_flow_for_batch(
+                batch, final_image_size_pixels=self.flow_image_size_pixels
+            )
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
+
+        if self.add_optical_flow:
+            # Add optical flow data source
+            batch.optical_flow = optical_flow
 
         # netcdf_batch = xr.load_dataset(local_netcdf_filename)
         if self.cloud != "local":
@@ -176,6 +191,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.add_position_encoding:
             # Add position encodings
             batch.update(position_encodings)
+        if self.add_optical_flow:
+            # Add optical flow predictions
+            batch.update(optical_flow)
         return batch
 
 

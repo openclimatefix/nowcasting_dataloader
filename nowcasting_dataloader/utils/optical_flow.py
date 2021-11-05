@@ -1,5 +1,6 @@
 """Functions for computing the optical flow on the fly for satellite images"""
 import logging
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -10,10 +11,10 @@ from nowcasting_dataset.dataset.batch import Batch
 
 _LOG = logging.getLogger("nowcasting_dataset")
 
-IMAGE_BUFFER_SIZE = 16
 
-
-def compute_optical_flow_for_batch(batch: Batch, final_image_size_pixels: int) -> torch.Tensor:
+def compute_optical_flow_for_batch(
+    batch: Batch, final_image_size_pixels: Optional[int] = None
+) -> torch.Tensor:
     """
     Computes the optical flow for satellite images in the batch
 
@@ -23,13 +24,17 @@ def compute_optical_flow_for_batch(batch: Batch, final_image_size_pixels: int) -
         batch: Batch containing at least metadata and satellite data
 
     Returns:
-        Optical Flow predictions
+        Tensor containing the Optical Flow predictions
     """
 
     assert (
         batch.satellite is not None
     ), "Satellite data does not exist in batch, required for optical flow"
     assert batch.metadata is not None, "Metadata does not exist in batch, required for optical flow"
+
+    if final_image_size_pixels is None:
+        final_image_size_pixels = len(batch.satellite.x_index)
+
     # Only do optical flow for satellite data
     optical_flow_predictions = []
     for i in range(batch.batch_size):
