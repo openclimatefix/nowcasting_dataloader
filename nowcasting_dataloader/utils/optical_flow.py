@@ -213,4 +213,4 @@ def crop_center(image, x_size, y_size):
     y, x, channels = image.shape
     startx = x // 2 - (x_size // 2)
     starty = y // 2 - (y_size // 2)
-    return image[starty: starty + y_size, startx: startx + x_size]
+    return image[starty : starty + y_size, startx : startx + x_size]
