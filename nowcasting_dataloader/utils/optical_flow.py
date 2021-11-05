@@ -99,44 +99,38 @@ def _compute_and_return_optical_flow(
         The Tensor with the optical flow predictions for t0 to forecast horizon
     """
 
-    prediction_dictionary = {}
     # Get the previous timestamp
     future_timesteps = _get_number_future_timesteps(satellite_data, t0_dt)
     satellite_data: xr.DataArray = _compute_previous_timestep(
         satellite_data,
         t0_dt=t0_dt,
     )
+    prediction_block = np.zeros((future_timesteps, final_image_size_pixels,
+                                 final_image_size_pixels, satellite_data.sizes["channels_index"]))
     for prediction_timestep in range(future_timesteps):
         predictions = []
-        for channel in range(0, len(satellite_data.coords["channels_index"]), 3):
+        for channel in range(0, len(satellite_data.coords["channels_index"]), 4):
             # Optical Flow works with RGB images, so chunking channels for it to be faster
-            channel_images = satellite_data.sel(channels_index=slice(channel, channel + 2))
+            channel_images = satellite_data.sel(channels_index=slice(channel, channel + 3))
             # Extra 1 in shape from time dimension, so removing that dimension
             t0_image = channel_images.isel(
                 time_index=len(satellite_data.time_index) - 1
-            ).data.values[0]
+            ).data.values
             previous_image = channel_images.isel(
                 time_index=len(satellite_data.time_index) - 2
-            ).data.values[0]
+            ).data.values
             optical_flow = _compute_optical_flow(t0_image, previous_image)
             # Do predictions now
-            flow = optical_flow * prediction_timestep
+            flow = optical_flow * prediction_timestep+1 # Otherwise first prediction would be 0
             warped_image = _remap_image(t0_image, flow)
             warped_image = crop_center(
                 warped_image,
                 final_image_size_pixels,
                 final_image_size_pixels,
             )
-            predictions.append(warped_image)
-        # Add the block of predictions for all channels
-        prediction_dictionary[prediction_timestep] = np.stack(predictions, axis=0)
-    # Make a block of C, T, H, W ordering
-    prediction = np.stack([prediction_dictionary[k] for k in prediction_dictionary.keys()], axis=1)
-    if len(satellite_data.coords["channels_index"]) == 1:
-        # Only case where another channel needs to be added
-        prediction = np.expand_dims(prediction, axis=-1)
+            prediction_block[prediction_timestep, :, :, channel:channel+4] = warped_image
     # Swap out data for the future part of the dataarray
-    return torch.from_numpy(prediction)
+    return torch.from_numpy(prediction_block)
 
 
 def _compute_optical_flow(t0_image: np.ndarray, previous_image: np.ndarray) -> np.ndarray:
@@ -150,6 +144,15 @@ def _compute_optical_flow(t0_image: np.ndarray, previous_image: np.ndarray) -> n
     Returns:
         Optical Flow field
     """
+    # Input images have to be single channel and between 0 and 1
+    image_min = np.min([t0_image,previous_image])
+    image_max = np.max([t0_image,previous_image])
+    t0_image -= image_min
+    t0_image /= image_max
+    previous_image -= image_min
+    previous_image /= image_max
+    t0_image = cv2.cvtColor(t0_image.astype(np.float32), cv2.COLOR_RGBA2GRAY)
+    previous_image = cv2.cvtColor(previous_image.astype(np.float32), cv2.COLOR_RGBA2GRAY)
     return cv2.calcOpticalFlowFarneback(
         prev=previous_image,
         next=t0_image,
@@ -202,7 +205,7 @@ def crop_center(img, cropx, cropy):
     Returns:
         The cropped image
     """
-    y, x = img.shape
+    y, x, channels = img.shape
     startx = x // 2 - (cropx // 2)
     starty = y // 2 - (cropy // 2)
     return img[starty : starty + cropy, startx : startx + cropx]
