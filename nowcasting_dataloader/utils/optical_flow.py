@@ -108,7 +108,6 @@ def _compute_and_return_optical_flow(
     prediction_block = np.zeros((future_timesteps, final_image_size_pixels,
                                  final_image_size_pixels, satellite_data.sizes["channels_index"]))
     for prediction_timestep in range(future_timesteps):
-        predictions = []
         for channel in range(0, len(satellite_data.coords["channels_index"]), 4):
             # Optical Flow works with RGB images, so chunking channels for it to be faster
             channel_images = satellite_data.sel(channels_index=slice(channel, channel + 3))
@@ -193,19 +192,19 @@ def _remap_image(image: np.ndarray, flow: np.ndarray) -> np.ndarray:
     )
 
 
-def crop_center(img, cropx, cropy):
+def crop_center(image, x_size, y_size):
     """
     Crop center of numpy image
 
     Args:
-        img: Image to crop
-        cropx: Size in x direction
-        cropy: Size in y direction
+        image: Image to crop
+        x_size: Size in x direction
+        y_size: Size in y direction
 
     Returns:
         The cropped image
     """
-    y, x, channels = img.shape
-    startx = x // 2 - (cropx // 2)
-    starty = y // 2 - (cropy // 2)
-    return img[starty : starty + cropy, startx : startx + cropx]
+    y, x, channels = image.shape
+    startx = x // 2 - (x_size // 2)
+    starty = y // 2 - (y_size // 2)
+    return image[starty: starty + y_size, startx: startx + x_size]
