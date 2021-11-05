@@ -20,7 +20,5 @@ def test_batch_encoding(configuration):
     """Test batch encoding"""
     batch: Batch = Batch.fake(configuration=configuration)
     optical_flow = compute_optical_flow_for_batch(batch, final_image_size_pixels=32)
-    assert "optical_flow" in optical_flow.keys()
-    predictions = optical_flow["optical_flow"]
-    assert predictions.shape == (32, 12, 12, 32, 32)
-    assert torch.isfinite(predictions).all()
+    assert optical_flow.shape == (32, 12, 12, 32, 32)
+    assert torch.isfinite(optical_flow).all()
