@@ -53,3 +53,6 @@ repos:
     hooks:
       - id: prettier
         types: [yaml]
+
+ci:
+  skip: [pydocstyle, flake8]
