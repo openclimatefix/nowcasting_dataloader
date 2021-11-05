@@ -13,7 +13,7 @@ _LOG = logging.getLogger("nowcasting_dataset")
 IMAGE_BUFFER_SIZE = 16
 
 
-def compute_optical_flow_for_batch(batch: Batch, final_image_size_pixels: int) -> xr.DataArray:
+def compute_optical_flow_for_batch(batch: Batch, final_image_size_pixels: int) -> torch.Tensor:
     """
     Computes the optical flow for satellite images in the batch
 
