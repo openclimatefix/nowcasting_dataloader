@@ -268,6 +268,7 @@ def combine_space_and_time_features(
             )
         else:
             date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
+        print(date_feature.shape)
         to_concat.append(date_feature)
     space_and_time_encoding = torch.cat(to_concat, dim=1)
     return space_and_time_encoding
@@ -350,7 +351,10 @@ def encode_year(
         # Rescale between -1 and 1
         encoding *= 2
         encoding -= 1
-        year_encoding.append(torch.as_tensor([encoding]))
+        # Compute Fourier Features
+        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq = 100, num_bands = 12)
+        encoding = einops.rearrange(encoding, "... n d -> ... (n d)")
+        year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
 
@@ -380,13 +384,15 @@ def create_datetime_features(
         day_of_year.append(days)
 
     outputs = []
-    for index in [hour_of_day, day_of_year]:
-        index = torch.as_tensor(index)
-        radians = index * 2 * np.pi
-        index_sin = torch.sin(radians)
-        index_cos = torch.cos(radians)
-        outputs.append(index_sin)
-        outputs.append(index_cos)
+    hour_of_day = torch.as_tensor(hour_of_day)
+    day_of_year = torch.as_tensor(day_of_year)
+    # Compute Fourier Features
+    hour_of_day = fourier_encode(hour_of_day, max_freq = 48, num_bands = 6)
+    hour_of_day = einops.rearrange(hour_of_day, "... n d -> ... (n d)")
+    day_of_year = fourier_encode(day_of_year, max_freq = 730, num_bands = 6)
+    day_of_year = einops.rearrange(day_of_year, "... n d -> ... (n d)")
+    outputs.append(hour_of_day)
+    outputs.append(day_of_year)
 
     return outputs
 

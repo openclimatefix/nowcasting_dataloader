@@ -34,7 +34,7 @@ def configuration():
     ["key", "expected_shape"],
     [
         ("nwp", [32, 10, 19, 64, 64]),
-        ("satellite", [32, 12, 19, 64, 64]),
+        ("satellite", [32, 10, 19, 64, 64]),
         ("topographic", [32, 1, 1, 64, 64]),
         ("pv", [32, 128, 19, 128]),
         ("gsp", [32, 32, 4, 32]),
@@ -93,9 +93,9 @@ def test_datetime_feature_creation():
         )
     datetimes.append(pd.date_range(start="2020-12-31 17:55", end="2020-12-31 23:55", freq="5min"))
     datetime_features = create_datetime_features(datetimes)
-    assert len(datetime_features) == 4
+    assert len(datetime_features) == 2
     for feature in datetime_features:
-        assert feature.size() == (12, 73)
+        assert feature.size() == (12, 949)
         assert torch.min(feature) >= -1.0
         assert torch.max(feature) <= 1.0
 
@@ -115,7 +115,7 @@ def test_encode_year_fourier():
             datetime.datetime(year=2021, month=12, day=31),
         ),
     )
-    assert year_encoding.size() == (7, 1)
+    assert year_encoding.size() == (7, 25)
     assert torch.min(year_encoding) >= -1.0
     assert torch.max(year_encoding) <= 1.0
 
