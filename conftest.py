@@ -1,13 +1,15 @@
 """Configure PyTest"""
-import nowcasting_dataloader
-import nowcasting_dataset
 import os
+
+import nowcasting_dataset
 import pytest
+from nowcasting_dataset.config.load import load_yaml_configuration
+
+import nowcasting_dataloader
 from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
 )
-from nowcasting_dataset.config.load import load_yaml_configuration
 
 pytest.IMAGE_SIZE_PIXELS = 128
 
