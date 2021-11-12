@@ -13,7 +13,6 @@ from nowcasting_dataloader.data_sources import (
     GSPML,
     NWPML,
     PVML,
-    MetadataML,
     SatelliteML,
     SunML,
     TopographicML,
@@ -36,7 +35,6 @@ class Example(BaseModel):
     Note that this is currently not really used
     """
 
-    metadata: Optional[MetadataML]
     satellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
     pv: Optional[PVML]
@@ -54,7 +52,7 @@ class Example(BaseModel):
             self.sun,
             self.gsp,
             self.nwp,
-            self.metadata,
+            # self.metadata,
         ]
 
 
@@ -93,7 +91,6 @@ class BatchML(Example):
 
         return BatchML(
             batch_size=process.batch_size,
-            metadata=MetadataML.fake(batch_size=process.batch_size, t0_dt=t0_dt),
             satellite=SatelliteML.fake(
                 process.batch_size,
                 input_data.default_seq_length_5_minutes,
