@@ -10,12 +10,11 @@ import pytest
 import torch
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
+from nowcasting_dataset.dataset.batch import Batch
 
 import nowcasting_dataloader
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
-from nowcasting_dataset.dataset.batch import Batch
-
 
 torch.set_default_dtype(torch.float32)
 
@@ -78,7 +77,7 @@ def test_netcdf_dataset_local_using_configuration():
         assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
 
         assert type(batch_ml.nwp.data) == torch.Tensor
-        assert batch_ml.nwp.data[0,0,0,0,0].dtype == torch.float32
+        assert batch_ml.nwp.data[0, 0, 0, 0, 0].dtype == torch.float32
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
