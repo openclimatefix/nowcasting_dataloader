@@ -73,7 +73,7 @@ class SatelliteML(DataSourceOutputML):
         "passed into the ML model.",
     )
 
-    channels: Optional[Array] = Field(None, description="List of the satellite channels")
+    channels: Optional[Array] = Field(SAT_MEAN.keys(), description="List of the satellite channels")
 
     @staticmethod
     def fake(
