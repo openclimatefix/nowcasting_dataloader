@@ -34,7 +34,7 @@ def configuration():
     ["key", "expected_shape"],
     [
         ("nwp", [32, 10, 19, 64, 64]),
-        ("satellite", [32, 10, 19, 64, 64]),
+        ("satellite", [32, 12, 19, 64, 64]),
         ("topographic", [32, 1, 1, 64, 64]),
         ("pv", [32, 128, 19, 128]),
         ("gsp", [32, 32, 4, 32]),
