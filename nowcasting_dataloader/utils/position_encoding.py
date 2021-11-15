@@ -350,7 +350,7 @@ def encode_year(
         encoding *= 2
         encoding -= 1
         # Compute Fourier Features
-        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=100, num_bands=12)
+        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=99, num_bands=12)
         year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
@@ -384,8 +384,8 @@ def create_datetime_features(
     hour_of_day = torch.as_tensor(hour_of_day)
     day_of_year = torch.as_tensor(day_of_year)
     # Compute Fourier Features
-    hour_of_day = fourier_encode(hour_of_day, max_freq=48, num_bands=6)
-    day_of_year = fourier_encode(day_of_year, max_freq=730, num_bands=6)
+    hour_of_day = fourier_encode(hour_of_day, max_freq=47, num_bands=6)
+    day_of_year = fourier_encode(day_of_year, max_freq=731, num_bands=6)
     outputs.append(hour_of_day)
     outputs.append(day_of_year)
 
