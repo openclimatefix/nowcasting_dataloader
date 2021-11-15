@@ -235,13 +235,12 @@ def encode_absolute_position(
             year_features = encode_year(datetimes, time_range)
             # Repeat
             year_features = einops.repeat(
-                year_features, "b t -> b (repeat t)", repeat=shape[TIME_DIM]
+                year_features, "b t c -> b (repeat t) c", repeat=shape[TIME_DIM]
             )
             datetime_features.append(year_features)
         absolute_position_encoding = combine_space_and_time_features(
             absolute_position_encoding, datetime_features=datetime_features, shape=shape
         )
-
     return absolute_position_encoding
 
 
@@ -264,11 +263,10 @@ def combine_space_and_time_features(
     for date_feature in datetime_features:
         if len(shape) == 5:
             date_feature = einops.repeat(
-                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+                date_feature, "b t c -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM]
             )
         else:
-            date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
-        print(date_feature.shape)
+            date_feature = einops.repeat(date_feature, "b t c -> b c t id", id=shape[ID_DIM])
         to_concat.append(date_feature)
     space_and_time_encoding = torch.cat(to_concat, dim=1)
     return space_and_time_encoding
@@ -353,7 +351,7 @@ def encode_year(
         encoding -= 1
         # Compute Fourier Features
         encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=100, num_bands=12)
-        encoding = einops.rearrange(encoding, "... n d -> ... (n d)")
+        #encoding = einops.rearrange(encoding, "... n d -> ... (n d)")
         year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
@@ -388,9 +386,7 @@ def create_datetime_features(
     day_of_year = torch.as_tensor(day_of_year)
     # Compute Fourier Features
     hour_of_day = fourier_encode(hour_of_day, max_freq=48, num_bands=6)
-    hour_of_day = einops.rearrange(hour_of_day, "... n d -> ... (n d)")
     day_of_year = fourier_encode(day_of_year, max_freq=730, num_bands=6)
-    day_of_year = einops.rearrange(day_of_year, "... n d -> ... (n d)")
     outputs.append(hour_of_day)
     outputs.append(day_of_year)
 
