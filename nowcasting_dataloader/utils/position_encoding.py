@@ -375,8 +375,8 @@ def create_datetime_features(
         days = []
         for index in datetimes[batch_idx]:
             time_index = pd.Timestamp(index)
-            hours.append((((time_index.hour + (time_index.minute / 60))/ 24) *2) - 1)
-            days.append(((time_index.timetuple().tm_yday / 366) * 2) -1)
+            hours.append((((time_index.hour + (time_index.minute / 60)) / 24) * 2) - 1)
+            days.append(((time_index.timetuple().tm_yday / 366) * 2) - 1)
         hour_of_day.append(hours)
         day_of_year.append(days)
 
