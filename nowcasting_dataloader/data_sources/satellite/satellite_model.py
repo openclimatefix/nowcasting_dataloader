@@ -29,6 +29,7 @@ SAT_MEAN = [
     532.47394,
 ]
 
+
 SAT_STD = [
     115.34247,
     139.92636,
@@ -127,6 +128,7 @@ class SatelliteML(DataSourceOutputML):
     def normalize(self):
         """Normalize the satellite data"""
         if not self.normalized:
+            # TODO Fix normalization in case not all 12 channels are used
             self.data = self.data - SAT_MEAN
             self.data = self.data / SAT_STD
             self.normalized = True

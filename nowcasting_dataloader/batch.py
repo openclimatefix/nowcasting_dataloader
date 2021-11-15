@@ -29,6 +29,7 @@ class Example(BaseModel):
     """
 
     satellite: Optional[SatelliteML]
+    hrvsatellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
     pv: Optional[PVML]
     sun: Optional[SunML]
@@ -40,12 +41,12 @@ class Example(BaseModel):
         """The different data sources"""
         return [
             self.satellite,
+            self.hrvsatellite,
             self.topographic,
             self.pv,
             self.sun,
             self.gsp,
             self.nwp,
-            # self.metadata,
         ]
 
 
@@ -91,6 +92,13 @@ class BatchML(Example):
                 len(input_data.satellite.satellite_channels),
                 time_5=time_5,
             ),
+            hrvsatellite=SatelliteML.fake(
+                process.batch_size,
+                input_data.default_seq_length_5_minutes,
+                input_data.satellite.satellite_image_size_pixels,
+                len(input_data.satellite.satellite_channels),
+                time_5=time_5,
+                ),
             topographic=TopographicML.fake(
                 batch_size=process.batch_size,
                 image_size_pixels=input_data.satellite.satellite_image_size_pixels,
