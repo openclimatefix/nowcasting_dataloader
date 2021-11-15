@@ -12,7 +12,6 @@ from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
 from nowcasting_dataset.dataset.batch import Batch
 
-import nowcasting_dataloader
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 
@@ -71,7 +70,6 @@ def test_netcdf_dataset_local_using_configuration():
         assert sat_data.shape == (4, 1, 5, 64, 64)
         assert batch_ml.nwp.data.shape == (4, 1, 5, 64, 64)
         assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
-        assert batch_ml.metadata.t0_dt.shape == (4, 1)
         assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
         assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
         assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
