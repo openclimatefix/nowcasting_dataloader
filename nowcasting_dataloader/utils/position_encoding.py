@@ -351,7 +351,6 @@ def encode_year(
         encoding -= 1
         # Compute Fourier Features
         encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=100, num_bands=12)
-        #encoding = einops.rearrange(encoding, "... n d -> ... (n d)")
         year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
@@ -376,8 +375,8 @@ def create_datetime_features(
         days = []
         for index in datetimes[batch_idx]:
             time_index = pd.Timestamp(index)
-            hours.append((time_index.hour + (time_index.minute / 60) / 24))
-            days.append((time_index.timetuple().tm_yday / 366))  # To take care of leap years
+            hours.append((((time_index.hour + (time_index.minute / 60))/ 24) *2) - 1)
+            days.append(((time_index.timetuple().tm_yday / 366) * 2) -1)
         hour_of_day.append(hours)
         day_of_year.append(days)
 

@@ -159,7 +159,7 @@ def test_encode_absolute_position():
 def test_combine_space_and_time_features():
     """Test combining space and time features"""
     space_features = torch.randn(32, 66, 10, 64, 64)
-    time_features = [torch.randn(32, 1, 10) for _ in range(4)]
+    time_features = [torch.randn(32, 10, 1) for _ in range(4)]
     shape = [32, 5, 10, 64, 64]
     combined_encoding = combine_space_and_time_features(
         spatial_features=space_features, datetime_features=time_features, shape=shape
