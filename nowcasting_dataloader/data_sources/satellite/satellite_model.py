@@ -14,36 +14,36 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 
 logger = logging.getLogger(__name__)
 
-SAT_MEAN = [
-    93.23458,
-    131.71373,
-    843.7779,
-    736.6148,
-    771.1189,
-    589.66034,
-    862.29816,
-    927.69586,
-    90.70885,
-    107.58985,
-    618.4583,
-    532.47394,
-]
+SAT_MEAN = {
+    'HRV': 115,
+    'IR_016': 139,
+    'IR_039': 36,
+    'IR_087': 57,
+    'IR_097': 30,
+    'IR_108': 149,
+    'IR_120': 51,
+    'IR_134': 35,
+    'VIS006': 115,
+    'VIS008': 120,
+    'WV_062': 98,
+    'WV_073': 99
+    }
 
 
-SAT_STD = [
-    115.34247,
-    139.92636,
-    36.99538,
-    57.366386,
-    30.346825,
-    149.68007,
-    51.70631,
-    35.872967,
-    115.77212,
-    120.997154,
-    98.57828,
-    99.76469,
-]
+SAT_STD = {
+    'HRV': 115,
+    'IR_016': 139,
+    'IR_039': 36,
+    'IR_087': 57,
+    'IR_097': 30,
+    'IR_108': 149,
+    'IR_120': 51,
+    'IR_134': 35,
+    'VIS006': 115,
+    'VIS008': 120,
+    'WV_062': 98,
+    'WV_073': 99
+    }
 
 
 class SatelliteML(DataSourceOutputML):
@@ -128,7 +128,8 @@ class SatelliteML(DataSourceOutputML):
     def normalize(self):
         """Normalize the satellite data"""
         if not self.normalized:
-            # TODO Fix normalization in case not all 12 channels are used
-            self.data = self.data - SAT_MEAN
-            self.data = self.data / SAT_STD
+            mean = np.array([SAT_MEAN[b] for b in self.channels])
+            std = np.array([SAT_STD[b] for b in self.channels])
+            self.data = self.data - mean
+            self.data = self.data / std
             self.normalized = True
