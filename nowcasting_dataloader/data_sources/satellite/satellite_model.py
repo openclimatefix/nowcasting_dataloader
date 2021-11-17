@@ -74,7 +74,9 @@ class SatelliteML(DataSourceOutputML):
         "passed into the ML model.",
     )
 
-    channels: Optional[Array] = Field(list(SAT_MEAN.keys()), description="List of the satellite channels")
+    channels: Optional[Array] = Field(
+        list(SAT_MEAN.keys()), description="List of the satellite channels"
+    )
 
     @staticmethod
     def fake(
@@ -132,8 +134,8 @@ class SatelliteML(DataSourceOutputML):
             mean = np.array([SAT_MEAN[b] for b in self.channels])
             std = np.array([SAT_STD[b] for b in self.channels])
             # Need to get to the same shape, so add 3 1-dimensions
-            mean = np.expand_dims(mean, axis = [1,2,3])
-            std = np.expand_dims(std, axis = [1,2,3])
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
             self.data = self.data - mean
             self.data = self.data / std
             self.normalized = True
