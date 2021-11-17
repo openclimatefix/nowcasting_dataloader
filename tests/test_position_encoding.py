@@ -93,9 +93,9 @@ def test_datetime_feature_creation():
         )
     datetimes.append(pd.date_range(start="2020-12-31 17:55", end="2020-12-31 23:55", freq="5min"))
     datetime_features = create_datetime_features(datetimes)
-    assert len(datetime_features) == 4
+    assert len(datetime_features) == 2
     for feature in datetime_features:
-        assert feature.size() == (12, 73)
+        assert feature.size() == (12, 73, 13)
         assert torch.min(feature) >= -1.0
         assert torch.max(feature) <= 1.0
 
@@ -112,10 +112,10 @@ def test_encode_year_fourier():
         datetimes,
         time_range=(
             datetime.datetime(year=2016, month=1, day=1),
-            datetime.datetime(year=2021, month=12, day=31),
+            datetime.datetime(year=2022, month=12, day=31),
         ),
     )
-    assert year_encoding.size() == (7, 1)
+    assert year_encoding.size() == (7, 1, 25)
     assert torch.min(year_encoding) >= -1.0
     assert torch.max(year_encoding) <= 1.0
 
@@ -151,7 +151,7 @@ def test_encode_absolute_position():
         max_freq=128,
         num_bands=32,
     )
-    assert absolute_position_encoding.size() == (12, 135, 13, 64, 64)
+    assert absolute_position_encoding.size() == (12, 181, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
 
@@ -159,7 +159,7 @@ def test_encode_absolute_position():
 def test_combine_space_and_time_features():
     """Test combining space and time features"""
     space_features = torch.randn(32, 66, 10, 64, 64)
-    time_features = [torch.randn(32, 10) for _ in range(4)]
+    time_features = [torch.randn(32, 10, 1) for _ in range(4)]
     shape = [32, 5, 10, 64, 64]
     combined_encoding = combine_space_and_time_features(
         spatial_features=space_features, datetime_features=time_features, shape=shape
@@ -191,11 +191,11 @@ def test_encode_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 135, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 181, 13, 64, 64)
     combined = torch.cat(
         [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
     )
-    assert combined.size() == (12, 145, 13, 64, 64)
+    assert combined.size() == (12, 191, 13, 64, 64)
 
 
 def test_encode_multiple_modalities():
@@ -229,13 +229,13 @@ def test_encode_multiple_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 135, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 181, 13, 64, 64)
     assert "Sat" in encoded_position.keys()
     assert "Sat_position_encoding" in encoded_position.keys()
-    assert encoded_position["Sat_position_encoding"].size() == (12, 135, 3, 64, 64)
+    assert encoded_position["Sat_position_encoding"].size() == (12, 181, 3, 64, 64)
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
-    assert encoded_position["PV_position_encoding"].size() == (12, 135, 5, 1, 1)
+    assert encoded_position["PV_position_encoding"].size() == (12, 181, 5, 1, 1)
 
     # Check that time and space features match for NWP and Sat when the times line up
     assert np.all(
