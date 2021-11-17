@@ -5,7 +5,7 @@ from nowcasting_dataloader.data_sources.satellite.satellite_model import Satelli
 
 
 def test_satellite_to_ml():
-    """ Test satellite ml can be made from Satellite """
+    """Test satellite ml can be made from Satellite"""
     sat = satellite_fake()
 
     _ = SatelliteML.from_xr_dataset(sat)
