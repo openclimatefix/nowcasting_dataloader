@@ -126,11 +126,11 @@ class GSPML(DataSourceOutputML):
         """Change xr dataset to model. If data does not exist, then return None"""
 
         gsp_batch_ml = xr_dataset.torch.to_tensor(
-            ["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"]
+            ["power_mw", "capacity_mwp", "time", "x_coords", "y_coords", "id"]
         )
 
         gsp_batch_ml[GSP_YIELD] = gsp_batch_ml.pop("power_mw")
-        gsp_batch_ml["gsp_capacity"] = gsp_batch_ml.pop("capacity_mwh")
+        gsp_batch_ml["gsp_capacity"] = gsp_batch_ml.pop("capacity_mwp")
         gsp_batch_ml[GSP_ID] = gsp_batch_ml.pop("id")
         gsp_batch_ml[GSP_DATETIME_INDEX] = gsp_batch_ml.pop("time")
         gsp_batch_ml[GSP_X_COORDS] = gsp_batch_ml.pop("x_coords")
