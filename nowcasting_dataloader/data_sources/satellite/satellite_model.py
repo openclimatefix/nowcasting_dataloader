@@ -15,7 +15,6 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 logger = logging.getLogger(__name__)
 
 
-
 SAT_MEAN = {
     "HRV": 105.83116724,
     "IR_016": 141.92817573,
