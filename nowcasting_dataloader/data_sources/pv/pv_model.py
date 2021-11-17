@@ -21,12 +21,21 @@ logger = logging.getLogger(__name__)
 class PVML(DataSourceOutputML):
     """Model for output of PV data"""
 
-    # Shape: [batch_size,] seq_length, width, height, channel
+    # Shape: [batch_size,] seq_length, n_pv_systems_per_example
     pv_yield: Array = Field(
         ...,
         description=" PV yield from all PV systems in the region of interest (ROI). \
     : Includes central PV system, which will always be the first entry. \
     : shape = [batch_size, ] seq_length, n_pv_systems_per_example",
+    )
+
+    # Shape: [batch_size,], n_pv_systems_per_example
+    pv_capacity: Array = Field(
+        ...,
+        description=" PV capacity from all PV systems in the region of interest (ROI). \
+        : Includes central PV system, which will always be the first entry. "
+                    "PV capacity is assume constant: \
+        : shape = [batch_size, ], n_pv_systems_per_example",
     )
 
     #: PV identification.
@@ -88,6 +97,10 @@ class PVML(DataSourceOutputML):
                 seq_length_5,
                 n_pv_systems_per_batch,
             ).astype(np.float32),
+            pv_capacity=np.random.randn(
+                batch_size,
+                n_pv_systems_per_batch,
+            ).astype(np.float32),
             pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
             pv_system_row_number=np.sort(
                 np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
@@ -111,9 +124,10 @@ class PVML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        pv_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
+        pv_batch_ml = xr_dataset.torch.to_tensor(["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"])
 
-        pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("data")
+        pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("power_mw")
+        pv_batch_ml["pv_capacity"] = pv_batch_ml.pop("capacity_mwh")
         pv_batch_ml[PV_SYSTEM_ID] = pv_batch_ml["id"]
         pv_batch_ml[PV_SYSTEM_ROW_NUMBER] = pv_batch_ml.pop("id")
         pv_batch_ml[PV_DATETIME_INDEX] = pv_batch_ml.pop("time")
@@ -121,3 +135,9 @@ class PVML(DataSourceOutputML):
         pv_batch_ml[PV_SYSTEM_Y_COORDS] = pv_batch_ml.pop("y_coords")
 
         return PVML(**pv_batch_ml)
+
+    def normalize(self):
+        """Normalize the gsp data"""
+        if not self.normalized:
+            self.pv_yield = self.pv_yield - self.pv_capacity
+            self.normalized = True
