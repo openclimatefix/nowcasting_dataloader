@@ -34,7 +34,7 @@ class PVML(DataSourceOutputML):
         ...,
         description=" PV capacity from all PV systems in the region of interest (ROI). \
         : Includes central PV system, which will always be the first entry. "
-                    "PV capacity is assume constant: \
+        "PV capacity is assume constant: \
         : shape = [batch_size, ], n_pv_systems_per_example",
     )
 
@@ -124,7 +124,9 @@ class PVML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        pv_batch_ml = xr_dataset.torch.to_tensor(["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"])
+        pv_batch_ml = xr_dataset.torch.to_tensor(
+            ["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"]
+        )
 
         pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("power_mw")
         pv_batch_ml["pv_capacity"] = pv_batch_ml.pop("capacity_mwh")

@@ -125,7 +125,9 @@ class GSPML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        gsp_batch_ml = xr_dataset.torch.to_tensor(["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"])
+        gsp_batch_ml = xr_dataset.torch.to_tensor(
+            ["power_mw", "capacity_mwh", "time", "x_coords", "y_coords", "id"]
+        )
 
         gsp_batch_ml[GSP_YIELD] = gsp_batch_ml.pop("power_mw")
         gsp_batch_ml["gsp_capacity"] = gsp_batch_ml.pop("capacity_mwh")
@@ -142,4 +144,3 @@ class GSPML(DataSourceOutputML):
         if not self.normalized:
             self.gsp_yield = self.gsp_yield - self.gsp_capacity
             self.normalized = True
-
