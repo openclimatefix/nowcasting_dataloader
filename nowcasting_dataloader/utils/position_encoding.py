@@ -82,6 +82,7 @@ def generate_position_encodings_for_batch(
         if k in [
             "nwp",
             "satellite",
+            "hrvsatellite",
             "topographic",
             "gsp",
             "pv",
