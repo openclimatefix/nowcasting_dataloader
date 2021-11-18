@@ -218,7 +218,10 @@ def encode_absolute_position(
     """
     # Fourier Features of absolute position
     encoded_geo_position = normalize_geospatial_coordinates(
-        geospatial_coordinates, geospatial_bounds, max_freq=(2 * len(geospatial_coordinates) - 1), num_bands=num_bands
+        geospatial_coordinates,
+        geospatial_bounds,
+        max_freq=(2 * len(geospatial_coordinates) - 1),
+        num_bands=num_bands,
     )
     absolute_position_encoding = einops.repeat(
         encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
