@@ -1,4 +1,4 @@
-"""Test NetCDF Dataset"""
+"""Test SatFlow Dataset"""
 import os
 import tempfile
 from pathlib import Path
@@ -7,7 +7,7 @@ import torch
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
-from nowcasting_dataloader.batch import BatchML
+
 from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 
 torch.set_default_dtype(torch.float32)
