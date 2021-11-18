@@ -75,7 +75,7 @@ class SatelliteML(DataSourceOutputML):
     )
 
     channels: Optional[Array] = Field(
-        np.asarray(list(SAT_MEAN.keys())), description="List of the satellite channels"
+        list(SAT_MEAN.keys()), description="List of the satellite channels"
     )
 
     @staticmethod
@@ -125,7 +125,7 @@ class SatelliteML(DataSourceOutputML):
         # convert to torch dictionary
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y"])
 
-        # move to Modle
+        # move to Model
         return SatelliteML(**satellite_batch_ml)
 
     def normalize(self):
