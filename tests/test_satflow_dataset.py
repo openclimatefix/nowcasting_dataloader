@@ -56,8 +56,16 @@ def test_satflow_dataset_local_using_configuration():
         train_dataset.per_worker_init(1)
         t = iter(train_dataset)
         x, y = next(t)
-        print(x.keys())
-        print(y.keys())
+
+        for k in ['pv_yield', 'pv_system_id', 'nwp', 'topo_data', 'gsp_id', 'sat_data', 'hrv_sat_data']:
+            assert k in x.keys()
+            assert type(x[k]) == torch.Tensor
+            print(x[k].shape)
+
+        for k in ['gsp_yield', 'gsp_id']:
+            assert k in y.keys()
+            assert type(y[k]) == torch.Tensor
+            print(x[k].shape)
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
@@ -108,8 +116,16 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
         train_dataset.per_worker_init(1)
         t = iter(train_dataset)
         x, y = next(t)
-        print(x.keys())
-        print(y.keys())
 
+        assert "sat_data" in x.keys()
+        assert type(x["sat_data"]) == torch.Tensor
+        for k in ['pv_yield', 'pv_system_id', 'nwp', 'topo_data', 'gsp_id', 'sat_data_query', 'hrv_sat_data_query', 'gsp_yield_query', 'sat_data', 'hrv_sat_data']:
+            assert k in x.keys()
+            assert type(x[k]) == torch.Tensor
+            print(x[k].shape)
+        for k in ['gsp_yield', 'gsp_id', 'sat_data', 'hrv_sat_data']:
+            assert k in y.keys()
+            assert type(y[k]) == torch.Tensor
+            print(x[k].shape)
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
