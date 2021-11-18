@@ -71,7 +71,6 @@ def test_satflow_dataset_local_using_configuration():
 
         for k in ["gsp_yield",
                   "gsp_id",]:
-            print(k)
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
 
