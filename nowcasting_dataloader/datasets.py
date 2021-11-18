@@ -329,8 +329,9 @@ class SatFlowDataset(NetCDFDataset):
             if x.get(PV_YIELD, False):
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
-            x[GSP_YIELD+"_query"] = batch[GSP_YIELD+"_position_encoding"][:, :, :self.current_timestep_index_30]
-
+            x[GSP_YIELD + "_query"] = batch[GSP_YIELD + "_position_encoding"][
+                :, :, : self.current_timestep_index_30
+            ]
 
         return x, target
 
