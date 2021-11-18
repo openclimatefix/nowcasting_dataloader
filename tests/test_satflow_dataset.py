@@ -22,7 +22,6 @@ def test_satflow_dataset_local_using_configuration():
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
     configuration = c
 
-
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         f = Batch.fake(configuration=c)
@@ -72,7 +71,6 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
     c.input_data.satellite.satellite_image_size_pixels = 24
     configuration = c
 
-
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         f = Batch.fake(configuration=c)
@@ -89,10 +87,10 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
             history_minutes=10,
             forecast_minutes=10,
             configuration=configuration,
-            add_position_encoding = True,
-            add_hrv_satellite_target = True,
-            add_satellite_target = True
-            )
+            add_position_encoding=True,
+            add_hrv_satellite_target=True,
+            add_satellite_target=True,
+        )
 
         dataloader_config = dict(
             pin_memory=True,
@@ -103,7 +101,7 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
             # Disable automatic batching because dataset
             # returns complete batches.
             batch_size=None,
-            )
+        )
 
         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 
