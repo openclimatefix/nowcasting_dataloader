@@ -270,24 +270,24 @@ class SatFlowDataset(NetCDFDataset):
         x = {}
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
-        if batch["satellite"].get(SATELLITE_DATA, False):
+        if len(batch["satellite"].get(SATELLITE_DATA, [])) > 0:
             past_satellite_data = batch["satellite"][SATELLITE_DATA][
                 :, : self.current_timestep_index
             ]
             x[SATELLITE_DATA] = past_satellite_data
-        if batch["hrvsatellite"].get(SATELLITE_DATA, False):
+        if len(batch["hrvsatellite"].get(SATELLITE_DATA, [])) > 0:
             past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][
                 :, :, self.current_timestep_index :
             ]
             x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
-        if batch["pv"].get(PV_YIELD, False):
+        if len(batch["pv"].get(PV_YIELD, [])) > 0:
             past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
-        if batch["nwp"].get(NWP_DATA, False):
+        if len(batch["nwp"].get(NWP_DATA, [])) > 0:
             # We can give future NWP too, as that will be available
             x[NWP_DATA] = batch["nwp"][NWP_DATA]
-        if batch["topographic"].get(TOPOGRAPHIC_DATA, False):
+        if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
             x[TOPOGRAPHIC_DATA] = batch["topographic"][TOPOGRAPHIC_DATA]
