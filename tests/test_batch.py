@@ -35,7 +35,9 @@ def test_fake_dataset(configuration):
 
 def test_fake_dataset_position_encodings(configuration):
     """Test creating fake dataset"""
-    train = torch.utils.data.DataLoader(FakeDataset(configuration=configuration, add_position_encoding = True), batch_size=None)
+    train = torch.utils.data.DataLoader(
+        FakeDataset(configuration=configuration, add_position_encoding=True), batch_size=None
+    )
     i = iter(train)
     x = next(i)
 
