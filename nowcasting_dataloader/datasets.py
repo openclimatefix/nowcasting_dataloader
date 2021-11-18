@@ -350,7 +350,7 @@ class SatFlowDataset(NetCDFDataset):
             add_future_encodings: Whether to add the future position encodings to the target
 
         Returns:
-            x dictionaries with the added/updated keys
+            x dictionary with the added/updated keys
         """
         if key + "_position_encoding" in batch:
             past_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index :]
