@@ -5,19 +5,19 @@ from typing import List, Optional, Tuple, Union
 
 import boto3
 import gcsfs
+import numpy as np
 import torch
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
-    PV_YIELD,
-    PV_SYSTEM_ID,
-    GSP_YIELD,
+    DEFAULT_REQUIRED_KEYS,
     GSP_ID,
+    GSP_YIELD,
     NWP_DATA,
+    PV_SYSTEM_ID,
+    PV_YIELD,
     SATELLITE_DATA,
     TOPOGRAPHIC_DATA,
-    DEFAULT_REQUIRED_KEYS
 )
-import numpy as np
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
@@ -294,7 +294,7 @@ class SatFlowDataset(NetCDFDataset):
         x[GSP_ID] = GSP_ID
 
         # Now creating the target data
-        future_gsp_data = batch["gsp"][GSP_YIELD][:, :self.current_timestep_index_30]
+        future_gsp_data = batch["gsp"][GSP_YIELD][:, : self.current_timestep_index_30]
         target[GSP_YIELD] = future_gsp_data
         target[GSP_ID] = GSP_ID
         if self.add_satellite_target:
