@@ -53,7 +53,6 @@ def test_batch_encoding(configuration):
     batch: Batch = Batch.fake(configuration=configuration)
     position_encodings = generate_position_encodings_for_batch(
         batch,
-        max_freq=64,
         num_bands=16,
     )
     for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
@@ -148,7 +147,6 @@ def test_encode_absolute_position():
             datetime.datetime(year=2016, month=1, day=1),
             datetime.datetime(year=2021, month=12, day=31),
         ),
-        max_freq=128,
         num_bands=32,
     )
     assert absolute_position_encoding.size() == (12, 181, 13, 64, 64)
@@ -186,7 +184,6 @@ def test_encode_modalities():
             datetime.datetime(year=2016, month=1, day=1),
             datetime.datetime(year=2021, month=12, day=31),
         ),
-        max_freq=128,
         num_bands=32,
     )
     assert "NWP" in encoded_position.keys()
@@ -224,7 +221,6 @@ def test_encode_multiple_modalities():
             datetime.datetime(year=2016, month=1, day=1),
             datetime.datetime(year=2021, month=12, day=31),
         ),
-        max_freq=128,
         num_bands=32,
     )
     assert "NWP" in encoded_position.keys()
