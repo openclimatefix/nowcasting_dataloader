@@ -325,7 +325,7 @@ class SatFlowDataset(NetCDFDataset):
                     self.add_hrv_satellite_target,
                 )
                 # Rename to match other ones better
-                x["hrv_"+SATELLITE_DATA] = x.pop("hrvsatellite")
+                x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
             if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
                 x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
             if len(x.get(NWP_DATA, [])) > 0:
