@@ -312,9 +312,17 @@ class SatFlowDataset(NetCDFDataset):
         # Add position encodings
         if self.add_position_encoding:
             if x.get(x[SATELLITE_DATA], False):
-                x = self.add_encodings(x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target)
-            if x.get("hrv_"+SATELLITE_DATA, False):
-                x = self.add_encodings(x, "hrv_"+SATELLITE_DATA, batch, self.current_timestep_index, self.add_hrv_satellite_target)
+                x = self.add_encodings(
+                    x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target
+                )
+            if x.get("hrv_" + SATELLITE_DATA, False):
+                x = self.add_encodings(
+                    x,
+                    "hrv_" + SATELLITE_DATA,
+                    batch,
+                    self.current_timestep_index,
+                    self.add_hrv_satellite_target,
+                )
             if x.get(TOPOGRAPHIC_DATA, False):
                 x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
             if x.get(NWP_DATA, False):
