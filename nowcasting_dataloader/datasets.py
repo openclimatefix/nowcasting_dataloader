@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple, Union
 
 import boto3
 import gcsfs
-import numpy as np
 import torch
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
@@ -233,7 +232,7 @@ class SatFlowDataset(NetCDFDataset):
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
             add_satellite_target: Whether to add future satellite imagery to the target or not
-            add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target or not
+            add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
         """
         super().__init__(
             n_batches,
