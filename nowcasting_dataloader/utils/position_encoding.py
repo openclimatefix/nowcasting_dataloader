@@ -196,7 +196,7 @@ def encode_absolute_position(
     geospatial_bounds: Dict[str, float],
     datetimes: Optional[List[datetime.datetime]] = None,
     time_range: Optional[Tuple[datetime.datetime, datetime.datetime]] = None,
-    **kwargs,
+    num_bands: int = 4,
 ) -> torch.Tensor:
     """
     Encodes the absolute position of the pixels/voxels in time and space
@@ -212,14 +212,17 @@ def encode_absolute_position(
             the coordinates of the area covered by the SEVIRI RSS image
         time_range: List of start_year, end_year datetimes to normalize against,
             time_range[0].year must be less than time_range[1].year
-        **kwargs:
+        num_bands: Number of bands to pass to Fourier encoding
 
     Returns:
         The absolute position encoding for the given shape
     """
     # Fourier Features of absolute position
     encoded_geo_position = normalize_geospatial_coordinates(
-        geospatial_coordinates, geospatial_bounds, **kwargs
+        geospatial_coordinates,
+        geospatial_bounds,
+        max_freq=(2 * len(geospatial_coordinates) - 1),
+        num_bands=num_bands,
     )
     absolute_position_encoding = einops.repeat(
         encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]

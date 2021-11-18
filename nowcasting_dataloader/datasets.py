@@ -169,7 +169,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 current_timestep_index=self.current_timestep_5_index,
             )
         if self.add_position_encoding:
-            position_encodings = generate_position_encodings_for_batch(batch)
+            position_encodings = generate_position_encodings_for_batch(batch, num_bands=16)
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 
