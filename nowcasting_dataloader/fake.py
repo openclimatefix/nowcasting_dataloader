@@ -1,18 +1,21 @@
 """ A class to create a fake dataset """
 import torch
-
-from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 from nowcasting_dataset.config.model import Configuration
+from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.batch import BatchML
-from nowcasting_dataset.dataset.batch import Batch
+from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 
 class FakeDataset(torch.utils.data.Dataset):
     """Fake dataset."""
 
-    def __init__(self, configuration: Configuration, length: int = 10,
-                 add_position_encoding: bool = False,):
+    def __init__(
+        self,
+        configuration: Configuration,
+        length: int = 10,
+        add_position_encoding: bool = False,
+    ):
         """
         Init
 
@@ -45,12 +48,12 @@ class FakeDataset(torch.utils.data.Dataset):
 
         """
         if self.add_position_encoding:
-            batch = Batch.fake(configuration = self.configuration)
+            batch = Batch.fake(configuration=self.configuration)
             position_encodings = generate_position_encodings_for_batch(batch)
             batch: BatchML = BatchML.from_batch(batch=batch)
             batch: dict = batch.dict()
             batch.update(position_encodings)
             return batch
         else:
-            x: BatchML = BatchML.fake(configuration = self.configuration)
+            x: BatchML = BatchML.fake(configuration=self.configuration)
             return x.dict()
