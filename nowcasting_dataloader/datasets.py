@@ -369,7 +369,7 @@ class SatFlowDataset(NetCDFDataset):
         """
         if key + "_position_encoding" in batch:
             past_encoding = batch[key + "_position_encoding"][:, :, :current_timestep_index]
-            print(f"Past Encoding: {past_encoding.shape} Shape: {x[key].shape}")
+            print(f"Key: {key} Past Encoding: {past_encoding.shape} Shape: {x[key].shape}")
             x[key] = torch.cat([x[key], past_encoding], dim=1)
             if add_future_encodings:
                 future_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index:]
