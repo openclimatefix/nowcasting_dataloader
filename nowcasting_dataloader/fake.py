@@ -1,21 +1,27 @@
 """ A class to create a fake dataset """
 import torch
+
+from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 from nowcasting_dataset.config.model import Configuration
 
 from nowcasting_dataloader.batch import BatchML
+from nowcasting_dataset.dataset.batch import Batch
 
 
 class FakeDataset(torch.utils.data.Dataset):
     """Fake dataset."""
 
-    def __init__(self, configuration: Configuration, length: int = 10):
+    def __init__(self, configuration: Configuration, length: int = 10,
+                 add_position_encoding: bool = False,):
         """
         Init
 
         Args:
             configuration: configuration object
             length: length of dataset
+            add_position_encoding: Whether to add position encoding or not
         """
+        self.add_position_encoding = add_position_encoding
         self.number_nwp_channels = len(configuration.input_data.nwp.nwp_channels)
         self.length = length
         self.configuration = configuration
@@ -38,6 +44,13 @@ class FakeDataset(torch.utils.data.Dataset):
         Returns: Dictionary of random data
 
         """
-        x: BatchML = BatchML.fake(configuration=self.configuration)
-
-        return x.dict()
+        if self.add_position_encoding:
+            batch = Batch.fake(configuration = self.configuration)
+            position_encodings = generate_position_encodings_for_batch(batch)
+            batch: BatchML = BatchML.from_batch(batch=batch)
+            batch: dict = batch.dict()
+            batch.update(position_encodings)
+            return batch
+        else:
+            x: BatchML = BatchML.fake(configuration = self.configuration)
+            return x.dict()
