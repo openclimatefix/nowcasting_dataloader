@@ -283,7 +283,7 @@ class SatFlowDataset(NetCDFDataset):
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, self.current_timestep_index :
             ]
-            x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
+            x["hrvsatellite"] = past_hrv_satellite_data
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
             past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
             x[PV_YIELD] = past_pv_data
@@ -312,23 +312,25 @@ class SatFlowDataset(NetCDFDataset):
 
         # Add position encodings
         if self.add_position_encoding:
-            if x.get(x[SATELLITE_DATA], False):
+            if len(x.get(x[SATELLITE_DATA], [])) > 0:
                 x = self.add_encodings(
                     x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target
                 )
-            if x.get("hrv_" + SATELLITE_DATA, False):
+            if len(x.get("hrvsatellite", [])) > 0:
                 x = self.add_encodings(
                     x,
-                    "hrv_" + SATELLITE_DATA,
+                    "hrvsatellite",
                     batch,
                     self.current_timestep_index,
                     self.add_hrv_satellite_target,
                 )
-            if x.get(TOPOGRAPHIC_DATA, False):
+                # Rename to match other ones better
+                x["hrv_"+SATELLITE_DATA] = x.pop("hrvsatellite")
+            if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
                 x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
-            if x.get(NWP_DATA, False):
+            if len(x.get(NWP_DATA, [])) > 0:
                 x = self.add_encodings(x, NWP_DATA, batch, len(x[NWP_DATA]), False)
-            if x.get(PV_YIELD, False):
+            if len(x.get(PV_YIELD, [])) > 0:
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch[GSP_YIELD + "_position_encoding"][
