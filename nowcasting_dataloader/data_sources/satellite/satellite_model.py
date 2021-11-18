@@ -75,7 +75,7 @@ class SatelliteML(DataSourceOutputML):
     )
 
     channels: Optional[Array] = Field(
-        list(SAT_MEAN.keys()), description="List of the satellite channels"
+        np.asarray(list(SAT_MEAN.keys())), description="List of the satellite channels"
     )
 
     @staticmethod
