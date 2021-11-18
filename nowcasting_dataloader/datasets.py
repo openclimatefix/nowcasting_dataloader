@@ -265,27 +265,28 @@ class SatFlowDataset(NetCDFDataset):
             Tuple of dicts of torch.Tensors holding the data
         """
         batch = super().__getitem__(batch_idx)
+        print(batch.keys())
         x = {}
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
-        if batch.get("satellite", False):
+        if batch["satellite"].get(SATELLITE_DATA, False):
             past_satellite_data = batch["satellite"][SATELLITE_DATA][
                 :, : self.current_timestep_index
             ]
             x[SATELLITE_DATA] = past_satellite_data
-        if batch.get("hrvsatellite", False):
+        if batch["hrvsatellite"].get(SATELLITE_DATA, False):
             past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][
                 :, :, self.current_timestep_index :
             ]
             x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
-        if batch.get("pv", False):
+        if batch["pv"].get(PV_YIELD, False):
             past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
-        if batch.get("nwp", False):
+        if batch["nwp"].get(NWP_DATA, False):
             # We can give future NWP too, as that will be available
             x[NWP_DATA] = batch["nwp"][NWP_DATA]
-        if batch.get("topographic", False):
+        if batch["topographic"].get(TOPOGRAPHIC_DATA, False):
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
             x[TOPOGRAPHIC_DATA] = batch["topographic"][TOPOGRAPHIC_DATA]
