@@ -251,8 +251,8 @@ class SatFlowDataset(NetCDFDataset):
         self.add_hrv_satellite_target = add_hrv_satellite_target
 
         # SatFlow specific changes, i.e. which timestep to split on
-        self.current_timestep_index = (history_minutes // 5) + 1
-        self.current_timestep_index_30 = (history_minutes // 30) + 1
+        self.current_timestep_index = (self.history_minutes // 5) + 1
+        self.current_timestep_index_30 = (self.history_minutes // 30) + 1
 
     def __getitem__(self, batch_idx: int) -> Tuple[dict, dict]:
         """
