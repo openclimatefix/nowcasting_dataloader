@@ -14,35 +14,37 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 
 logger = logging.getLogger(__name__)
 
-SAT_MEAN = [
-    93.23458,
-    131.71373,
-    843.7779,
-    736.6148,
-    771.1189,
-    589.66034,
-    862.29816,
-    927.69586,
-    90.70885,
-    107.58985,
-    618.4583,
-    532.47394,
-]
 
-SAT_STD = [
-    115.34247,
-    139.92636,
-    36.99538,
-    57.366386,
-    30.346825,
-    149.68007,
-    51.70631,
-    35.872967,
-    115.77212,
-    120.997154,
-    98.57828,
-    99.76469,
-]
+SAT_MEAN = {
+    "HRV": 105.83116724,
+    "IR_016": 141.92817573,
+    "IR_039": 800.73679222,
+    "IR_087": 701.5911239,
+    "IR_097": 733.78406155,
+    "IR_108": 573.94072497,
+    "IR_120": 819.39910065,
+    "IR_134": 880.35105517,
+    "VIS006": 97.78966381,
+    "VIS008": 116.07948311,
+    "WV_062": 601.81221011,
+    "WV_073": 517.77309103,
+}
+
+
+SAT_STD = {
+    "HRV": 128.32319421,
+    "IR_016": 157.25982331,
+    "IR_039": 200.56013175,
+    "IR_087": 181.3212391,
+    "IR_097": 183.25528804,
+    "IR_108": 199.49770784,
+    "IR_120": 207.71619773,
+    "IR_134": 219.66516666,
+    "VIS006": 129.34155682,
+    "VIS008": 135.47021997,
+    "WV_062": 177.58304628,
+    "WV_073": 159.41967647,
+}
 
 
 class SatelliteML(DataSourceOutputML):
@@ -72,7 +74,9 @@ class SatelliteML(DataSourceOutputML):
         "passed into the ML model.",
     )
 
-    channels: Optional[Array] = Field(None, description="List of the satellite channels")
+    channels: Optional[Array] = Field(
+        list(SAT_MEAN.keys()), description="List of the satellite channels"
+    )
 
     @staticmethod
     def fake(
@@ -121,12 +125,17 @@ class SatelliteML(DataSourceOutputML):
         # convert to torch dictionary
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y"])
 
-        # move to Modle
+        # move to Model
         return SatelliteML(**satellite_batch_ml)
 
     def normalize(self):
         """Normalize the satellite data"""
         if not self.normalized:
-            self.data = self.data - SAT_MEAN
-            self.data = self.data / SAT_STD
+            mean = np.array([SAT_MEAN[b] for b in self.channels])
+            std = np.array([SAT_STD[b] for b in self.channels])
+            # Need to get to the same shape, so add 3 1-dimensions
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
+            self.data = self.data - mean
+            self.data = self.data / std
             self.normalized = True
