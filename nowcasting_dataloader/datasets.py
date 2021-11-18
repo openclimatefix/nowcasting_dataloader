@@ -7,10 +7,6 @@ import boto3
 import gcsfs
 import torch
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import DEFAULT_REQUIRED_KEYS
-from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
-from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 from nowcasting_dataset.consts import (
     PV_YIELD,
     GSP_YIELD,
@@ -19,7 +15,10 @@ from nowcasting_dataset.consts import (
     NWP_Y_COORDS,
     SATELLITE_DATA,
     TOPOGRAPHIC_DATA,
-    )
+)
+from nowcasting_dataset.dataset.batch import Batch
+from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
+from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
