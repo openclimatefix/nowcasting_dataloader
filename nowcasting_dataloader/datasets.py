@@ -12,15 +12,12 @@ from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 from nowcasting_dataset.consts import (
-    DATETIME_FEATURE_NAMES,
+    PV_YIELD,
     GSP_YIELD,
     NWP_DATA,
     NWP_X_COORDS,
     NWP_Y_COORDS,
     SATELLITE_DATA,
-    SATELLITE_DATETIME_INDEX,
-    SATELLITE_X_COORDS,
-    SATELLITE_Y_COORDS,
     TOPOGRAPHIC_DATA,
     )
 
@@ -211,18 +208,30 @@ class SatFlowDataset(NetCDFDataset):
             forecast_minutes: Optional[int] = None,
             normalize: bool = False,
             add_position_encoding: bool = False,
+            add_satellite_target: bool = False,
+            add_hrv_satellite_target: bool = False
             ):
         """
-        Extension to NetCDFDataset for specific Satflow model training
+        Netcdf Dataset
 
         Args:
-            n_batches: Number of batches
-            src_path: The source path for the training files
-            tmp_path: The temporary path to use if streaming from a remote filesystem
-            configuration: Nowcasting Configuration to use
-            cloud: Which cloud is being used, either 'gcp', 'aws', or 'local' for local filesystem
-            history_minutes: Number of history minutes to use
-            forecast_minutes: Number of forecast minutes to use
+            n_batches: Number of batches available on disk.
+            src_path: The full path (including 'gs://') to the data on
+                Google Cloud storage.
+            tmp_path: The full path to the local temporary directory
+                (on a local filesystem).
+            cloud:
+            required_keys: Tuple or list of keys required in the example for
+                it to be considered usable
+            history_minutes: How many past minutes of data to use, if subsetting the batch
+            forecast_minutes: How many future minutes of data to use, if reducing the amount
+                of forecast time
+            configuration: configuration object
+            cloud: which cloud is used, can be "gcp", "aws" or "local".
+            normalize: normalize the batch data
+            add_position_encoding: Whether to add position encoding or not
+            add_satellite_target: Whether to add future satellite imagery to the target or not
+            add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target or not
         """
         super().__init__(
             n_batches,
@@ -236,6 +245,10 @@ class SatFlowDataset(NetCDFDataset):
             normalize,
             add_position_encoding
             )
+
+        self.add_satellite_target = add_satellite_target
+        self.add_hrv_satellite_target = add_hrv_satellite_target
+
         # SatFlow specific changes, i.e. which timestep to split on
         self.current_timestep_index = (history_minutes // 5) + 1
         self.current_timestep_index_30 = (history_minutes // 30) + 1
@@ -251,33 +264,27 @@ class SatFlowDataset(NetCDFDataset):
             Tuple of dicts of torch.Tensors holding the data
         """
         batch = super().__getitem__(batch_idx)
-
+        x = {}
+        target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
-        past_satellite_data = batch[SATELLITE_DATA][:, : self.current_timestep_index]
-        past_gsp_data = batch[GSP_YIELD][:, : self.current_timestep_index_30]
-        future_gsp_data = batch[GSP_YIELD][:, self.current_timestep_index_30 :]
+        if "satellite" in batch:
+            past_satellite_data = batch["satellite"][SATELLITE_DATA][:, : self.current_timestep_index]
+            x[SATELLITE_DATA] = past_satellite_data
+        if "hrvsatellite" in batch:
+            past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][:, : self.current_timestep_index]
+            x["hrv_"+SATELLITE_DATA] = past_hrv_satellite_data
+        if "pv" in batch:
+            past_pv_data = batch["pv"][PV_YIELD][:,: self.current_timestep_index]
+            x[PV_YIELD] = past_pv_data
 
-        future_sat_data = batch[SATELLITE_DATA][:, self.current_timestep_index :]
-        x = {
-            SATELLITE_DATA: past_satellite_data,
-            SATELLITE_X_COORDS: batch.get(SATELLITE_X_COORDS, None),
-            SATELLITE_Y_COORDS: batch.get(SATELLITE_Y_COORDS, None),
-            SATELLITE_DATETIME_INDEX: batch[SATELLITE_DATETIME_INDEX][
-                                      :, : self.current_timestep_index
-                                      ],
-            GSP_YIELD: past_gsp_data,
-            }
-        y = {
-            SATELLITE_DATA: future_sat_data,
-            SATELLITE_DATETIME_INDEX: batch[SATELLITE_DATETIME_INDEX][
-                                      :, self.current_timestep_index :
-                                      ],
-            GSP_YIELD: future_gsp_data,
-            }
-
-        for k in list(DATETIME_FEATURE_NAMES):
-            if k in self.required_keys:
-                x[k] = batch[k][:, : self.current_timestep_index]
+        future_gsp_data = batch["gsp"][GSP_YIELD][:, :self.current_timestep_index_30]
+        target[GSP_YIELD] = future_gsp_data
+        if self.add_satellite_target:
+            future_sat_data = batch["satellite"][SATELLITE_DATA][:, :self.current_timestep_index]
+            target[SATELLITE_DATA] = future_sat_data
+        if self.add_hrv_satellite_target:
+            future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][:, :self.current_timestep_index]
+            target["hrv_"+SATELLITE_DATA] = future_hrv_sat_data
 
         if NWP_DATA in self.required_keys:
             past_nwp_data = batch[NWP_DATA][:, :, : self.current_timestep_index]
@@ -290,7 +297,7 @@ class SatFlowDataset(NetCDFDataset):
             # Results in topographic maps with [Batch, Channel, H, W]
             x[TOPOGRAPHIC_DATA] = np.expand_dims(batch[TOPOGRAPHIC_DATA], axis=1)
 
-        return x, y
+        return x, target
 
 
 def worker_init_fn(worker_id):
