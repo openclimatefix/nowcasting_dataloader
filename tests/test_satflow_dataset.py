@@ -69,7 +69,8 @@ def test_satflow_dataset_local_using_configuration():
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
 
-        for k in y.keys():
+        for k in ["gsp_yield",
+                  "gsp_id",]:
             print(k)
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
@@ -139,8 +140,10 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
 
-        for k in y.keys():
-            print(k)
+        for k in ["gsp_yield",
+                  "gsp_id",
+                  "sat_data",
+                  "hrv_sat_data"]:
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
         # Make sure file isn't deleted!
