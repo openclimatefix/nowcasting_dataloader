@@ -272,16 +272,17 @@ class SatFlowDataset(NetCDFDataset):
         print(batch["pv"].keys())
         print(batch["nwp"].keys())
         print(batch["topographic"].keys())
+        print(batch["gsp"].keys())
         x = {}
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
-        if len(batch["satellite"].get(SATELLITE_DATA, [])) > 0:
-            past_satellite_data = batch["satellite"][SATELLITE_DATA][
+        if len(batch["satellite"].get("data", [])) > 0:
+            past_satellite_data = batch["satellite"]["data"][
                 :, : self.current_timestep_index
             ]
             x[SATELLITE_DATA] = past_satellite_data
-        if len(batch["hrvsatellite"].get(SATELLITE_DATA, [])) > 0:
-            past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][
+        if len(batch["hrvsatellite"].get("data", [])) > 0:
+            past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, self.current_timestep_index :
             ]
             x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
@@ -289,9 +290,9 @@ class SatFlowDataset(NetCDFDataset):
             past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
-        if len(batch["nwp"].get(NWP_DATA, [])) > 0:
+        if len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
-            x[NWP_DATA] = batch["nwp"][NWP_DATA]
+            x[NWP_DATA] = batch["nwp"]["data"]
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
@@ -305,12 +306,12 @@ class SatFlowDataset(NetCDFDataset):
         target[GSP_ID] = GSP_ID
 
         if self.add_satellite_target:
-            future_sat_data = batch["satellite"][SATELLITE_DATA][
+            future_sat_data = batch["satellite"]["data"][
                 :, :, : self.current_timestep_index
             ]
             target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
-            future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][
+            future_hrv_sat_data = batch["hrvsatellite"]["data"][
                 :, :, : self.current_timestep_index
             ]
             target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
