@@ -7,12 +7,9 @@ import boto3
 import gcsfs
 import torch
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import DEFAULT_REQUIRED_KEYS
-from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
-from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 from nowcasting_dataset.consts import (
     DATETIME_FEATURE_NAMES,
+    DEFAULT_REQUIRED_KEYS,
     GSP_YIELD,
     NWP_DATA,
     NWP_X_COORDS,
@@ -22,7 +19,10 @@ from nowcasting_dataset.consts import (
     SATELLITE_X_COORDS,
     SATELLITE_Y_COORDS,
     TOPOGRAPHIC_DATA,
-    )
+)
+from nowcasting_dataset.dataset.batch import Batch
+from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
+from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
@@ -200,18 +200,18 @@ class SatFlowDataset(NetCDFDataset):
     """
 
     def __init__(
-            self,
-            n_batches: int,
-            src_path: str,
-            tmp_path: str,
-            configuration: Configuration,
-            cloud: str = "gcp",
-            required_keys: Union[Tuple[str], List[str]] = None,
-            history_minutes: Optional[int] = None,
-            forecast_minutes: Optional[int] = None,
-            normalize: bool = False,
-            add_position_encoding: bool = False,
-            ):
+        self,
+        n_batches: int,
+        src_path: str,
+        tmp_path: str,
+        configuration: Configuration,
+        cloud: str = "gcp",
+        required_keys: Union[Tuple[str], List[str]] = None,
+        history_minutes: Optional[int] = None,
+        forecast_minutes: Optional[int] = None,
+        normalize: bool = False,
+        add_position_encoding: bool = False,
+    ):
         """
         Extension to NetCDFDataset for specific Satflow model training
 
@@ -234,8 +234,8 @@ class SatFlowDataset(NetCDFDataset):
             history_minutes,
             forecast_minutes,
             normalize,
-            add_position_encoding
-            )
+            add_position_encoding,
+        )
         # SatFlow specific changes, i.e. which timestep to split on
         self.current_timestep_index = (history_minutes // 5) + 1
         self.current_timestep_index_30 = (history_minutes // 30) + 1
@@ -263,17 +263,17 @@ class SatFlowDataset(NetCDFDataset):
             SATELLITE_X_COORDS: batch.get(SATELLITE_X_COORDS, None),
             SATELLITE_Y_COORDS: batch.get(SATELLITE_Y_COORDS, None),
             SATELLITE_DATETIME_INDEX: batch[SATELLITE_DATETIME_INDEX][
-                                      :, : self.current_timestep_index
-                                      ],
+                :, : self.current_timestep_index
+            ],
             GSP_YIELD: past_gsp_data,
-            }
+        }
         y = {
             SATELLITE_DATA: future_sat_data,
             SATELLITE_DATETIME_INDEX: batch[SATELLITE_DATETIME_INDEX][
-                                      :, self.current_timestep_index :
-                                      ],
+                :, self.current_timestep_index :
+            ],
             GSP_YIELD: future_gsp_data,
-            }
+        }
 
         for k in list(DATETIME_FEATURE_NAMES):
             if k in self.required_keys:
