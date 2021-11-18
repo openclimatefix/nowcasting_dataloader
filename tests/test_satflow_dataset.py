@@ -38,7 +38,7 @@ def test_netcdf_dataset_local_using_configuration():
             history_minutes=10,
             forecast_minutes=10,
             configuration=configuration,
-            )
+        )
 
         dataloader_config = dict(
             pin_memory=True,
@@ -49,7 +49,7 @@ def test_netcdf_dataset_local_using_configuration():
             # Disable automatic batching because dataset
             # returns complete batches.
             batch_size=None,
-            )
+        )
 
         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 
