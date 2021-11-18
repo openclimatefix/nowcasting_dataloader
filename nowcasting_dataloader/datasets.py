@@ -9,13 +9,15 @@ import torch
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     PV_YIELD,
+    PV_SYSTEM_ID,
     GSP_YIELD,
+    GSP_ID,
     NWP_DATA,
-    NWP_X_COORDS,
-    NWP_Y_COORDS,
     SATELLITE_DATA,
     TOPOGRAPHIC_DATA,
+    DEFAULT_REQUIRED_KEYS
 )
+import numpy as np
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
@@ -275,26 +277,28 @@ class SatFlowDataset(NetCDFDataset):
         if "pv" in batch:
             past_pv_data = batch["pv"][PV_YIELD][:,: self.current_timestep_index]
             x[PV_YIELD] = past_pv_data
+            x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
+        if NWP_DATA in self.required_keys:
+            # We can give future NWP too, as that will be available
+            x[NWP_DATA] = batch["nwp"][NWP_DATA]
+        if TOPOGRAPHIC_DATA in self.required_keys:
+            # Need to expand dims to get a single channel one
+            # Results in topographic maps with [Batch, Channel, H, W]
+            x[TOPOGRAPHIC_DATA] = batch["topographic"][TOPOGRAPHIC_DATA]
 
+        # Only GSP information we give to the model to train on is the IDs and physical locations
+        x[GSP_ID] = GSP_ID
+
+        # Now creating the target data
         future_gsp_data = batch["gsp"][GSP_YIELD][:, :self.current_timestep_index_30]
         target[GSP_YIELD] = future_gsp_data
+        target[GSP_ID] = GSP_ID
         if self.add_satellite_target:
             future_sat_data = batch["satellite"][SATELLITE_DATA][:, :self.current_timestep_index]
             target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
             future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][:, :self.current_timestep_index]
             target["hrv_"+SATELLITE_DATA] = future_hrv_sat_data
-
-        if NWP_DATA in self.required_keys:
-            past_nwp_data = batch[NWP_DATA][:, :, : self.current_timestep_index]
-            x[NWP_DATA] = past_nwp_data
-            x[NWP_X_COORDS] = batch.get(NWP_X_COORDS, None)
-            x[NWP_Y_COORDS] = batch.get(NWP_Y_COORDS, None)
-
-        if TOPOGRAPHIC_DATA in self.required_keys:
-            # Need to expand dims to get a single channel one
-            # Results in topographic maps with [Batch, Channel, H, W]
-            x[TOPOGRAPHIC_DATA] = np.expand_dims(batch[TOPOGRAPHIC_DATA], axis=1)
 
         return x, target
 
