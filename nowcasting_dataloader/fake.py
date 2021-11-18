@@ -46,7 +46,7 @@ class FakeDataset(torch.utils.data.Dataset):
         """
         if self.add_position_encoding:
             batch = Batch.fake(configuration = self.configuration)
-            position_encodings = generate_position_encodings_for_batch(batch)
+            position_encodings = generate_position_encodings_for_batch(batch, num_bands=12)
             batch: BatchML = BatchML.from_batch(batch=batch)
             batch: dict = batch.dict()
             batch.update(position_encodings)
