@@ -344,17 +344,20 @@ class SatFlowDataset(NetCDFDataset):
         Args:
             x: Dictionary containing model inputs
             key: Key to check and insert
+            batch: Batch of data to use
+            current_timestep_index: The index of the t0 time in the data, used to split into past
+                and future encodings
             add_future_encodings: Whether to add the future position encodings to the target
 
         Returns:
             x dictionaries with the added/updated keys
         """
         if key + "_position_encoding" in batch:
-            past_encoding = batch[key + "_position_encoding"][:, :, self.current_timestep_index :]
+            past_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index :]
             x[key] = torch.cat([x[key], past_encoding], dim=1)
             if add_future_encodings:
                 future_encoding = batch[key + "_position_encoding"][
-                    :, :, : self.current_timestep_index
+                    :, :, : current_timestep_index
                 ]
                 x[key + "_query"] = future_encoding
         return x
