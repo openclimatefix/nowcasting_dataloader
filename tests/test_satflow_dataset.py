@@ -13,7 +13,7 @@ from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 torch.set_default_dtype(torch.float32)
 
 
-def test_netcdf_dataset_local_using_configuration():
+def test_satflow_dataset_local_using_configuration():
     """Test satflow locally"""
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
