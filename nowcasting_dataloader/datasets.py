@@ -277,15 +277,15 @@ class SatFlowDataset(NetCDFDataset):
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
         if len(batch["satellite"].get("data", [])) > 0:
-            past_satellite_data = batch["satellite"]["data"][:, : self.current_timestep_index]
+            past_satellite_data = batch["satellite"]["data"][:, :, :self.current_timestep_index]
             x["satellite"] = past_satellite_data
         if len(batch["hrvsatellite"].get("data", [])) > 0:
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
-                :, :, self.current_timestep_index :
+                :, :, :self.current_timestep_index
             ]
             x["hrvsatellite"] = past_hrv_satellite_data
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
-            past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
+            past_pv_data = batch["pv"][PV_YIELD][:, :, :self.current_timestep_index]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if len(batch["nwp"].get("data", [])) > 0:
@@ -300,14 +300,14 @@ class SatFlowDataset(NetCDFDataset):
         x[GSP_ID] = GSP_ID
 
         # Now creating the target data
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, :, : self.current_timestep_index_30]
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, :, self.current_timestep_index_30:]
         target[GSP_ID] = GSP_ID
 
         if self.add_satellite_target:
-            future_sat_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
+            future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index:]
             target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
-            future_hrv_sat_data = batch["hrvsatellite"]["data"][:, :, : self.current_timestep_index]
+            future_hrv_sat_data = batch["hrvsatellite"]["data"][:, :, self.current_timestep_index:]
             target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
 
         # Add position encodings
@@ -336,7 +336,7 @@ class SatFlowDataset(NetCDFDataset):
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
-                :, :, : self.current_timestep_index_30
+                :, :, self.current_timestep_index_30:
             ]
 
         # Rename to match other ones better
