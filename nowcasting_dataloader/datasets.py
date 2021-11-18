@@ -329,7 +329,7 @@ class SatFlowDataset(NetCDFDataset):
             if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
                 x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
             if len(x.get(NWP_DATA, [])) > 0:
-                x = self.add_encodings(x, NWP_DATA, batch, len(x[NWP_DATA]), False)
+                x = self.add_encodings(x, NWP_DATA, batch, 0, False)
             if len(x.get(PV_YIELD, [])) > 0:
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
