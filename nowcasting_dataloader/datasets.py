@@ -278,7 +278,7 @@ class SatFlowDataset(NetCDFDataset):
         # Need to partition out past and future sat images here, along with the rest of the data
         if len(batch["satellite"].get("data", [])) > 0:
             past_satellite_data = batch["satellite"]["data"][:, : self.current_timestep_index]
-            x[SATELLITE_DATA] = past_satellite_data
+            x["satellite"] = past_satellite_data
         if len(batch["hrvsatellite"].get("data", [])) > 0:
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, self.current_timestep_index :
@@ -314,8 +314,12 @@ class SatFlowDataset(NetCDFDataset):
         if self.add_position_encoding:
             if len(x.get(x[SATELLITE_DATA], [])) > 0:
                 x = self.add_encodings(
-                    x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target
+                    x, "satellite", batch, self.current_timestep_index, self.add_satellite_target
                 )
+                # Rename to match other ones better
+                x[SATELLITE_DATA] = x.pop("satellite")
+                if self.add_hrv_satellite_target:
+                    x[SATELLITE_DATA + "_query"] = x.pop("satellite_query")
             if len(x.get("hrvsatellite", [])) > 0:
                 x = self.add_encodings(
                     x,
