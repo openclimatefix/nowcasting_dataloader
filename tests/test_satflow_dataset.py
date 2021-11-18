@@ -22,6 +22,7 @@ def test_satflow_dataset_local_using_configuration():
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
     configuration = c
 
+
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         f = Batch.fake(configuration=c)
@@ -50,6 +51,59 @@ def test_satflow_dataset_local_using_configuration():
             # returns complete batches.
             batch_size=None,
         )
+
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+
+        train_dataset.per_worker_init(1)
+        t = iter(train_dataset)
+        x, y = next(t)
+        print(x.keys())
+        print(y.keys())
+
+        # Make sure file isn't deleted!
+        assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
+
+
+def test_satflow_dataset_local_using_configuration_with_position_encoding():
+    """Test satflow locally"""
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.process.batch_size = 4
+    c.input_data.satellite.satellite_image_size_pixels = 24
+    configuration = c
+
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+
+        f = Batch.fake(configuration=c)
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
+
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
+
+        train_dataset = SatFlowDataset(
+            1,
+            DATA_PATH,
+            TEMP_PATH,
+            cloud="local",
+            history_minutes=10,
+            forecast_minutes=10,
+            configuration=configuration,
+            add_position_encoding = True,
+            add_hrv_satellite_target = True,
+            add_satellite_target = True
+            )
+
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+            )
 
         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 

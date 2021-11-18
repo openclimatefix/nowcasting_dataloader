@@ -267,6 +267,11 @@ class SatFlowDataset(NetCDFDataset):
         """
         batch = super().__getitem__(batch_idx)
         print(batch.keys())
+        print(batch["satellite"].keys())
+        print(batch["hrvsatellite"].keys())
+        print(batch["pv"].keys())
+        print(batch["nwp"].keys())
+        print(batch["topographic"].keys())
         x = {}
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
