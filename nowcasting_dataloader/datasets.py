@@ -275,11 +275,11 @@ class SatFlowDataset(NetCDFDataset):
             x[SATELLITE_DATA] = past_satellite_data
         if "hrvsatellite" in batch:
             past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][
-                :, :,  self.current_timestep_index:
+                :, :, self.current_timestep_index :
             ]
             x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
         if "pv" in batch:
-            past_pv_data = batch["pv"][PV_YIELD][:, :,  self.current_timestep_index:]
+            past_pv_data = batch["pv"][PV_YIELD][:, :, self.current_timestep_index :]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if NWP_DATA in self.required_keys:
@@ -299,7 +299,9 @@ class SatFlowDataset(NetCDFDataset):
         target[GSP_ID] = GSP_ID
 
         if self.add_satellite_target:
-            future_sat_data = batch["satellite"][SATELLITE_DATA][:, :, : self.current_timestep_index]
+            future_sat_data = batch["satellite"][SATELLITE_DATA][
+                :, :, : self.current_timestep_index
+            ]
             target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
             future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][
@@ -309,8 +311,16 @@ class SatFlowDataset(NetCDFDataset):
 
         # Add position encodings
         if self.add_position_encoding:
-            x = self.add_encodings(x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target)
-            x = self.add_encodings(x, "hrv_"+SATELLITE_DATA, batch, self.current_timestep_index, self.add_hrv_satellite_target)
+            x = self.add_encodings(
+                x, SATELLITE_DATA, batch, self.current_timestep_index, self.add_satellite_target
+            )
+            x = self.add_encodings(
+                x,
+                "hrv_" + SATELLITE_DATA,
+                batch,
+                self.current_timestep_index,
+                self.add_hrv_satellite_target,
+            )
             if TOPOGRAPHIC_DATA in self.required_keys:
                 x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
             if NWP_DATA in self.required_keys:
@@ -318,7 +328,14 @@ class SatFlowDataset(NetCDFDataset):
 
         return x, target
 
-    def add_encodings(self, x: dict, key: str, batch: dict, current_timestep_index: int, add_future_encodings: bool = False) -> dict[str, torch.Tensor]:
+    def add_encodings(
+        self,
+        x: dict,
+        key: str,
+        batch: dict,
+        current_timestep_index: int,
+        add_future_encodings: bool = False,
+    ) -> dict[str, torch.Tensor]:
         """
         Adds encodings to the targets and inputs
 
@@ -330,16 +347,14 @@ class SatFlowDataset(NetCDFDataset):
         Returns:
             x dictionaries with the added/updated keys
         """
-        if key+"_position_encoding" in batch:
-            past_encoding = batch[key+"_position_encoding"][
-                            :, :,  self.current_timestep_index:
-                            ]
-            x[key] = torch.cat([x[key], past_encoding], dim = 1)
+        if key + "_position_encoding" in batch:
+            past_encoding = batch[key + "_position_encoding"][:, :, self.current_timestep_index :]
+            x[key] = torch.cat([x[key], past_encoding], dim=1)
             if add_future_encodings:
-                future_encoding = batch[key+"_position_encoding"][
-                                  :, :,  :self.current_timestep_index
-                                  ]
-                x[key+"_query"] = future_encoding
+                future_encoding = batch[key + "_position_encoding"][
+                    :, :, : self.current_timestep_index
+                ]
+                x[key + "_query"] = future_encoding
         return x
 
 
