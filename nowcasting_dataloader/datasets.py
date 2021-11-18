@@ -312,12 +312,10 @@ class SatFlowDataset(NetCDFDataset):
 
         # Add position encodings
         if self.add_position_encoding:
-            if len(x.get(x[SATELLITE_DATA], [])) > 0:
+            if len(x.get("satellite", [])) > 0:
                 x = self.add_encodings(
                     x, "satellite", batch, self.current_timestep_index, self.add_satellite_target
                 )
-                # Rename to match other ones better
-                x[SATELLITE_DATA] = x.pop("satellite")
                 if self.add_hrv_satellite_target:
                     x[SATELLITE_DATA + "_query"] = x.pop("satellite_query")
             if len(x.get("hrvsatellite", [])) > 0:
@@ -328,8 +326,6 @@ class SatFlowDataset(NetCDFDataset):
                     self.current_timestep_index,
                     self.add_hrv_satellite_target,
                 )
-                # Rename to match other ones better
-                x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
                 if self.add_hrv_satellite_target:
                     x["hrv_" + SATELLITE_DATA + "_query"] = x.pop("hrvsatellite_query")
             if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
@@ -342,6 +338,10 @@ class SatFlowDataset(NetCDFDataset):
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
                 :, :, : self.current_timestep_index_30
             ]
+
+        # Rename to match other ones better
+        x[SATELLITE_DATA] = x.pop("satellite")
+        x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
 
         return x, target
 
