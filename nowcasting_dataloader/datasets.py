@@ -198,20 +198,20 @@ class SatFlowDataset(NetCDFDataset):
     """
 
     def __init__(
-            self,
-            n_batches: int,
-            src_path: str,
-            tmp_path: str,
-            configuration: Configuration,
-            cloud: str = "gcp",
-            required_keys: Union[Tuple[str], List[str]] = None,
-            history_minutes: Optional[int] = None,
-            forecast_minutes: Optional[int] = None,
-            normalize: bool = False,
-            add_position_encoding: bool = False,
-            add_satellite_target: bool = False,
-            add_hrv_satellite_target: bool = False
-            ):
+        self,
+        n_batches: int,
+        src_path: str,
+        tmp_path: str,
+        configuration: Configuration,
+        cloud: str = "gcp",
+        required_keys: Union[Tuple[str], List[str]] = None,
+        history_minutes: Optional[int] = None,
+        forecast_minutes: Optional[int] = None,
+        normalize: bool = False,
+        add_position_encoding: bool = False,
+        add_satellite_target: bool = False,
+        add_hrv_satellite_target: bool = False,
+    ):
         """
         Netcdf Dataset
 
@@ -244,8 +244,8 @@ class SatFlowDataset(NetCDFDataset):
             history_minutes,
             forecast_minutes,
             normalize,
-            add_position_encoding
-            )
+            add_position_encoding,
+        )
 
         self.add_satellite_target = add_satellite_target
         self.add_hrv_satellite_target = add_hrv_satellite_target
@@ -269,13 +269,17 @@ class SatFlowDataset(NetCDFDataset):
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
         if "satellite" in batch:
-            past_satellite_data = batch["satellite"][SATELLITE_DATA][:, : self.current_timestep_index]
+            past_satellite_data = batch["satellite"][SATELLITE_DATA][
+                :, : self.current_timestep_index
+            ]
             x[SATELLITE_DATA] = past_satellite_data
         if "hrvsatellite" in batch:
-            past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][:, : self.current_timestep_index]
-            x["hrv_"+SATELLITE_DATA] = past_hrv_satellite_data
+            past_hrv_satellite_data = batch["hrvsatellite"][SATELLITE_DATA][
+                :, : self.current_timestep_index
+            ]
+            x["hrv_" + SATELLITE_DATA] = past_hrv_satellite_data
         if "pv" in batch:
-            past_pv_data = batch["pv"][PV_YIELD][:,: self.current_timestep_index]
+            past_pv_data = batch["pv"][PV_YIELD][:, : self.current_timestep_index]
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if NWP_DATA in self.required_keys:
@@ -294,11 +298,13 @@ class SatFlowDataset(NetCDFDataset):
         target[GSP_YIELD] = future_gsp_data
         target[GSP_ID] = GSP_ID
         if self.add_satellite_target:
-            future_sat_data = batch["satellite"][SATELLITE_DATA][:, :self.current_timestep_index]
+            future_sat_data = batch["satellite"][SATELLITE_DATA][:, : self.current_timestep_index]
             target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
-            future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][:, :self.current_timestep_index]
-            target["hrv_"+SATELLITE_DATA] = future_hrv_sat_data
+            future_hrv_sat_data = batch["hrvsatellite"][SATELLITE_DATA][
+                :, : self.current_timestep_index
+            ]
+            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
 
         return x, target
 
