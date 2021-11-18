@@ -40,7 +40,7 @@ def test_fake_dataset_position_encodings(configuration):
     )
     i = iter(train)
     x = next(i)
-
+    assert type(x["satellite_position_encoding"]) == torch.Tensor
     x = BatchML(**x)
     # IT WORKS
     assert type(x.satellite.data) == torch.Tensor
