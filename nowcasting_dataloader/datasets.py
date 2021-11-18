@@ -190,6 +190,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
 class SatFlowDataset(NetCDFDataset):
     """
+    SatFlow dataset for training the joint model
 
     Dataset for training the joint model, ensures that the target contains the future GSP data, and
     satellite imagery. It also ensures that no past GSP data is given to the model as it wont be
