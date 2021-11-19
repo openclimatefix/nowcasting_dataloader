@@ -24,6 +24,7 @@ from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
 from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +281,7 @@ class SatFlowDataset(NetCDFDataset):
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
-            x[TOPOGRAPHIC_DATA] = batch["topographic"][TOPOGRAPHIC_DATA]
+            x[TOPOGRAPHIC_DATA] = np.expand_dims(batch["topographic"][TOPOGRAPHIC_DATA], dim=1)
 
         # Only GSP information we give to the model to train on is the IDs and physical locations
         x[GSP_ID] = batch["gsp"][GSP_ID]
@@ -315,7 +316,7 @@ class SatFlowDataset(NetCDFDataset):
                 if self.add_hrv_satellite_target:
                     x["hrv_" + SATELLITE_DATA + "_query"] = x.pop("hrvsatellite_query")
             if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
-                x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
+                x = self.add_encodings(x, "topographic", batch, 0, False)
             if len(x.get(NWP_DATA, [])) > 0:
                 x[NWP_DATA] = torch.cat(
                     [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
