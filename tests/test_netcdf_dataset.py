@@ -43,6 +43,7 @@ def test_netcdf_dataset_local_using_configuration():
             history_minutes=10,
             forecast_minutes=10,
             configuration=configuration,
+            normalize = False
         )
 
         dataloader_config = dict(
