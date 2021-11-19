@@ -45,7 +45,7 @@ class SatFlowDataModule(LightningDataModule):
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
         pin_memory: bool = True,
-        num_workers: int = 0,
+        num_workers: int = 1,
     ):
         """
         Datamodule for the SatFlow dataset
