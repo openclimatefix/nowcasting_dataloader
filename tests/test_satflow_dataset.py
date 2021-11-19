@@ -76,7 +76,7 @@ def test_satflow_dataset_local_using_configuration():
             assert type(y[k]) == torch.Tensor
 
         # Make sure file isn't deleted!
-        assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
 def test_satflow_dataset_local_using_configuration_with_position_encoding():
@@ -144,4 +144,4 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
         # Make sure file isn't deleted!
-        assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
