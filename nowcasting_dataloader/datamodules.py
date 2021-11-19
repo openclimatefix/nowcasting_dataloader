@@ -132,7 +132,7 @@ class SatFlowDataModule(LightningDataModule):
     def test_dataloader(self):
         """Test dataloader"""
         test_dataset = SatFlowDataset(
-            self.n_val_data,
+            self.n_test_data,
             os.path.join(self.configuration.output_data.filepath, "test"),
             os.path.join(self.temp_path, "test"),
             configuration=self.configuration,
