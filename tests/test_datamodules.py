@@ -1,4 +1,3 @@
-from nowcasting_dataloader.datamodules import SatFlowDataModule
 import os
 import tempfile
 from pathlib import Path
@@ -7,7 +6,10 @@ import torch
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
+from nowcasting_dataloader.datamodules import SatFlowDataModule
+
 torch.set_default_dtype(torch.float32)
+
 
 def test_satflow_datamodule_init():
     c = Configuration()
@@ -21,20 +23,22 @@ def test_satflow_datamodule_init():
         f = Batch.fake(configuration=c)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
-        DATA_PATH = tmpdirname+"/train"
-        TEMP_PATH = tmpdirname+"/train"
+        DATA_PATH = tmpdirname + "/train"
+        TEMP_PATH = tmpdirname + "/train"
 
-        datamodule = SatFlowDataModule(TEMP_PATH,
-                                       configuration=configuration,
-                                       n_train_data = 1,
-                                       n_val_data = 0,
-                                       n_test_data = 0,
-                                       cloud="local",
-                                       add_position_encoding = True,
-                                       add_satellite_target = True,
-                                       add_hrv_satellite_target = True,
-                                       history_minutes = 10,
-                                       forecast_minutes = 10)
+        datamodule = SatFlowDataModule(
+            TEMP_PATH,
+            configuration=configuration,
+            n_train_data=1,
+            n_val_data=0,
+            n_test_data=0,
+            cloud="local",
+            add_position_encoding=True,
+            add_satellite_target=True,
+            add_hrv_satellite_target=True,
+            history_minutes=10,
+            forecast_minutes=10,
+        )
 
         t = next(datamodule.train_dataloader())
         x, y = next(t)
@@ -50,7 +54,7 @@ def test_satflow_datamodule_init():
             "gsp_yield_query",
             "sat_data",
             "hrv_sat_data",
-            ]:
+        ]:
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
 
