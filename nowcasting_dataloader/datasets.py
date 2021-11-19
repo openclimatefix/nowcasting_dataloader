@@ -54,7 +54,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
-        normalize: bool = False,
+        normalize: bool = True,
         add_position_encoding: bool = False,
     ):
         """
@@ -200,7 +200,7 @@ class SatFlowDataset(NetCDFDataset):
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
-        normalize: bool = False,
+        normalize: bool = True,
         add_position_encoding: bool = False,
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
@@ -228,16 +228,16 @@ class SatFlowDataset(NetCDFDataset):
             add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
         """
         super().__init__(
-            n_batches,
-            src_path,
-            tmp_path,
-            configuration,
-            cloud,
-            required_keys,
-            history_minutes,
-            forecast_minutes,
-            normalize,
-            add_position_encoding,
+            n_batches = n_batches,
+            src_path = src_path,
+            tmp_path = tmp_path,
+            configuration = configuration,
+            cloud = cloud,
+            required_keys = required_keys,
+            history_minutes = history_minutes,
+            forecast_minutes = forecast_minutes,
+            normalize = normalize,
+            add_position_encoding = add_position_encoding,
         )
 
         self.add_satellite_target = add_satellite_target
@@ -255,7 +255,8 @@ class SatFlowDataset(NetCDFDataset):
             batch_idx: Batch ID to load
 
         Returns:
-            Tuple of dicts of torch.Tensors holding the data
+            Tuple of dicts of torch.Tensors holding the data, with the first one being the inputs
+            and the second being the target
         """
         batch = super().__getitem__(batch_idx)
         x = {}
