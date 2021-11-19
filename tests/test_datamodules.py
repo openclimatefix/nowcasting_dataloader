@@ -23,8 +23,9 @@ def test_satflow_datamodule_init():
         f = Batch.fake(configuration=c)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
-        DATA_PATH = tmpdirname + "/train"
-        TEMP_PATH = tmpdirname + "/train"
+        DATA_PATH = tmpdirname
+        configuration.output_data.filepath = DATA_PATH
+        TEMP_PATH = tmpdirname
 
         datamodule = SatFlowDataModule(
             TEMP_PATH,
@@ -40,7 +41,7 @@ def test_satflow_datamodule_init():
             forecast_minutes=10,
         )
 
-        t = next(datamodule.train_dataloader())
+        t = iter(datamodule.train_dataloader())
         x, y = next(t)
 
         for k in [
