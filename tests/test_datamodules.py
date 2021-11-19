@@ -1,4 +1,3 @@
-import glob
 import os
 import tempfile
 from pathlib import Path
@@ -22,8 +21,8 @@ def test_satflow_datamodule_init():
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         f = Batch.fake(configuration=c)
-        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
-        print(list(glob.glob(tmpdirname + "/*")))
+        train_tmp = os.path.join(tmpdirname, 'train')
+        f.save_netcdf(batch_i=0, path=Path(train_tmp))
         DATA_PATH = tmpdirname
         configuration.output_data.filepath = DATA_PATH
         TEMP_PATH = tmpdirname
