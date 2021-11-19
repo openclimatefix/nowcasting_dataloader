@@ -7,7 +7,16 @@ import boto3
 import gcsfs
 import torch
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import DEFAULT_REQUIRED_KEYS
+from nowcasting_dataset.consts import (
+    DEFAULT_REQUIRED_KEYS,
+    GSP_ID,
+    GSP_YIELD,
+    NWP_DATA,
+    PV_SYSTEM_ID,
+    PV_YIELD,
+    SATELLITE_DATA,
+    TOPOGRAPHIC_DATA,
+)
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
@@ -45,7 +54,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
-        normalize: bool = False,
+        normalize: bool = True,
         add_position_encoding: bool = False,
     ):
         """
@@ -163,7 +172,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 
-        # netcdf_batch = xr.load_dataset(local_netcdf_filename)
         if self.cloud != "local":
             # remove files in a folder, but not the folder itself
             delete_all_files_in_temp_path(self.src_path)
@@ -177,6 +185,183 @@ class NetCDFDataset(torch.utils.data.Dataset):
             # Add position encodings
             batch.update(position_encodings)
         return batch
+
+
+class SatFlowDataset(NetCDFDataset):
+    """SatFlow dataset for filtering and splitting up output from NetCDFDataset properly"""
+
+    def __init__(
+        self,
+        n_batches: int,
+        src_path: str,
+        tmp_path: str,
+        configuration: Configuration,
+        cloud: str = "gcp",
+        required_keys: Union[Tuple[str], List[str]] = None,
+        history_minutes: Optional[int] = None,
+        forecast_minutes: Optional[int] = None,
+        normalize: bool = True,
+        add_position_encoding: bool = False,
+        add_satellite_target: bool = False,
+        add_hrv_satellite_target: bool = False,
+    ):
+        """
+        Netcdf Dataset
+
+        Args:
+            n_batches: Number of batches available on disk.
+            src_path: The full path (including 'gs://') to the data on
+                Google Cloud storage.
+            tmp_path: The full path to the local temporary directory
+                (on a local filesystem).
+            cloud:
+            required_keys: Tuple or list of keys required in the example for
+                it to be considered usable
+            history_minutes: How many past minutes of data to use, if subsetting the batch
+            forecast_minutes: How many future minutes of data to use, if reducing the amount
+                of forecast time
+            configuration: configuration object
+            cloud: which cloud is used, can be "gcp", "aws" or "local".
+            normalize: normalize the batch data
+            add_position_encoding: Whether to add position encoding or not
+            add_satellite_target: Whether to add future satellite imagery to the target or not
+            add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
+        """
+        super().__init__(
+            n_batches=n_batches,
+            src_path=src_path,
+            tmp_path=tmp_path,
+            configuration=configuration,
+            cloud=cloud,
+            required_keys=required_keys,
+            history_minutes=history_minutes,
+            forecast_minutes=forecast_minutes,
+            normalize=normalize,
+            add_position_encoding=add_position_encoding,
+        )
+
+        self.add_satellite_target = add_satellite_target
+        self.add_hrv_satellite_target = add_hrv_satellite_target
+
+        # SatFlow specific changes, i.e. which timestep to split on
+        self.current_timestep_index = (self.history_minutes // 5) + 1
+        self.current_timestep_index_30 = (self.history_minutes // 30) + 1
+
+    def __getitem__(self, batch_idx: int) -> Tuple[dict, dict]:
+        """
+        Satflow extension for the dataloader
+
+        Args:
+            batch_idx: Batch ID to load
+
+        Returns:
+            Tuple of dicts of torch.Tensors holding the data, with the first one being the inputs
+            and the second being the target
+        """
+        batch = super().__getitem__(batch_idx)
+        x = {}
+        target = {}
+        # Need to partition out past and future sat images here, along with the rest of the data
+        if len(batch["satellite"].get("data", [])) > 0:
+            past_satellite_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
+            x["satellite"] = past_satellite_data
+        if len(batch["hrvsatellite"].get("data", [])) > 0:
+            past_hrv_satellite_data = batch["hrvsatellite"]["data"][
+                :, :, : self.current_timestep_index
+            ]
+            x["hrvsatellite"] = past_hrv_satellite_data
+        if len(batch["pv"].get(PV_YIELD, [])) > 0:
+            past_pv_data = batch["pv"][PV_YIELD][:, :, : self.current_timestep_index]
+            x[PV_YIELD] = past_pv_data
+            x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
+        if len(batch["nwp"].get("data", [])) > 0:
+            # We can give future NWP too, as that will be available
+            x[NWP_DATA] = batch["nwp"]["data"]
+        if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
+            # Need to expand dims to get a single channel one
+            # Results in topographic maps with [Batch, Channel, H, W]
+            x[TOPOGRAPHIC_DATA] = batch["topographic"][TOPOGRAPHIC_DATA]
+
+        # Only GSP information we give to the model to train on is the IDs and physical locations
+        x[GSP_ID] = batch["gsp"][GSP_ID]
+
+        # Now creating the target data
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, :, self.current_timestep_index_30 :]
+        target[GSP_ID] = batch["gsp"][GSP_ID]
+
+        if self.add_satellite_target:
+            future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
+            target[SATELLITE_DATA] = future_sat_data
+        if self.add_hrv_satellite_target:
+            future_hrv_sat_data = batch["hrvsatellite"]["data"][:, :, self.current_timestep_index :]
+            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
+
+        # Add position encodings
+        if self.add_position_encoding:
+            if len(x.get("satellite", [])) > 0:
+                x = self.add_encodings(
+                    x, "satellite", batch, self.current_timestep_index, self.add_satellite_target
+                )
+                if self.add_hrv_satellite_target:
+                    x[SATELLITE_DATA + "_query"] = x.pop("satellite_query")
+            if len(x.get("hrvsatellite", [])) > 0:
+                x = self.add_encodings(
+                    x,
+                    "hrvsatellite",
+                    batch,
+                    self.current_timestep_index,
+                    self.add_hrv_satellite_target,
+                )
+                if self.add_hrv_satellite_target:
+                    x["hrv_" + SATELLITE_DATA + "_query"] = x.pop("hrvsatellite_query")
+            if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
+                x = self.add_encodings(x, TOPOGRAPHIC_DATA, batch, 0, False)
+            if len(x.get(NWP_DATA, [])) > 0:
+                x[NWP_DATA] = torch.cat(
+                    [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
+                )
+            if len(x.get(PV_YIELD, [])) > 0:
+                x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
+            # Add the future GSP position encoding for querying
+            x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
+                :, :, self.current_timestep_index_30 :
+            ]
+
+        # Rename to match other ones better
+        x[SATELLITE_DATA] = x.pop("satellite")
+        x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
+
+        return x, target
+
+    def add_encodings(
+        self,
+        x: dict,
+        key: str,
+        batch: dict,
+        current_timestep_index: int,
+        add_future_encodings: bool = False,
+    ) -> dict[str, torch.Tensor]:
+        """
+        Adds encodings to the targets and inputs
+
+        Args:
+            x: Dictionary containing model inputs
+            key: Key to check and insert
+            batch: Batch of data to use
+            current_timestep_index: The index of the t0 time in the data, used to split into past
+                and future encodings
+            add_future_encodings: Whether to add the future position encodings to the target
+
+        Returns:
+            x dictionary with the added/updated keys
+        """
+        if key + "_position_encoding" in batch:
+            past_encoding = batch[key + "_position_encoding"][:, :, :current_timestep_index]
+            x[key] = torch.cat([x[key], past_encoding], dim=1)
+            if add_future_encodings:
+                future_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index:]
+                x[key + "_query"] = future_encoding
+        return x
 
 
 def worker_init_fn(worker_id):

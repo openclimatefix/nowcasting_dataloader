@@ -43,6 +43,7 @@ def test_netcdf_dataset_local_using_configuration():
             history_minutes=10,
             forecast_minutes=10,
             configuration=configuration,
+            normalize=False,
         )
 
         dataloader_config = dict(
@@ -79,7 +80,7 @@ def test_netcdf_dataset_local_using_configuration():
         assert batch_ml.nwp.data[0, 0, 0, 0, 0].dtype == torch.float32
 
         # Make sure file isn't deleted!
-        assert os.path.exists(os.path.join(DATA_PATH, "metadata/000000.nc"))
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
 @pytest.mark.skip("CD does not have access to GCS")

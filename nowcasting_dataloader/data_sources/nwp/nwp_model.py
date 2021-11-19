@@ -19,31 +19,46 @@ logger = logging.getLogger(__name__)
 # nwp_ds.open()
 # mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
 #     dim=['step', 'x', 'init_time', 'y']).compute()
-NWP_MEAN = [
-    2.8041010e02,
-    1.6854691e01,
-    6.7529683e-05,
-    8.1832832e01,
-    7.1233767e-03,
-    8.8566933e00,
-    4.3474598e04,
-    4.9820110e01,
-    4.8095409e01,
-    4.2833260e01,
-]
+NWP_MEAN = {
+    "cdcb": 7.2974139e02,
+    "lcc": 6.5617416e01,
+    "mcc": 1.6285239e02,
+    "hcc": 1.3941898e04,
+    "sde": 3.0906494e00,
+    "hcct": -5.6213774e03,
+    "dswrf": 5.1038762e04,
+    "dlwrf": 1.6305742e02,
+    "h": 1.7993237e03,
+    "t": 1.6539281e02,
+    "r": 6.2220219e01,
+    "dpt": 1.5260010e02,
+    "vis": 1.4262634e04,
+    "si10": -5.7674189e03,
+    "wdir10": 1.8992134e02,
+    "prmsl": 5.0526031e04,
+    "prate": 1.0633790e03,
+}
 
-NWP_STD = [
-    2.5812180e00,
-    4.1278820e01,
-    2.7507244e-04,
-    9.0967312e00,
-    1.4110464e-01,
-    4.3616886e00,
-    2.3853148e04,
-    3.8900299e01,
-    4.2830105e01,
-    4.2778091e01,
-]
+
+NWP_STD = {
+    "cdcb": 1.3334375e03,
+    "lcc": 3.2893822e01,
+    "mcc": 1.2259225e02,
+    "hcc": 1.8789906e04,
+    "sde": 3.8366046e00,
+    "hcct": 1.3473152e04,
+    "dswrf": 5.0562855e04,
+    "dlwrf": 1.6629593e02,
+    "h": 1.5047467e03,
+    "t": 1.2125533e02,
+    "r": 3.6228081e01,
+    "dpt": 1.3035966e02,
+    "vis": 1.9323789e04,
+    "si10": 1.3476445e04,
+    "wdir10": 1.8192195e02,
+    "prmsl": 5.0504230e04,
+    "prate": 1.2471907e03,
+}
 
 
 class NWPML(DataSourceOutputML):
@@ -134,6 +149,12 @@ class NWPML(DataSourceOutputML):
     def normalize(self):
         """Normalize the nwp data"""
         if not self.normalized:
-            self.data = self.data - NWP_MEAN
-            self.data = self.data / NWP_STD
+            # Only take the channels that are used
+            mean = np.array([NWP_MEAN[b] for b in self.channels])
+            std = np.array([NWP_STD[b] for b in self.channels])
+            # Expand for normaliation
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
+            self.data = self.data - mean
+            self.data = self.data / std
             self.normalized = True

@@ -53,7 +53,7 @@ def test_batch_encoding(configuration):
     batch: Batch = Batch.fake(configuration=configuration)
     position_encodings = generate_position_encodings_for_batch(
         batch,
-        num_bands=16,
+        num_bands=4,
     )
     for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
         position_encoding_key = key + "_position_encoding"
