@@ -34,20 +34,23 @@ NWP_MEAN = np.asarray(
     ]
 )
 
-NWP_STD = np.asarray(
-    [
-        2.5812180e00,
-        4.1278820e01,
-        2.7507244e-04,
-        9.0967312e00,
-        1.4110464e-01,
-        4.3616886e00,
-        2.3853148e04,
-        3.8900299e01,
-        4.2830105e01,
-        4.2778091e01,
-    ]
-)
+NWP_STD = np.asarray([
+    2.5812180e00,
+    4.1278820e01,
+    2.7507244e-04,
+    9.0967312e00,
+    1.4110464e-01,
+    4.3616886e00,
+    2.3853148e04,
+    3.8900299e01,
+    4.2830105e01,
+    4.2778091e01,
+])
+
+NWP_STD = {
+    'cdcb' 'lcc' 'mcc' 'hcc' 'sde' 'hcct' 'dswrf' 'dlwrf' 'h' 't' 'r' 'dpt'
+    'vis' 'si10' 'wdir10' 'prmsl' 'prate'
+    }
 
 
 class NWPML(DataSourceOutputML):

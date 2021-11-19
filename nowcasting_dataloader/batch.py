@@ -144,6 +144,7 @@ class BatchML(Example):
                 if "satellite" in data_source_name or "nwp" in data_source_name:
                     # Add in the channels being used
                     # Only need it from the first example
+                    print(xr_dataset["channels"][0].values)
                     data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
         data_sources_dict["batch_size"] = data_sources_dict["satellite"].batch_size
 
