@@ -1,4 +1,4 @@
-"""DAtamodules to use for training"""
+"""Datamodules to use for training"""
 import logging
 import os
 from typing import List, Optional, Tuple, Union
