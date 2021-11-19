@@ -1,3 +1,4 @@
+import glob
 import os
 import tempfile
 from pathlib import Path
@@ -7,7 +8,7 @@ from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.datamodules import SatFlowDataModule
-import glob
+
 torch.set_default_dtype(torch.float32)
 
 
@@ -22,7 +23,7 @@ def test_satflow_datamodule_init():
 
         f = Batch.fake(configuration=c)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
-        print(list(glob.glob(tmpdirname+"/*")))
+        print(list(glob.glob(tmpdirname + "/*")))
         DATA_PATH = tmpdirname
         configuration.output_data.filepath = DATA_PATH
         TEMP_PATH = tmpdirname
