@@ -21,6 +21,7 @@ def test_batch_to_batch_ml(configuration):
     """Test creating BatchML from Batch"""
     _ = BatchML.from_batch(batch=Batch.fake(configuration=configuration))
 
+
 def test_batch_to_batch_ml_normalize(configuration):
     """Test creating BatchML from Batch and normalizing the data"""
     batch = BatchML.from_batch(batch=Batch.fake(configuration=configuration))

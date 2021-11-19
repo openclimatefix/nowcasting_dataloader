@@ -142,6 +142,6 @@ class PVML(DataSourceOutputML):
         """Normalize the gsp data"""
         if not self.normalized:
             # Expand capacity to the same timesteps for broadcasting
-            capacity = np.expand_dims(self.pv_capacity, axis = 1)
+            capacity = np.expand_dims(self.pv_capacity, axis=1)
             self.pv_yield = self.pv_yield - capacity
             self.normalized = True
