@@ -21,7 +21,7 @@ def test_satflow_datamodule_init():
     with tempfile.TemporaryDirectory() as tmpdirname:
 
         f = Batch.fake(configuration=c)
-        train_tmp = os.path.join(tmpdirname, 'train')
+        train_tmp = os.path.join(tmpdirname, "train")
         f.save_netcdf(batch_i=0, path=Path(train_tmp))
         DATA_PATH = tmpdirname
         configuration.output_data.filepath = DATA_PATH
