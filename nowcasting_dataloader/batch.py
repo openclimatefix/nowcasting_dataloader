@@ -141,7 +141,10 @@ class BatchML(Example):
             if xr_dataset is not None:
 
                 data_sources_dict[data_source_name] = data_source.from_xr_dataset(xr_dataset)
-
+                if "satellite" in data_source_name:
+                    # Add in the channels being used
+                    # Only need it from the first example
+                    data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
         data_sources_dict["batch_size"] = data_sources_dict["satellite"].batch_size
 
         return BatchML(**data_sources_dict)
