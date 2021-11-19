@@ -11,7 +11,6 @@ from pytorch_lightning import LightningDataModule
 from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 
 _LOG = logging.getLogger(__name__)
-_LOG.setLevel(logging.DEBUG)
 
 
 class SatFlowDataModule(LightningDataModule):
@@ -34,9 +33,6 @@ class SatFlowDataModule(LightningDataModule):
         self,
         temp_path: str,
         configuration: Union[Configuration, str],
-        n_train_data: int = 24900,
-        n_val_data: int = 1000,
-        n_test_data: int = 1000,
         cloud: str = "local",
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
@@ -54,9 +50,6 @@ class SatFlowDataModule(LightningDataModule):
         Args:
             temp_path: temp path of data
             configuration: Configuration to use, or path to configuration file
-            n_train_data: Number of training batches
-            n_val_data: Number of validation batches
-            n_test_data: Number of test batches
             cloud: What cloud to use, defaults to local
             required_keys: Required keys for the dataset
             history_minutes: Number of history minutes to use
@@ -72,11 +65,11 @@ class SatFlowDataModule(LightningDataModule):
         self.temp_path = temp_path
         if type(configuration) == str:
             configuration = load_yaml_configuration(configuration)
-        self.configuration = configuration
+        self.configuration: Configuration = configuration
         self.cloud = cloud
-        self.n_train_data = n_train_data
-        self.n_val_data = n_val_data
-        self.n_test_data = n_test_data
+        self.n_train_data = self.configuration.process.n_train_batches
+        self.n_val_data = self.configuration.process.n_validation_batches
+        self.n_test_data = self.configuration.process.n_test_batches
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.required_keys = required_keys

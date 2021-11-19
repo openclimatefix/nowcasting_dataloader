@@ -16,6 +16,9 @@ def test_satflow_datamodule_init():
     c.input_data = InputData.set_all_to_defaults()
     c.process.batch_size = 4
     c.input_data.satellite.satellite_image_size_pixels = 24
+    c.process.n_test_batches = 0
+    c.process.n_validation_batches = 0
+    c.process.n_train_batches = 1
     configuration = c
 
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -30,9 +33,6 @@ def test_satflow_datamodule_init():
         datamodule = SatFlowDataModule(
             temp_path=TEMP_PATH,
             configuration=configuration,
-            n_train_data=1,
-            n_val_data=0,
-            n_test_data=0,
             cloud="local",
             add_position_encoding=True,
             add_satellite_target=True,
