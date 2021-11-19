@@ -37,7 +37,7 @@ NWP_MEAN = {
     "wdir10": 1,
     "prmsl": 1,
     "prate": 1,
-    }
+}
 
 NWP_STD = {
     "cdcb": 1,
