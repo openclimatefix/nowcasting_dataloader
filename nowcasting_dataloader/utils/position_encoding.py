@@ -221,7 +221,7 @@ def encode_absolute_position(
     encoded_geo_position = normalize_geospatial_coordinates(
         geospatial_coordinates,
         geospatial_bounds,
-        max_freq=(2 * len(geospatial_coordinates) - 1),
+        max_freq=(2 * len(geospatial_coordinates) + 1),
         num_bands=num_bands,
     )
     absolute_position_encoding = einops.repeat(
@@ -388,8 +388,8 @@ def create_datetime_features(
     hour_of_day = torch.as_tensor(hour_of_day)
     day_of_year = torch.as_tensor(day_of_year)
     # Compute Fourier Features
-    hour_of_day = fourier_encode(hour_of_day, max_freq=47, num_bands=6)
-    day_of_year = fourier_encode(day_of_year, max_freq=731, num_bands=6)
+    hour_of_day = fourier_encode(hour_of_day, max_freq=49, num_bands=6)
+    day_of_year = fourier_encode(day_of_year, max_freq=733, num_bands=6)
     outputs.append(hour_of_day)
     outputs.append(day_of_year)
 
