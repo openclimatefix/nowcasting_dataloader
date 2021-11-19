@@ -228,16 +228,16 @@ class SatFlowDataset(NetCDFDataset):
             add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
         """
         super().__init__(
-            n_batches = n_batches,
-            src_path = src_path,
-            tmp_path = tmp_path,
-            configuration = configuration,
-            cloud = cloud,
-            required_keys = required_keys,
-            history_minutes = history_minutes,
-            forecast_minutes = forecast_minutes,
-            normalize = normalize,
-            add_position_encoding = add_position_encoding,
+            n_batches=n_batches,
+            src_path=src_path,
+            tmp_path=tmp_path,
+            configuration=configuration,
+            cloud=cloud,
+            required_keys=required_keys,
+            history_minutes=history_minutes,
+            forecast_minutes=forecast_minutes,
+            normalize=normalize,
+            add_position_encoding=add_position_encoding,
         )
 
         self.add_satellite_target = add_satellite_target
