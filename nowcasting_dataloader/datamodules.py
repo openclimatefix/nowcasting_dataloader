@@ -1,12 +1,12 @@
-import os
-from nowcasting_dataloader.datasets import worker_init_fn
-from nowcasting_dataloader.datasets import SatFlowDataset
-from typing import Union, List, Tuple, Optional
 import logging
+import os
+from typing import List, Optional, Tuple, Union
+
 import torch
 from nowcasting_dataset.config.model import Configuration
 from pytorch_lightning import LightningDataModule
 
+from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 
 _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
@@ -28,24 +28,23 @@ class SatFlowDataModule(LightningDataModule):
     """
 
     def __init__(
-            self,
-            temp_path: str,
-            configuration: Configuration,
-            n_train_data: int = 24900,
-            n_val_data: int = 1000,
-            n_test_data: int = 1000,
-            cloud: str = "gcp",
-            required_keys: Union[Tuple[str], List[str]] = None,
-            history_minutes: Optional[int] = None,
-            forecast_minutes: Optional[int] = None,
-            normalize: bool = True,
-            add_position_encoding: bool = False,
-            add_satellite_target: bool = False,
-            add_hrv_satellite_target: bool = False,
-            pin_memory: bool = True,
-            num_workers: int = 0,
-
-            ):
+        self,
+        temp_path: str,
+        configuration: Configuration,
+        n_train_data: int = 24900,
+        n_val_data: int = 1000,
+        n_test_data: int = 1000,
+        cloud: str = "gcp",
+        required_keys: Union[Tuple[str], List[str]] = None,
+        history_minutes: Optional[int] = None,
+        forecast_minutes: Optional[int] = None,
+        normalize: bool = True,
+        add_position_encoding: bool = False,
+        add_satellite_target: bool = False,
+        add_hrv_satellite_target: bool = False,
+        pin_memory: bool = True,
+        num_workers: int = 0,
+    ):
         """
         fake_data: random data is created and used instead. This is useful for testing
         """
@@ -75,7 +74,7 @@ class SatFlowDataModule(LightningDataModule):
             # Disable automatic batching because dataset
             # returns complete batches.
             batch_size=None,
-            )
+        )
 
     def train_dataloader(self):
         train_dataset = SatFlowDataset(
@@ -87,11 +86,11 @@ class SatFlowDataModule(LightningDataModule):
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
-            normalize = self.normalize,
-            add_position_encoding = self.add_position_encoding,
-            add_satellite_target = self.add_satellite_target,
-            add_hrv_satellite_target = self.add_hrv_satellite_target
-            )
+            normalize=self.normalize,
+            add_position_encoding=self.add_position_encoding,
+            add_satellite_target=self.add_satellite_target,
+            add_hrv_satellite_target=self.add_hrv_satellite_target,
+        )
 
         return torch.utils.data.DataLoader(train_dataset, shuffle=True, **self.dataloader_config)
 
@@ -105,11 +104,11 @@ class SatFlowDataModule(LightningDataModule):
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
-            normalize = self.normalize,
-            add_position_encoding = self.add_position_encoding,
-            add_satellite_target = self.add_satellite_target,
-            add_hrv_satellite_target = self.add_hrv_satellite_target
-            )
+            normalize=self.normalize,
+            add_position_encoding=self.add_position_encoding,
+            add_satellite_target=self.add_satellite_target,
+            add_hrv_satellite_target=self.add_hrv_satellite_target,
+        )
 
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
 
@@ -123,10 +122,10 @@ class SatFlowDataModule(LightningDataModule):
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
-            normalize = self.normalize,
-            add_position_encoding = self.add_position_encoding,
-            add_satellite_target = self.add_satellite_target,
-            add_hrv_satellite_target = self.add_hrv_satellite_target
-            )
+            normalize=self.normalize,
+            add_position_encoding=self.add_position_encoding,
+            add_satellite_target=self.add_satellite_target,
+            add_hrv_satellite_target=self.add_hrv_satellite_target,
+        )
 
         return torch.utils.data.DataLoader(test_dataset, shuffle=False, **self.dataloader_config)
