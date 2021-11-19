@@ -19,27 +19,44 @@ logger = logging.getLogger(__name__)
 # nwp_ds.open()
 # mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
 #     dim=['step', 'x', 'init_time', 'y']).compute()
-NWP_MEAN = {'cdcb' 'lcc' 'mcc' 'hcc' 'sde' 'hcct' 'dswrf' 'dlwrf' 'h' 't' 'r' 'dpt'
-            'vis' 'si10' 'wdir10' 'prmsl' 'prate'}
+NWP_MEAN = {
+    "cdcb": 1,
+    "lcc": 1,
+    "mcc": 1,
+    "hcc": 1,
+    "sde": 1,
+    "hcct": 1,
+    "dswrf": 1,
+    "dlwrf": 1,
+    "h": 1,
+    "t": 1,
+    "r": 1,
+    "dpt": 1,
+    "vis": 1,
+    "si10": 1,
+    "wdir10": 1,
+    "prmsl": 1,
+    "prate": 1,
+    }
 
 NWP_STD = {
-    "cdcb"
-    "lcc"
-    "mcc"
-    "hcc"
-    "sde"
-    "hcct"
-    "dswrf"
-    "dlwrf"
-    "h"
-    "t"
-    "r"
-    "dpt"
-    "vis"
-    "si10"
-    "wdir10"
-    "prmsl"
-    "prate"
+    "cdcb": 1,
+    "lcc": 1,
+    "mcc": 1,
+    "hcc": 1,
+    "sde": 1,
+    "hcct": 1,
+    "dswrf": 1,
+    "dlwrf": 1,
+    "h": 1,
+    "t": 1,
+    "r": 1,
+    "dpt": 1,
+    "vis": 1,
+    "si10": 1,
+    "wdir10": 1,
+    "prmsl": 1,
+    "prate": 1,
 }
 
 
@@ -131,9 +148,12 @@ class NWPML(DataSourceOutputML):
     def normalize(self):
         """Normalize the nwp data"""
         if not self.normalized:
+            # Only take the channels that are used
+            mean = np.array([NWP_MEAN[b] for b in self.channels])
+            std = np.array([NWP_STD[b] for b in self.channels])
             # Expand for normaliation
-            mean = np.expand_dims(NWP_MEAN, axis=[1, 2, 3])
-            std = np.expand_dims(NWP_STD, axis=[1, 2, 3])
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
             self.data = self.data - mean
             self.data = self.data / std
             self.normalized = True
