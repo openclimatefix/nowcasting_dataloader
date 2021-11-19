@@ -4,8 +4,8 @@ import os
 from typing import List, Optional, Tuple, Union
 
 import torch
-from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.config import load_yaml_configuration
+from nowcasting_dataset.config.model import Configuration
 from pytorch_lightning import LightningDataModule
 
 from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
@@ -33,7 +33,7 @@ class SatFlowDataModule(LightningDataModule):
     def __init__(
         self,
         temp_path: str,
-        configuration: Union[Configuration,str],
+        configuration: Union[Configuration, str],
         n_train_data: int = 24900,
         n_val_data: int = 1000,
         n_test_data: int = 1000,
