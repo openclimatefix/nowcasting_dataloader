@@ -281,7 +281,7 @@ class SatFlowDataset(NetCDFDataset):
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
-            x[TOPOGRAPHIC_DATA] = np.expand_dims(batch["topographic"][TOPOGRAPHIC_DATA], dim=1)
+            x[TOPOGRAPHIC_DATA] = np.expand_dims(batch["topographic"][TOPOGRAPHIC_DATA], axis=1)
 
         # Only GSP information we give to the model to train on is the IDs and physical locations
         x[GSP_ID] = batch["gsp"][GSP_ID]
