@@ -94,6 +94,7 @@ class SatFlowDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
+        """Train dataloader"""
         train_dataset = SatFlowDataset(
             self.n_train_data,
             os.path.join(self.configuration.output_data.filepath, "train"),
@@ -112,6 +113,7 @@ class SatFlowDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(train_dataset, shuffle=True, **self.dataloader_config)
 
     def val_dataloader(self):
+        """"Validation dataloader"""
         val_dataset = SatFlowDataset(
             self.n_val_data,
             os.path.join(self.configuration.output_data.filepath, "validation"),
@@ -130,6 +132,7 @@ class SatFlowDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
 
     def test_dataloader(self):
+        """"Test dataloader"""
         test_dataset = SatFlowDataset(
             self.n_val_data,
             os.path.join(self.configuration.output_data.filepath, "test"),
