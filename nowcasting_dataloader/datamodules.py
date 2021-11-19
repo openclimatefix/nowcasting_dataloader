@@ -1,3 +1,4 @@
+"""DAtamodules to use for training"""
 import logging
 import os
 from typing import List, Optional, Tuple, Union
@@ -14,7 +15,8 @@ _LOG.setLevel(logging.DEBUG)
 
 class SatFlowDataModule(LightningDataModule):
     """
-    Example of LightningDataModule for NETCDF dataset.
+    Example of LightningDataModule for SatFlow dataset.
+
     A DataModule implements 5 key methods:
         - prepare_data (things to do on 1 GPU/TPU, not on every GPU/TPU in distributed mode)
         - setup (things to do on every accelerator in distributed mode)
@@ -113,7 +115,7 @@ class SatFlowDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(train_dataset, shuffle=True, **self.dataloader_config)
 
     def val_dataloader(self):
-        """ "Validation dataloader"""
+        """Validation dataloader"""
         val_dataset = SatFlowDataset(
             self.n_val_data,
             os.path.join(self.configuration.output_data.filepath, "validation"),
@@ -132,7 +134,7 @@ class SatFlowDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
 
     def test_dataloader(self):
-        """ "Test dataloader"""
+        """Test dataloader"""
         test_dataset = SatFlowDataset(
             self.n_val_data,
             os.path.join(self.configuration.output_data.filepath, "test"),
