@@ -63,4 +63,4 @@ def test_satflow_datamodule_init():
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
         # Make sure file isn't deleted!
-        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+        assert os.path.exists(os.path.join(DATA_PATH, "train", "nwp/000000.nc"))
