@@ -34,7 +34,7 @@ class SatFlowDataModule(LightningDataModule):
         n_train_data: int = 24900,
         n_val_data: int = 1000,
         n_test_data: int = 1000,
-        cloud: str = "gcp",
+        cloud: str = "local",
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
@@ -46,7 +46,24 @@ class SatFlowDataModule(LightningDataModule):
         num_workers: int = 0,
     ):
         """
-        fake_data: random data is created and used instead. This is useful for testing
+        Datamodule for the SatFlow dataset
+
+        Args:
+            temp_path: temp path of data
+            configuration: Configuration to use
+            n_train_data: Number of training batches
+            n_val_data: Number of validation batches
+            n_test_data: Number of test batches
+            cloud: What cloud to use, defaults to local
+            required_keys: Required keys for the dataset
+            history_minutes: Number of history minutes to use
+            forecast_minutes: Number of forecast minutes to use
+            normalize: Whether to normalize the data
+            add_position_encoding: Whether to add position encoding
+            add_satellite_target: Whether to add satellite imagery to the targets
+            add_hrv_satellite_target: Whether to add HRV satellite target
+            pin_memory: Whether to pin memory in the dataloader
+            num_workers: Number of workers for each dataloader
         """
         super().__init__()
         self.temp_path = temp_path
