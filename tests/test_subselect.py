@@ -14,6 +14,7 @@ def configuration():
     con.process.batch_size = 4
     return con
 
+
 @pytest.mark.skip("Broken test: bug #63")
 def test_subselect_date(test_data_folder, configuration):
     """Test subselecting Data"""
