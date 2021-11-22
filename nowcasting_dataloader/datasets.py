@@ -78,6 +78,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
+            num_fourier_bands: Number of bands to for the Fourier encoding
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -237,6 +238,7 @@ class SatFlowDataset(NetCDFDataset):
             add_position_encoding: Whether to add position encoding or not
             add_satellite_target: Whether to add future satellite imagery to the target or not
             add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
+            num_fourier_bands: Number of bands to for the Fourier encoding
         """
         super().__init__(
             n_batches=n_batches,
