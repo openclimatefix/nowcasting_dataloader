@@ -214,7 +214,7 @@ class SatFlowDataset(NetCDFDataset):
         add_position_encoding: bool = False,
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
-        num_fourier_bands: int = 16
+        num_fourier_bands: int = 16,
     ):
         """
         Netcdf Dataset
@@ -249,7 +249,7 @@ class SatFlowDataset(NetCDFDataset):
             forecast_minutes=forecast_minutes,
             normalize=normalize,
             add_position_encoding=add_position_encoding,
-            num_fourier_bands = num_fourier_bands
+            num_fourier_bands=num_fourier_bands,
         )
 
         self.add_satellite_target = add_satellite_target
