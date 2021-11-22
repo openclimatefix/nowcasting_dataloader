@@ -1,68 +1,68 @@
-# """Test position encoding"""
-# import datetime
-# from copy import deepcopy
-#
-# import numpy as np
-# import pandas as pd
-# import pytest
-# import torch
-# from nowcasting_dataset.config.model import Configuration, InputData
-# from nowcasting_dataset.dataset.batch import Batch
-#
-# from nowcasting_dataloader.utils.position_encoding import (
-#     combine_space_and_time_features,
-#     create_datetime_features,
-#     determine_shape_of_encoding,
-#     encode_absolute_position,
-#     encode_modalities,
-#     encode_year,
-#     generate_position_encodings_for_batch,
-#     normalize_geospatial_coordinates,
-# )
-#
-#
-# @pytest.fixture
-# def configuration():
-#     """Create configuration object"""
-#     con = Configuration()
-#     con.input_data = InputData.set_all_to_defaults()
-#     con.process.batch_size = 32
-#     return con
-#
-#
-# @pytest.mark.parametrize(
-#     ["key", "expected_shape"],
-#     [
-#         ("nwp", [32, 17, 19, 64, 64]),
-#         ("satellite", [32, 10, 19, 64, 64]),
-#         ("topographic", [32, 1, 1, 64, 64]),
-#         ("pv", [32, 128, 19, 128]),
-#         ("gsp", [32, 32, 4, 32]),
-#     ],
-# )
-# def test_shape_encoding(key, expected_shape, configuration):
-#     """Test shape encoding creation"""
-#     batch: Batch = Batch.fake(configuration=configuration)
-#     xr_dataset = getattr(batch, key)
-#     shape = determine_shape_of_encoding(xr_dataset)
-#     assert shape == expected_shape
-#
-#
-# def test_batch_encoding(configuration):
-#     """Test batch encoding"""
-#     batch: Batch = Batch.fake(configuration=configuration)
-#     position_encodings = generate_position_encodings_for_batch(
-#         batch,
-#         num_bands=4,
-#     )
-#     for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
-#         position_encoding_key = key + "_position_encoding"
-#         assert position_encoding_key in position_encodings.keys()
-#         assert torch.isfinite(position_encodings[position_encoding_key]).all()
-#         assert torch.min(position_encodings[position_encoding_key]) >= -1.0
-#         assert torch.max(position_encodings[position_encoding_key]) <= 1.0
-#
-#
+"""Test position encoding"""
+import datetime
+from copy import deepcopy
+
+import numpy as np
+import pandas as pd
+import pytest
+import torch
+from nowcasting_dataset.config.model import Configuration, InputData
+from nowcasting_dataset.dataset.batch import Batch
+
+from nowcasting_dataloader.utils.position_encoding import (
+    combine_space_and_time_features,
+    create_datetime_features,
+    determine_shape_of_encoding,
+    encode_absolute_position,
+    encode_modalities,
+    encode_year,
+    generate_position_encodings_for_batch,
+    normalize_geospatial_coordinates,
+)
+
+
+@pytest.fixture
+def configuration():
+    """Create configuration object"""
+    con = Configuration()
+    con.input_data = InputData.set_all_to_defaults()
+    con.process.batch_size = 32
+    return con
+
+
+@pytest.mark.parametrize(
+    ["key", "expected_shape"],
+    [
+        ("nwp", [32, 17, 19, 64, 64]),
+        ("satellite", [32, 10, 19, 64, 64]),
+        ("topographic", [32, 1, 1, 64, 64]),
+        ("pv", [32, 128, 19, 128]),
+        ("gsp", [32, 32, 4, 32]),
+    ],
+)
+def test_shape_encoding(key, expected_shape, configuration):
+    """Test shape encoding creation"""
+    batch: Batch = Batch.fake(configuration=configuration)
+    xr_dataset = getattr(batch, key)
+    shape = determine_shape_of_encoding(xr_dataset)
+    assert shape == expected_shape
+
+
+def test_batch_encoding(configuration):
+    """Test batch encoding"""
+    batch: Batch = Batch.fake(configuration=configuration)
+    position_encodings = generate_position_encodings_for_batch(
+        batch,
+        num_bands=4,
+    )
+    for key in ["nwp", "satellite", "topographic", "gsp", "pv"]:
+        position_encoding_key = key + "_position_encoding"
+        assert position_encoding_key in position_encodings.keys()
+        assert torch.isfinite(position_encodings[position_encoding_key]).all()
+        assert torch.min(position_encodings[position_encoding_key]) >= -1.0
+        assert torch.max(position_encodings[position_encoding_key]) <= 1.0
+
+
 # def get_data(batch_size: int = 12, interval="5min", spatial_size: int = 64):
 #     """Create data for tests"""
 #     datetimes = []
