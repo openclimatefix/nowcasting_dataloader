@@ -5,4 +5,4 @@ jobs:
   call-run-python-tests:
     uses: openclimatefix/.github/.github/workflows/python-test.yml@pytest-X
     with:
-      PYTEST-NUMCPUS: 0
+      pytest-numcpus: '0' # 0 means dont use pytest-xdist
