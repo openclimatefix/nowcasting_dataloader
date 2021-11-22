@@ -8,6 +8,15 @@ from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.fake import FakeDataset
 
 
+@pytest.fixture
+def configuration():
+    """Create Configuration object for tests"""
+    con = Configuration()
+    con.input_data = InputData.set_all_to_defaults()
+    con.process.batch_size = 4
+    return con
+
+
 def test_batch_to_batch_ml(configuration):
     """Test creating BatchML from Batch"""
     _ = BatchML.from_batch(batch=Batch.fake(configuration=configuration))
@@ -19,8 +28,6 @@ def test_batch_to_batch_ml_normalize(configuration):
     batch.normalize()
 
 
-
-@pytest.mark.skip("Temp skipping")
 def test_fake_dataset(configuration):
     """Test creating fake dataset"""
     train = torch.utils.data.DataLoader(FakeDataset(configuration=configuration), batch_size=None)
@@ -32,7 +39,6 @@ def test_fake_dataset(configuration):
     assert type(x.satellite.data) == torch.Tensor
 
 
-@pytest.mark.skip("Temp skipping")
 def test_fake_dataset_position_encodings(configuration):
     """Test creating fake dataset"""
     train = torch.utils.data.DataLoader(
