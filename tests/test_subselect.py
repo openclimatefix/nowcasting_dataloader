@@ -31,7 +31,7 @@ def test_subselect_date(test_data_folder, configuration):
     assert batch.pv.x_coords.shape == (4, 128)
 
 
-#
+# @pytest.mark.skip("Broken test: bug #63")
 def test_subselect_date_with_to_dt(test_data_folder, configuration):
     """Test subselecting Data with datetimes"""
     x = Batch.fake(configuration=configuration)
