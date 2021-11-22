@@ -19,7 +19,6 @@ def test_batch_to_batch_ml_normalize(configuration):
     batch.normalize()
 
 
-
 @pytest.mark.skip("Temp skipping")
 def test_fake_dataset(configuration):
     """Test creating fake dataset"""

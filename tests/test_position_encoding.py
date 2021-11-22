@@ -30,7 +30,6 @@ def configuration():
     return con
 
 
-
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
     [
