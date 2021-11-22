@@ -22,22 +22,22 @@ from nowcasting_dataloader.utils.position_encoding import (
 
 
 
-@pytest.mark.parametrize(
-    ["key", "expected_shape"],
-    [
-        ("nwp", [32, 17, 19, 64, 64]),
-        ("satellite", [32, 10, 19, 64, 64]),
-        ("topographic", [32, 1, 1, 64, 64]),
-        ("pv", [32, 128, 19, 128]),
-        ("gsp", [32, 32, 4, 32]),
-    ],
-)
-def test_shape_encoding(key, expected_shape, configuration):
-    """Test shape encoding creation"""
-    batch: Batch = Batch.fake(configuration=configuration)
-    xr_dataset = getattr(batch, key)
-    shape = determine_shape_of_encoding(xr_dataset)
-    assert shape == expected_shape
+# @pytest.mark.parametrize(
+#     ["key", "expected_shape"],
+#     [
+#         ("nwp", [32, 17, 19, 64, 64]),
+#         ("satellite", [32, 10, 19, 64, 64]),
+#         ("topographic", [32, 1, 1, 64, 64]),
+#         ("pv", [32, 128, 19, 128]),
+#         ("gsp", [32, 32, 4, 32]),
+#     ],
+# )
+# def test_shape_encoding(key, expected_shape, configuration):
+#     """Test shape encoding creation"""
+#     batch: Batch = Batch.fake(configuration=configuration)
+#     xr_dataset = getattr(batch, key)
+#     shape = determine_shape_of_encoding(xr_dataset)
+#     assert shape == expected_shape
 
 
 def test_batch_encoding(configuration):
