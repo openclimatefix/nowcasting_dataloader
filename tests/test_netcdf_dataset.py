@@ -18,6 +18,7 @@ from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 torch.set_default_dtype(torch.float32)
 
 
+@pytest.mark.skip("Temp skipping")
 def test_netcdf_dataset_local_using_configuration():
     """Test netcdf locally"""
     c = Configuration()

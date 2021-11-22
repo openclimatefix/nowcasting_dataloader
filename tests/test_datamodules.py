@@ -11,6 +11,7 @@ from nowcasting_dataloader.datamodules import SatFlowDataModule
 torch.set_default_dtype(torch.float32)
 
 
+@pytest.mark.skip("Temp skipping")
 def test_satflow_datamodule_init():
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
