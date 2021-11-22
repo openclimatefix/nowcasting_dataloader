@@ -77,10 +77,15 @@ class BatchML(Example):
             (input_data.default_history_minutes + input_data.default_forecast_minutes) / 30 + 1
         )
 
-        t0_dt, time_5, time_30 = make_random_time_vectors(
+        seq_length_60 = int(
+            (input_data.default_history_minutes + input_data.default_forecast_minutes) / 60 + 1
+        )
+
+        time_vectors = make_random_time_vectors(
             batch_size=process.batch_size,
             seq_length_5_minutes=input_data.default_seq_length_5_minutes,
             seq_length_30_minutes=seq_length_30,
+            seq_length_60_minutes=seq_length_60,
         )
 
         return BatchML(
@@ -90,14 +95,14 @@ class BatchML(Example):
                 input_data.default_seq_length_5_minutes,
                 input_data.satellite.satellite_image_size_pixels,
                 len(input_data.satellite.satellite_channels),
-                time_5=time_5,
+                time_5=time_vectors["time_5"],
             ),
             hrvsatellite=SatelliteML.fake(
                 process.batch_size,
                 input_data.default_seq_length_5_minutes,
                 input_data.satellite.satellite_image_size_pixels,
                 len(input_data.satellite.satellite_channels),
-                time_5=time_5,
+                time_5=time_vectors["time_5"],
             ),
             topographic=TopographicML.fake(
                 batch_size=process.batch_size,
@@ -107,23 +112,23 @@ class BatchML(Example):
                 batch_size=process.batch_size,
                 seq_length_5=input_data.default_seq_length_5_minutes,
                 n_pv_systems_per_batch=128,
-                time_5=time_5,
+                time_5=time_vectors["time_5"],
             ),
             gsp=GSPML.fake(
                 process.batch_size,
                 seq_length_30=seq_length_30,
                 n_gsp_per_batch=32,
-                time_30=time_30,
+                time_30=time_vectors["time_30"],
             ),
             sun=SunML.fake(
                 batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
             ),
             nwp=NWPML.fake(
                 batch_size=process.batch_size,
-                seq_length_5=input_data.default_seq_length_5_minutes,
+                seq_length_60=seq_length_60,
                 image_size_pixels=input_data.nwp.nwp_image_size_pixels,
                 number_nwp_channels=len(input_data.nwp.nwp_channels),
-                time_5=time_5,
+                time_60=time_vectors["time_60"],
             ),
         )
 

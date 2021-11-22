@@ -96,23 +96,23 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def fake(
         batch_size=32,
-        seq_length_5=19,
+        seq_length_60=2,
         image_size_pixels=64,
         number_nwp_channels=7,
-        time_5=None,
+        time_60=None,
     ):
         """Create fake data"""
-        if time_5 is None:
-            _, time_5, _ = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )
+        if time_60 is None:
+            time_60 = make_random_time_vectors(
+                batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes=seq_length_60
+            )["time_60"]
 
         s = NWPML(
             batch_size=batch_size,
             data=np.random.randn(
                 batch_size,
                 number_nwp_channels,
-                seq_length_5,
+                seq_length_60,
                 image_size_pixels,
                 image_size_pixels,
             ).astype(np.float32),
@@ -122,8 +122,8 @@ class NWPML(DataSourceOutputML):
             ].copy()
             # copy is needed as torch doesnt not support negative strides
             ,
-            time=time_5,
-            init_time=time_5[0],
+            time=time_60,
+            init_time=time_60[0],
             channels=np.array([list(range(number_nwp_channels)) for _ in range(batch_size)]),
         )
 

@@ -40,8 +40,8 @@ def test_netcdf_dataset_local_using_configuration():
             DATA_PATH,
             TEMP_PATH,
             cloud="local",
-            history_minutes=10,
-            forecast_minutes=10,
+            history_minutes=30,
+            forecast_minutes=60,
             configuration=configuration,
             normalize=False,
         )
@@ -68,13 +68,13 @@ def test_netcdf_dataset_local_using_configuration():
         sat_data = batch_ml.satellite.data
         # TODO
         # Sat is in 5min increments, so should have 2 history + current + 2 future
-        assert sat_data.shape == (4, 1, 5, 64, 64)
-        assert batch_ml.nwp.data.shape == (4, 1, 5, 64, 64)
+        assert sat_data.shape == (4, 1, 19, 64, 64)
+        assert batch_ml.nwp.data.shape == (4, 1, 2, 64, 64)
         assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
-        assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
-        assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
-        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
-        assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
+        assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
+        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)
+        assert batch_ml.sun.sun_elevation_angle.shape == (4, 19)
 
         assert type(batch_ml.nwp.data) == torch.Tensor
         assert batch_ml.nwp.data[0, 0, 0, 0, 0].dtype == torch.float32
