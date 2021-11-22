@@ -104,8 +104,8 @@ class NWPML(DataSourceOutputML):
         """Create fake data"""
         if time_60 is None:
             time_60 = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes= seq_length_60
-            )['time_60']
+                batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes=seq_length_60
+            )["time_60"]
 
         s = NWPML(
             batch_size=batch_size,
