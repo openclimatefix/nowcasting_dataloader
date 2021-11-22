@@ -50,9 +50,9 @@ class SunML(DataSourceOutputML):
     def fake(batch_size, seq_length_5, time_5=None):
         """Create fake data"""
         if time_5 is None:
-            _, time_5, _ = make_random_time_vectors(
+            time_5 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )
+            )['time_5']
 
         return SunML(
             batch_size=batch_size,

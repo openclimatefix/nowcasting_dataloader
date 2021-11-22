@@ -92,9 +92,9 @@ class GSPML(DataSourceOutputML):
     def fake(batch_size, seq_length_30, n_gsp_per_batch, time_30=None):
         """Make a fake GSP object"""
         if time_30 is None:
-            _, _, time_30 = make_random_time_vectors(
+            time_30 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=0, seq_length_30_minutes=seq_length_30
-            )
+            )['time_30']
 
         return GSPML(
             batch_size=batch_size,
