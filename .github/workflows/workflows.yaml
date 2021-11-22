@@ -3,7 +3,9 @@ name: Python package
 on: [push]
 jobs:
   call-run-python-tests:
-    uses: openclimatefix/.github/.github/workflows/python-test.yml@pytest-X
-    with:
-      # 0 means don't use pytest-xdist
-      pytest_numcpus: '0'
+    steps:
+      - name: run tests
+        uses: openclimatefix/.github/.github/workflows/python-test.yml@pytest-X
+        with:
+          # 0 means don't use pytest-xdist
+          pytest_numcpus: '0'
