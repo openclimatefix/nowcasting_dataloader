@@ -28,6 +28,7 @@ def test_batch_to_batch_ml_normalize(configuration):
     batch.normalize()
 
 
+@pytest.mark.skip("Temp skipping")
 def test_fake_dataset(configuration):
     """Test creating fake dataset"""
     train = torch.utils.data.DataLoader(FakeDataset(configuration=configuration), batch_size=None)
@@ -39,6 +40,7 @@ def test_fake_dataset(configuration):
     assert type(x.satellite.data) == torch.Tensor
 
 
+@pytest.mark.skip("Temp skipping")
 def test_fake_dataset_position_encodings(configuration):
     """Test creating fake dataset"""
     train = torch.utils.data.DataLoader(
