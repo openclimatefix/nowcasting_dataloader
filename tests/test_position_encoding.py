@@ -21,14 +21,6 @@ from nowcasting_dataloader.utils.position_encoding import (
 )
 
 
-@pytest.fixture
-def configuration():
-    """Create configuration object"""
-    con = Configuration()
-    con.input_data = InputData.set_all_to_defaults()
-    con.process.batch_size = 32
-    return con
-
 
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
