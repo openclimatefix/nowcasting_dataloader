@@ -57,6 +57,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         forecast_minutes: Optional[int] = None,
         normalize: bool = True,
         add_position_encoding: bool = False,
+        num_fourier_bands: int = 16,
     ):
         """
         Netcdf Dataset
@@ -87,6 +88,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+        self.num_fourier_bands = num_fourier_bands
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -175,7 +177,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                     datetime.datetime(year=2016, month=1, day=1),
                     datetime.datetime(year=2021, month=12, day=31),
                 ),
-                num_bands=16,
+                num_bands=self.num_fourier_bands,
             )
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
@@ -212,6 +214,7 @@ class SatFlowDataset(NetCDFDataset):
         add_position_encoding: bool = False,
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
+        num_fourier_bands: int = 16
     ):
         """
         Netcdf Dataset
@@ -246,6 +249,7 @@ class SatFlowDataset(NetCDFDataset):
             forecast_minutes=forecast_minutes,
             normalize=normalize,
             add_position_encoding=add_position_encoding,
+            num_fourier_bands = num_fourier_bands
         )
 
         self.add_satellite_target = add_satellite_target
