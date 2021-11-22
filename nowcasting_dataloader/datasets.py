@@ -288,7 +288,7 @@ class SatFlowDataset(NetCDFDataset):
         x[GSP_ID] = batch["gsp"][GSP_ID]
 
         # Now creating the target data
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, :, self.current_timestep_index_30 :]
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :]
         target[GSP_ID] = batch["gsp"][GSP_ID]
 
         if self.add_satellite_target:
