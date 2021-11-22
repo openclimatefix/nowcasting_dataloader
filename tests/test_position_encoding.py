@@ -26,18 +26,18 @@ def configuration():
     """Create configuration object"""
     con = Configuration()
     con.input_data = InputData.set_all_to_defaults()
-    con.process.batch_size = 32
+    con.process.batch_size = 4
     return con
 
 
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
     [
-        ("nwp", [32, 17, 2, 64, 64]),
-        ("satellite", [32, 10, 19, 64, 64]),
-        ("topographic", [32, 1, 1, 64, 64]),
-        ("pv", [32, 128, 19, 128]),
-        ("gsp", [32, 32, 4, 32]),
+        ("nwp", [4, 17, 2, 64, 64]),
+        ("satellite", [4, 10, 19, 64, 64]),
+        ("topographic", [4, 1, 1, 64, 64]),
+        ("pv", [4, 128, 19, 128]),
+        ("gsp", [4, 32, 4, 32]),
     ],
 )
 def test_shape_encoding(key, expected_shape, configuration):
