@@ -79,7 +79,6 @@ def test_satflow_dataset_local_using_configuration():
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-@pytest.mark.skip("Temp skipping")
 def test_satflow_dataset_local_using_configuration_with_position_encoding():
     """Test satflow locally"""
     c = Configuration()
