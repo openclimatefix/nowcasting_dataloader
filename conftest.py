@@ -46,8 +46,6 @@ def configuration():
     filename = os.path.join(os.path.dirname(nowcasting_dataset.__file__), "config", "gcp.yaml")
     configuration = load_yaml_configuration(filename)
 
-    configuration.process.batch_size = 32
-
     return configuration
 
 
