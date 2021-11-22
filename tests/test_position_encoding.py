@@ -29,6 +29,7 @@ def configuration():
     con.process.batch_size = 32
     return con
 
+
 @pytest.mark.skip("Skipping due to issue #66")
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
