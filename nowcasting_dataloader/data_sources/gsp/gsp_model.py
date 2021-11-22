@@ -142,5 +142,5 @@ class GSPML(DataSourceOutputML):
     def normalize(self):
         """Normalize the gsp data"""
         if not self.normalized:
-            self.gsp_yield = (self.gsp_yield / self.gsp_capacity)
+            self.gsp_yield = self.gsp_yield / self.gsp_capacity
             self.normalized = True
