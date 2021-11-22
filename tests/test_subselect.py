@@ -15,6 +15,7 @@ def configuration():
     return con
 
 
+@pytest.mark.skip("Skipping due to issue #66")
 def test_subselect_date(test_data_folder, configuration):
     """Test subselecting Data"""
     x = Batch.fake(configuration=configuration)
