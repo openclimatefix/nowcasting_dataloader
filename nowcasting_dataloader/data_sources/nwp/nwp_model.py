@@ -19,12 +19,46 @@ logger = logging.getLogger(__name__)
 # nwp_ds.open()
 # mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
 #     dim=['step', 'x', 'init_time', 'y']).compute()
-NWP_MEAN = {'cdcb': 742.401, 'lcc': 66.756538, 'mcc': 157.74133, 'hcc': 15542.797, 'sde': 3.2133293, 'hcct': -5909.7021, 'dswrf': 49265.621, 'dlwrf': 167.16484, 'h': 1707.0344, 't': 171.22368, 'r': 63.139393, 'dpt': 158.05571, 'vis': 16480.631, 'si10': -5607.0537, 'wdir10': 151.85562, 'prmsl': 52296.281, 'prate': 975.62311}
+NWP_MEAN = {
+    "cdcb": 742.401,
+    "lcc": 66.756538,
+    "mcc": 157.74133,
+    "hcc": 15542.797,
+    "sde": 3.2133293,
+    "hcct": -5909.7021,
+    "dswrf": 49265.621,
+    "dlwrf": 167.16484,
+    "h": 1707.0344,
+    "t": 171.22368,
+    "r": 63.139393,
+    "dpt": 158.05571,
+    "vis": 16480.631,
+    "si10": -5607.0537,
+    "wdir10": 151.85562,
+    "prmsl": 52296.281,
+    "prate": 975.62311,
+}
 
 
-
-NWP_STD = {'cdcb': 1437.9733, 'lcc': 32.845642, 'mcc': 122.90843, 'hcc': 22072.18, 'sde': 4.2809649, 'hcct': 13865.189, 'dswrf': 50599.918, 'dlwrf': 165.04289, 'h': 1566.2006, 't': 118.57211, 'r': 35.996311, 'dpt': 128.49652, 'vis': 22340.301, 'si10': 13388.914, 'wdir10': 153.62816, 'prmsl': 50509.055, 'prate': 1263.6071}
-
+NWP_STD = {
+    "cdcb": 1437.9733,
+    "lcc": 32.845642,
+    "mcc": 122.90843,
+    "hcc": 22072.18,
+    "sde": 4.2809649,
+    "hcct": 13865.189,
+    "dswrf": 50599.918,
+    "dlwrf": 165.04289,
+    "h": 1566.2006,
+    "t": 118.57211,
+    "r": 35.996311,
+    "dpt": 128.49652,
+    "vis": 22340.301,
+    "si10": 13388.914,
+    "wdir10": 153.62816,
+    "prmsl": 50509.055,
+    "prate": 1263.6071,
+}
 
 
 class NWPML(DataSourceOutputML):
@@ -71,7 +105,7 @@ class NWPML(DataSourceOutputML):
         if time_60 is None:
             time_60 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )['time_60']
+            )["time_60"]
 
         s = NWPML(
             batch_size=batch_size,

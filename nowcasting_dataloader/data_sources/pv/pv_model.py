@@ -88,7 +88,7 @@ class PVML(DataSourceOutputML):
         if time_5 is None:
             time_5 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )['time_5']
+            )["time_5"]
 
         return PVML(
             batch_size=batch_size,

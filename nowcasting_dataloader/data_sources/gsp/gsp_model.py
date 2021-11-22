@@ -94,7 +94,7 @@ class GSPML(DataSourceOutputML):
         if time_30 is None:
             time_30 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=0, seq_length_30_minutes=seq_length_30
-            )['time_30']
+            )["time_30"]
 
         return GSPML(
             batch_size=batch_size,

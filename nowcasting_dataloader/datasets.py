@@ -280,7 +280,9 @@ class SatFlowDataset(NetCDFDataset):
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
-            x[TOPOGRAPHIC_DATA] = torch.unsqueeze(torch.unsqueeze(batch["topographic"][TOPOGRAPHIC_DATA], dim=1), dim=1)
+            x[TOPOGRAPHIC_DATA] = torch.unsqueeze(
+                torch.unsqueeze(batch["topographic"][TOPOGRAPHIC_DATA], dim=1), dim=1
+            )
 
         # Only GSP information we give to the model to train on is the IDs and physical locations
         x[GSP_ID] = batch["gsp"][GSP_ID]
@@ -317,7 +319,7 @@ class SatFlowDataset(NetCDFDataset):
             if len(x.get(TOPOGRAPHIC_DATA, [])) > 0:
                 x[TOPOGRAPHIC_DATA] = torch.cat(
                     [x[TOPOGRAPHIC_DATA], batch["topographic_position_encoding"]], dim=1
-                    )
+                )
             if len(x.get(NWP_DATA, [])) > 0:
                 x[NWP_DATA] = torch.cat(
                     [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
