@@ -9,17 +9,9 @@ import torch
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
-from nowcasting_dataloader.utils.position_encoding import (
-    # combine_space_and_time_features,
-    # create_datetime_features,
-    # determine_shape_of_encoding,
-    # encode_absolute_position,
-    # encode_modalities,
-    # encode_year,
+from nowcasting_dataloader.utils.position_encoding import (  # combine_space_and_time_features,; create_datetime_features,; determine_shape_of_encoding,; encode_absolute_position,; encode_modalities,; encode_year,; normalize_geospatial_coordinates,
     generate_position_encodings_for_batch,
-    # normalize_geospatial_coordinates,
 )
-
 
 
 @pytest.mark.parametrize(
