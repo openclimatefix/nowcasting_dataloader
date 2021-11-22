@@ -20,6 +20,7 @@ from nowcasting_dataset.consts import (
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
+import datetime
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
@@ -168,7 +169,10 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 current_timestep_index=self.current_timestep_5_index,
             )
         if self.add_position_encoding:
-            position_encodings = generate_position_encodings_for_batch(batch, num_bands=16)
+            position_encodings = generate_position_encodings_for_batch(batch, time_range=(
+                datetime.datetime(year=2016, month=1, day=1),
+                datetime.datetime(year=2021, month=12, day=31),
+                ), num_bands=16)
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 
