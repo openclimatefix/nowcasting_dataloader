@@ -317,7 +317,7 @@ def normalize_geospatial_coordinates(
         encoded_position = fourier_encode(pos, **kwargs)
         encoded_position = einops.rearrange(encoded_position, "... n d -> ... (n d)")
         if solid_tensor is None:
-            solid_tensor = torch.zeros(len(geospatial_coordinates[0]), *encoded_position.size())
+            solid_tensor = torch.zeros(len(geospatial_coordinates[0]), *encoded_position.size(), dtype=x.dtype)
         solid_tensor[idx] = encoded_position
 
     return solid_tensor
