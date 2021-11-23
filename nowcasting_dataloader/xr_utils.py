@@ -76,11 +76,11 @@ def register_xr_data_set_to_tensor():
 
                 for dim in dims:
                     v = getattr(self._obj, dim)
-                    
+
                     if dim.find("time") != -1:
                         time_int = v.data.astype(int)
                         torch_dict[dim] = torch.tensor(time_int, dtype=torch.float64)
-                    
+
                     else:
                         torch_dict[dim] = v.torch.to_tensor()
 
