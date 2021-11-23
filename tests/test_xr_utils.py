@@ -1,9 +1,9 @@
 """ Test for xr utils """
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-from datetime import datetime
-
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
