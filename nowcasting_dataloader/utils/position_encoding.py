@@ -308,7 +308,7 @@ def normalize_geospatial_coordinates(
     geospatial_coordinates[1] = geospatial_coordinates[1] * 2 - 1
     # Now create a grid of the coordinates
     # Have to do it for each individual example in the batch, and zip together x and y for it
-    to_concat = []
+    solid_tensor = None
     for idx in range(len(geospatial_coordinates[0])):
         x = torch.from_numpy(geospatial_coordinates[0][idx])
         y = torch.from_numpy(geospatial_coordinates[1][idx])
@@ -316,10 +316,11 @@ def normalize_geospatial_coordinates(
         pos = torch.stack(grid, dim=-1)
         encoded_position = fourier_encode(pos, **kwargs)
         encoded_position = einops.rearrange(encoded_position, "... n d -> ... (n d)")
-        to_concat.append(encoded_position)
+        if solid_tensor is None:
+            solid_tensor = torch.zeros(len(geospatial_coordinates[0]), *encoded_position.size())
+        solid_tensor[idx] = encoded_position
 
-    encoded_position = torch.stack(to_concat, dim=0)
-    return encoded_position
+    return solid_tensor
 
 
 def encode_year(
