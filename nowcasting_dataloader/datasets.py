@@ -375,7 +375,6 @@ class SatFlowDataset(NetCDFDataset):
                 x[key + "_query"] = future_encoding
         return x
 
-
     def zero_out_nan_pv_systems(self, x: dict) -> dict:
         """
         Zeros out NaN PV systems and their position encodings
@@ -395,10 +394,10 @@ class SatFlowDataset(NetCDFDataset):
 
         for key in [PV_YIELD, GSP_YIELD]:
             if key in x:
-                print(key) # Batch, channels, timesteps, [ID]
+                print(key)  # Batch, channels, timesteps, [ID]
                 print(x[key].shape)
-                mask = torch.isnan(x[key][:,0,0,:]) # Only looking at the yield
-                mask = einops.repeat(mask, 'b id -> b c t id', c=x[key].shape[1], t=x[key].shape[2])
+                mask = torch.isnan(x[key][:, 0, 0, :])  # Only looking at the yield
+                mask = einops.repeat(mask, "b id -> b c t id", c=x[key].shape[1], t=x[key].shape[2])
                 # Zero out for all entries related to
                 x[key][mask] = 0.0
 
