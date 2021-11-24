@@ -8,8 +8,8 @@ from nowcasting_dataset.config import load_yaml_configuration
 from nowcasting_dataset.config.model import Configuration
 from pytorch_lightning import LightningDataModule
 
-from nowcasting_dataloader.fake import FakeDataset
 from nowcasting_dataloader.datasets import NetCDFDataset, SatFlowDataset, worker_init_fn
+from nowcasting_dataloader.fake import FakeDataset
 
 _LOG = logging.getLogger(__name__)
 
