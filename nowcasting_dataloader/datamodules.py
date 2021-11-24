@@ -153,7 +153,7 @@ class SatFlowDataModule(LightningDataModule):
 class NetCDFDataModule(LightningDataModule):
     """
     Example of LightningDataModule for NETCDF dataset.
-    
+
     A DataModule implements 5 key methods:
         - prepare_data (things to do on 1 GPU/TPU, not on every GPU/TPU in distributed mode)
         - setup (things to do on every accelerator in distributed mode)
@@ -191,8 +191,8 @@ class NetCDFDataModule(LightningDataModule):
         self.pin_memory = pin_memory
         self.fake_data = fake_data
 
-        filename = os.path.join(data_path, 'configuration.yaml')
-        _LOG.debug(f'Will be loading the configuration file {filename}')
+        filename = os.path.join(data_path, "configuration.yaml")
+        _LOG.debug(f"Will be loading the configuration file {filename}")
         self.configuration = load_yaml_configuration(filename=filename)
 
         self.dataloader_config = dict(
@@ -207,7 +207,7 @@ class NetCDFDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
-        """ Get the train dataloader """
+        """Get the train dataloader"""
         if self.fake_data:
             train_dataset = FakeDataset(configuration=self.configuration)
         else:
@@ -216,13 +216,13 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.data_path, "train"),
                 os.path.join(self.temp_path, "train"),
                 cloud=self.cloud,
-                configuration=self.configuration
+                configuration=self.configuration,
             )
 
         return torch.utils.data.DataLoader(train_dataset, **self.dataloader_config)
 
     def val_dataloader(self):
-        """ Get the validation dataloader """
+        """Get the validation dataloader"""
         if self.fake_data:
             val_dataset = FakeDataset(configuration=self.configuration)
         else:
@@ -231,13 +231,13 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.data_path, "test"),
                 os.path.join(self.temp_path, "test"),
                 cloud=self.cloud,
-                configuration=self.configuration
+                configuration=self.configuration,
             )
 
         return torch.utils.data.DataLoader(val_dataset, **self.dataloader_config)
 
     def test_dataloader(self):
-        """ Get the test dataloader """
+        """Get the test dataloader"""
         if self.fake_data:
             test_dataset = FakeDataset(configuration=self.configuration)
         else:
@@ -246,8 +246,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.data_path, "test"),
                 os.path.join(self.temp_path, "test"),
                 cloud=self.cloud,
-                configuration=self.configuration
+                configuration=self.configuration,
             )
 
         return torch.utils.data.DataLoader(test_dataset, **self.dataloader_config)
-
