@@ -7,7 +7,7 @@ from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.config.save import save_yaml_configuration
 from nowcasting_dataset.dataset.batch import Batch
 
-from nowcasting_dataloader.datamodules import SatFlowDataModule, NetCDFDataModule
+from nowcasting_dataloader.datamodules import NetCDFDataModule, SatFlowDataModule
 
 torch.set_default_dtype(torch.float32)
 
@@ -84,13 +84,9 @@ def test_netcdf_datamodule_init():
         f.save_netcdf(batch_i=0, path=Path(train_tmp))
 
         configuration.output_data.filepath = tmpdirname
-        save_yaml_configuration(c, filename=f'{tmpdirname}/configuration.yaml')
+        save_yaml_configuration(c, filename=f"{tmpdirname}/configuration.yaml")
 
-        datamodule = NetCDFDataModule(
-            temp_path=tmpdirname,
-            cloud="local",
-            data_path=tmpdirname
-        )
+        datamodule = NetCDFDataModule(temp_path=tmpdirname, cloud="local", data_path=tmpdirname)
 
         t = iter(datamodule.train_dataloader())
         x = next(t)
