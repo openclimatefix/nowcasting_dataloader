@@ -33,7 +33,7 @@ def configuration():
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
     [
-        ("nwp", [4, 17, 2, 64, 64]),
+        ("nwp", [4, 10, 2, 64, 64]),
         ("satellite", [4, 10, 19, 64, 64]),
         ("topographic", [4, 1, 1, 64, 64]),
         ("pv", [4, 128, 19, 128]),
