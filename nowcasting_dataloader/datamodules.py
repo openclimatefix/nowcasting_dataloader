@@ -153,6 +153,7 @@ class SatFlowDataModule(LightningDataModule):
 class NetCDFDataModule(LightningDataModule):
     """
     Example of LightningDataModule for NETCDF dataset.
+    
     A DataModule implements 5 key methods:
         - prepare_data (things to do on 1 GPU/TPU, not on every GPU/TPU in distributed mode)
         - setup (things to do on every accelerator in distributed mode)
