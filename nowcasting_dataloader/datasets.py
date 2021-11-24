@@ -352,7 +352,6 @@ class SatFlowDataset(NetCDFDataset):
         """
         Adds encodings to the targets and inputs
 
-
         Args:
             x: Dictionary containing model inputs
             key: Key to check and insert
