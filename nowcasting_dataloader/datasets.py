@@ -352,8 +352,6 @@ class SatFlowDataset(NetCDFDataset):
         """
         Adds encodings to the targets and inputs
 
-        Also checks for any NaN values in the data, to zero out the position encodings for that
-        value. Primarily for PV and GSP systems where there is filler data
 
         Args:
             x: Dictionary containing model inputs
