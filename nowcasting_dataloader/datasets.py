@@ -394,10 +394,8 @@ class SatFlowDataset(NetCDFDataset):
 
         for key in [PV_YIELD, GSP_YIELD]:
             if key in x:
-                print(key)  # Batch, channels, timesteps, [ID]
-                print(x[key].shape)
-                mask = torch.isnan(x[key][:, 0, 0, :])  # Only looking at the yield
-                mask = einops.repeat(mask, "b id -> b c t id", c=x[key].shape[1], t=x[key].shape[2])
+                mask = torch.isnan(x[key][:, 0, :])  # Only looking at the yield
+                mask = einops.repeat(mask, "b id -> b t id", t=x[key].shape[1])
                 # Zero out for all entries related to
                 x[key][mask] = 0.0
 
