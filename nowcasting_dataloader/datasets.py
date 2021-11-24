@@ -28,12 +28,6 @@ from nowcasting_dataloader.utils.position_encoding import generate_position_enco
 
 logger = logging.getLogger(__name__)
 
-"""
-This file contains the following classes
-NetCDFDataset- torch.utils.data.Dataset: Use for loading pre-made batches
-NowcastingDataset - torch.utils.data.IterableDataset: Dataset for making batches
-"""
-
 
 _LOG = logging.getLogger(__name__)
 
