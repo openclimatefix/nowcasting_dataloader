@@ -4,6 +4,7 @@ import os
 from typing import List, Optional, Tuple, Union
 
 import boto3
+import einops
 import gcsfs
 import torch
 from nowcasting_dataset.config.model import Configuration
@@ -335,6 +336,9 @@ class SatFlowDataset(NetCDFDataset):
         x[SATELLITE_DATA] = x.pop("satellite")
         x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
 
+        # Zero out NaN PV and GSP Yield
+        x = self.zero_out_nan_pv_systems(x)
+
         return x, target
 
     def add_encodings(
@@ -348,6 +352,9 @@ class SatFlowDataset(NetCDFDataset):
         """
         Adds encodings to the targets and inputs
 
+        Also checks for any NaN values in the data, to zero out the position encodings for that
+        value. Primarily for PV and GSP systems where there is filler data
+
         Args:
             x: Dictionary containing model inputs
             key: Key to check and insert
@@ -359,12 +366,42 @@ class SatFlowDataset(NetCDFDataset):
         Returns:
             x dictionary with the added/updated keys
         """
+
         if key + "_position_encoding" in batch:
             past_encoding = batch[key + "_position_encoding"][:, :, :current_timestep_index]
             x[key] = torch.cat([x[key], past_encoding], dim=1)
             if add_future_encodings:
                 future_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index:]
                 x[key + "_query"] = future_encoding
+        return x
+
+
+    def zero_out_nan_pv_systems(self, x: dict) -> dict:
+        """
+        Zeros out NaN PV systems and their position encodings
+
+        This takes advantage of the fact that NaN values for PV and GSP systems are always at the
+        end of the example, so just need to find the first one and can zero out everything after.
+
+        This should be used after the position encodings are appended, so that it zeros out all the
+        channels as well
+
+        Args:
+            x: dictionary of inputs
+
+        Returns:
+            The dictionary x with the PV systems zeroed out and position encodings zeroed as well
+        """
+
+        for key in [PV_YIELD, GSP_YIELD]:
+            if key in x:
+                print(key) # Batch, channels, timesteps, [ID]
+                print(x[key].shape)
+                mask = torch.isnan(x[key][:,0,0,:]) # Only looking at the yield
+                mask = einops.repeat(mask, 'b id -> b c t id', c=x[key].shape[1], t=x[key].shape[2])
+                # Zero out for all entries related to
+                x[key][mask] = 0.0
+
         return x
 
 
