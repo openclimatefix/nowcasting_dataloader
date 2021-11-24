@@ -1,0 +1,13 @@
+name: nowcasting_dataloader
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python>=3.9
+  - pytorch::pytorch
+  - pytorch-lightning
+  - einops
+  - boto3
+  - pip
+  - pip:
+      - nowcasting_dataset
