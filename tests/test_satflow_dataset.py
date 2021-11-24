@@ -6,8 +6,8 @@ from pathlib import Path
 import torch
 from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataloader.batch import BatchML
 
+from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 
 torch.set_default_dtype(torch.float32)
@@ -147,19 +147,20 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
+
 def test_zero_pv_systems():
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
     c.process.batch_size = 4
     c.input_data.satellite.satellite_image_size_pixels = 24
     configuration = c
-    batch = Batch.fake(configuration = c)
+    batch = Batch.fake(configuration=c)
     x = BatchML.from_batch(batch)
     x = x.dict()
-    x["pv"]["pv_yield"][0,:,100:] = float("nan")
-    x["pv"]["pv_yield"][2,:,64:] = float("nan")
-    x["gsp"]["gsp_yield"][0,:,30:] = float("nan")
-    x["gsp"]["gsp_yield"][3,:,15:] = float("nan")
+    x["pv"]["pv_yield"][0, :, 100:] = float("nan")
+    x["pv"]["pv_yield"][2, :, 64:] = float("nan")
+    x["gsp"]["gsp_yield"][0, :, 30:] = float("nan")
+    x["gsp"]["gsp_yield"][3, :, 15:] = float("nan")
     x["pv_yield"] = x["pv"]["pv_yield"]
     x["gsp_yield"] = x["gsp"]["gsp_yield"]
     dset = SatFlowDataset(
@@ -173,7 +174,7 @@ def test_zero_pv_systems():
         add_position_encoding=True,
         add_hrv_satellite_target=True,
         add_satellite_target=True,
-        )
+    )
     cleaned = dset.zero_out_nan_pv_systems(x)
     assert torch.isnan(cleaned["pv_yield"]).sum() == 0
     assert torch.isnan(cleaned["gsp_yield"]).sum() == 0
