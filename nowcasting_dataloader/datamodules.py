@@ -206,6 +206,7 @@ class NetCDFDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
+        """ Get the train dataloader """
         if self.fake_data:
             train_dataset = FakeDataset(configuration=self.configuration)
         else:
@@ -220,6 +221,7 @@ class NetCDFDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(train_dataset, **self.dataloader_config)
 
     def val_dataloader(self):
+        """ Get the validation dataloader """
         if self.fake_data:
             val_dataset = FakeDataset(configuration=self.configuration)
         else:
@@ -234,6 +236,7 @@ class NetCDFDataModule(LightningDataModule):
         return torch.utils.data.DataLoader(val_dataset, **self.dataloader_config)
 
     def test_dataloader(self):
+        """ Get the test dataloader """
         if self.fake_data:
             test_dataset = FakeDataset(configuration=self.configuration)
         else:
