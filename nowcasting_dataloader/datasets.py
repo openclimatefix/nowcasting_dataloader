@@ -29,9 +29,6 @@ from nowcasting_dataloader.utils.position_encoding import generate_position_enco
 logger = logging.getLogger(__name__)
 
 
-_LOG = logging.getLogger(__name__)
-
-
 class NetCDFDataset(torch.utils.data.Dataset):
     """
     Loads data saved by the `prepare_ml_training_data.py` script.
