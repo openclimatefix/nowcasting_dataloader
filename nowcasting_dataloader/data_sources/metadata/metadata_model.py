@@ -3,7 +3,6 @@ import logging
 
 import numpy as np
 from nowcasting_dataset.data_sources.fake import metadata_fake
-
 from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
