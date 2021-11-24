@@ -175,7 +175,7 @@ def test_zero_pv_systems():
         add_satellite_target=True,
         )
     cleaned = dset.zero_out_nan_pv_systems(x)
-    assert torch.isnan(x["pv_yield"]).sum() == 0
-    assert torch.isnan(x["gsp_yield"]).sum() == 0
-    assert torch.isclose(torch.sum(x["gsp_yield"][0,:,30:]), torch.zeros(1))
-    assert not torch.isclose(torch.sum(x["gsp_yield"][1,:,30:]), torch.zeros(1))
+    assert torch.isnan(cleaned["pv_yield"]).sum() == 0
+    assert torch.isnan(cleaned["gsp_yield"]).sum() == 0
+    assert torch.isclose(torch.sum(cleaned["gsp_yield"][0,:,30:]), torch.zeros(1))
+    assert not torch.isclose(torch.sum(cleaned["gsp_yield"][1,:,30:]), torch.zeros(1))
