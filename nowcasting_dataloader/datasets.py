@@ -49,7 +49,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         normalize: bool = True,
         add_position_encoding: bool = False,
         data_sources_names: Optional[list[str]] = None,
-            num_bands: int = 4
+        num_bands: int = 4,
     ):
         """
         Netcdf Dataset
@@ -170,7 +170,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 current_timestep_index=self.current_timestep_5_index,
             )
         if self.add_position_encoding:
-            position_encodings = generate_position_encodings_for_batch(batch, num_bands=self.num_bands)
+            position_encodings = generate_position_encodings_for_batch(
+                batch, num_bands=self.num_bands
+            )
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
 

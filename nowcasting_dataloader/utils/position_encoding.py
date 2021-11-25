@@ -328,7 +328,7 @@ def normalize_geospatial_coordinates(
 def encode_year(
     datetimes: List[List[datetime.datetime]],
     time_range: Tuple[datetime.datetime, datetime.datetime],
-    num_bands: int = 4
+    num_bands: int = 4,
 ) -> torch.Tensor:
     """
     Encode the year of each example in the batch, normalizing between the start and end date
