@@ -282,15 +282,15 @@ class SatFlowDataset(NetCDFDataset):
         x[GSP_ID] = batch["gsp"][GSP_ID]
 
         # Now creating the target data, only want the first GSP as the target
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0].float()
         target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
-            target[SATELLITE_DATA] = future_sat_data
+            target[SATELLITE_DATA] = future_sat_data.float()
         if self.add_hrv_satellite_target:
             future_hrv_sat_data = batch["hrvsatellite"]["data"][:, :, self.current_timestep_index :]
-            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
+            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data.float()
 
         # Add position encodings
         if self.add_position_encoding:
