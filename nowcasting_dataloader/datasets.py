@@ -272,7 +272,7 @@ class SatFlowDataset(NetCDFDataset):
             x["hrvsatellite"] = past_hrv_satellite_data
         if "pv" in self.data_sources_names and len(batch["pv"].get(PV_YIELD, [])) > 0:
             past_pv_data = torch.unsqueeze(
-                batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
+                batch["pv"][PV_YIELD][:, : self.current_timestep_index], dim=1
             )
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = torch.nan_to_num(batch["pv"][PV_SYSTEM_ID])
@@ -331,9 +331,7 @@ class SatFlowDataset(NetCDFDataset):
                 )
             if len(x.get(PV_YIELD, [])) > 0:
                 past_encoding = batch["pv_position_encoding"][:, :, : self.current_timestep_index]
-                x[PV_YIELD] = einops.rearrange(
-                    torch.cat([x[PV_YIELD], past_encoding], dim=1), "b c id t -> b c t id"
-                )
+                x[PV_YIELD] = torch.cat([x[PV_YIELD], past_encoding], dim=1)
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
                 :, :, self.current_timestep_index_30 :
