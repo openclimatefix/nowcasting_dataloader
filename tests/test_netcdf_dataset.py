@@ -109,8 +109,8 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
             forecast_minutes=60,
             configuration=configuration,
             normalize=False,
-            data_source_names=["pv", "gsp", "hrvsatellite"],
-        )
+            data_sources_names = ["pv", "gsp", "hrvsatellite"]
+            )
 
         dataloader_config = dict(
             pin_memory=True,
@@ -131,12 +131,13 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
 
         batch_ml = BatchML(**data)
 
-        assert batch_ml.nwp.data is None
-        assert batch_ml.topographic.topo_data is None
+        assert batch_ml.nwp is None
+        assert batch_ml.topographic is None
         assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
         assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
-        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)
-        assert batch_ml.sun.sun_elevation_angle.shape == (4, 19)
+        assert batch_ml.sun is None
+        assert batch_ml.satellite is None
+        assert batch_ml.hrvsatellite is not None
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
