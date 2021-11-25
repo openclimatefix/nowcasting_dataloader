@@ -256,19 +256,19 @@ class SatFlowDataset(NetCDFDataset):
         # Need to partition out past and future sat images here, along with the rest of the data
         if len(batch["satellite"].get("data", [])) > 0:
             past_satellite_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
-            x["satellite"] = past_satellite_data
+            x["satellite"] = past_satellite_data.float()
         if len(batch["hrvsatellite"].get("data", [])) > 0:
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, : self.current_timestep_index
             ]
-            x["hrvsatellite"] = past_hrv_satellite_data
+            x["hrvsatellite"] = past_hrv_satellite_data.float()
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
-            past_pv_data = batch["pv"][PV_YIELD][:, :, : self.current_timestep_index]
+            past_pv_data = torch.unsqueeze(batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1)
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
-            x[NWP_DATA] = batch["nwp"]["data"]
+            x[NWP_DATA] = batch["nwp"]["data"].float()
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
@@ -279,9 +279,9 @@ class SatFlowDataset(NetCDFDataset):
         # Only GSP information we give to the model to train on is the IDs and physical locations
         x[GSP_ID] = batch["gsp"][GSP_ID]
 
-        # Now creating the target data
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :]
-        target[GSP_ID] = batch["gsp"][GSP_ID]
+        # Now creating the target data, only want the first GSP as the target
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
+        target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
@@ -382,8 +382,8 @@ class SatFlowDataset(NetCDFDataset):
 
         for key in [PV_YIELD, GSP_YIELD]:
             if key in x:
-                mask = torch.isnan(x[key][:, 0, :])  # Only looking at the yield
-                mask = einops.repeat(mask, "b id -> b t id", t=x[key].shape[1])
+                mask = torch.isnan(x[key][:, 0, 0, :])  # Only looking at the yield
+                mask = einops.repeat(mask, "b id -> b c t id", c=x[key].shape[1], t=x[key].shape[2])
                 # Zero out for all entries related to
                 x[key][mask] = 0.0
 
