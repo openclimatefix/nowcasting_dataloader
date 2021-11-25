@@ -262,7 +262,7 @@ class SatFlowDataset(NetCDFDataset):
         x = {}
         target = {}
         # Need to partition out past and future sat images here, along with the rest of the data
-        if len(batch["satellite"].get("data", [])) > 0:
+        if "satellite" in self.data_sources_names and len(batch["satellite"].get("data", [])) > 0:
             past_satellite_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
             x["satellite"] = past_satellite_data
         if len(batch["hrvsatellite"].get("data", [])) > 0:
@@ -270,16 +270,16 @@ class SatFlowDataset(NetCDFDataset):
                 :, :, : self.current_timestep_index
             ]
             x["hrvsatellite"] = past_hrv_satellite_data
-        if len(batch["pv"].get(PV_YIELD, [])) > 0:
+        if "pv" in self.data_sources_names and len(batch["pv"].get(PV_YIELD, [])) > 0:
             past_pv_data = torch.unsqueeze(
                 batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
             )
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = torch.nan_to_num(batch["pv"][PV_SYSTEM_ID])
-        if len(batch["nwp"].get("data", [])) > 0:
+        if "nwp" in self.data_sources_names and len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
             x[NWP_DATA] = batch["nwp"]["data"]
-        if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
+        if "topographic" in self.data_sources_names and len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
             x[TOPOGRAPHIC_DATA] = torch.unsqueeze(
@@ -327,7 +327,8 @@ class SatFlowDataset(NetCDFDataset):
                     [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
                 )
             if len(x.get(PV_YIELD, [])) > 0:
-                x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
+                past_encoding = batch["pv_position_encoding"][:, :, :self.current_timestep_index]
+                x[PV_YIELD] = einops.rearrange(torch.cat([x[PV_YIELD], past_encoding], dim=1), 'b c id t -> b c t id')
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
                 :, :, self.current_timestep_index_30 :
