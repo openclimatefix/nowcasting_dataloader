@@ -263,9 +263,11 @@ class SatFlowDataset(NetCDFDataset):
             ]
             x["hrvsatellite"] = past_hrv_satellite_data
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
-            past_pv_data = batch["pv"][PV_YIELD][:, :, : self.current_timestep_index]
+            past_pv_data = torch.unsqueeze(
+                batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
+            )
             x[PV_YIELD] = past_pv_data
-            x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
+            x[PV_SYSTEM_ID] = torch.nan_to_num(batch["pv"][PV_SYSTEM_ID])
         if len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
             x[NWP_DATA] = batch["nwp"]["data"]
@@ -277,11 +279,11 @@ class SatFlowDataset(NetCDFDataset):
             )
 
         # Only GSP information we give to the model to train on is the IDs and physical locations
-        x[GSP_ID] = batch["gsp"][GSP_ID]
+        x[GSP_ID] = torch.nan_to_num(batch["gsp"][GSP_ID])
 
-        # Now creating the target data
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :]
-        target[GSP_ID] = batch["gsp"][GSP_ID]
+        # Now creating the target data, only want the first GSP as the target
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
+        target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
@@ -329,6 +331,14 @@ class SatFlowDataset(NetCDFDataset):
 
         # Zero out NaN PV and GSP Yield
         x = self.zero_out_nan_pv_systems(x)
+
+        # Convert all to float32 if not already done so
+        for k in x.keys():
+            if x[k].dtype != torch.float32:
+                x[k] = x[k].float()
+        for k in target.keys():
+            if target[k].dtype != torch.float32:
+                target[k] = target[k].float()
 
         return x, target
 
@@ -382,8 +392,8 @@ class SatFlowDataset(NetCDFDataset):
 
         for key in [PV_YIELD, GSP_YIELD]:
             if key in x:
-                mask = torch.isnan(x[key][:, 0, :])  # Only looking at the yield
-                mask = einops.repeat(mask, "b id -> b t id", t=x[key].shape[1])
+                mask = torch.isnan(x[key][:, 0, 0, :])  # Only looking at the yield
+                mask = einops.repeat(mask, "b id -> b c t id", c=x[key].shape[1], t=x[key].shape[2])
                 # Zero out for all entries related to
                 x[key][mask] = 0.0
 
