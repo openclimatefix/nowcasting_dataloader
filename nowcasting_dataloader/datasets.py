@@ -336,6 +336,9 @@ class SatFlowDataset(NetCDFDataset):
         for k in x.keys():
             if x[k].dtype != torch.float32:
                 x[k] = x[k].float()
+        for k in target.keys():
+            if target[k].dtype != torch.float32:
+                target[k] = target[k].float()
 
         return x, target
 
