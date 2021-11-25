@@ -332,6 +332,11 @@ class SatFlowDataset(NetCDFDataset):
         # Zero out NaN PV and GSP Yield
         x = self.zero_out_nan_pv_systems(x)
 
+        # Convert all to float32 if not already done so
+        for k in x.keys():
+            if x[k].dtype != torch.float32:
+                x[k] = x[k].float()
+
         return x, target
 
     def add_encodings(
