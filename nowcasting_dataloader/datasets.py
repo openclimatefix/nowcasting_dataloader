@@ -267,7 +267,7 @@ class SatFlowDataset(NetCDFDataset):
                 batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
             )
             x[PV_YIELD] = past_pv_data
-            x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
+            x[PV_SYSTEM_ID] = torch.nan_to_num(batch["pv"][PV_SYSTEM_ID])
         if len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
             x[NWP_DATA] = batch["nwp"]["data"]
@@ -279,7 +279,7 @@ class SatFlowDataset(NetCDFDataset):
             )
 
         # Only GSP information we give to the model to train on is the IDs and physical locations
-        x[GSP_ID] = batch["gsp"][GSP_ID]
+        x[GSP_ID] = torch.nan_to_num(batch["gsp"][GSP_ID])
 
         # Now creating the target data, only want the first GSP as the target
         target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
