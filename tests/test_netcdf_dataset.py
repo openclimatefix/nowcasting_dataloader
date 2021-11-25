@@ -82,6 +82,7 @@ def test_netcdf_dataset_local_using_configuration():
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
+
 def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
     """Test netcdf locally"""
     c = Configuration()
@@ -108,8 +109,8 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
             forecast_minutes=60,
             configuration=configuration,
             normalize=False,
-            data_source_names = ["pv", "gsp", "hrvsatellite"]
-            )
+            data_source_names=["pv", "gsp", "hrvsatellite"],
+        )
 
         dataloader_config = dict(
             pin_memory=True,
@@ -120,7 +121,7 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
             # Disable automatic batching because dataset
             # returns complete batches.
             batch_size=None,
-            )
+        )
 
         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 
@@ -139,6 +140,7 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+
 
 @pytest.mark.skip("CD does not have access to GCS")
 def test_get_dataloaders_gcp(configuration: Configuration):
