@@ -48,7 +48,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         forecast_minutes: Optional[int] = None,
         normalize: bool = True,
         add_position_encoding: bool = False,
-            data_source_names: Optional[list[str]] = None
+        data_source_names: Optional[list[str]] = None,
     ):
         """
         Netcdf Dataset
@@ -153,7 +153,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         else:
             local_netcdf_folder = self.src_path
 
-        batch: Batch = Batch.load_netcdf(local_netcdf_folder, batch_idx=batch_idx, data_sources_names = self.data_source_names)
+        batch: Batch = Batch.load_netcdf(
+            local_netcdf_folder, batch_idx=batch_idx, data_sources_names=self.data_source_names
+        )
 
         if self.select_subset_data:
             batch = subselect_data(
@@ -199,7 +201,7 @@ class SatFlowDataset(NetCDFDataset):
         add_position_encoding: bool = False,
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
-            data_source_names: Optional[list[str]] = None
+        data_source_names: Optional[list[str]] = None,
     ):
         """
         Netcdf Dataset
@@ -235,7 +237,7 @@ class SatFlowDataset(NetCDFDataset):
             forecast_minutes=forecast_minutes,
             normalize=normalize,
             add_position_encoding=add_position_encoding,
-            data_source_names = data_source_names
+            data_source_names=data_source_names,
         )
 
         self.add_satellite_target = add_satellite_target
