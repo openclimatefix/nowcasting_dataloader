@@ -109,8 +109,8 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
             forecast_minutes=60,
             configuration=configuration,
             normalize=False,
-            data_sources_names = ["pv", "gsp", "hrvsatellite"]
-            )
+            data_sources_names=["pv", "gsp", "hrvsatellite"],
+        )
 
         dataloader_config = dict(
             pin_memory=True,
