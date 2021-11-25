@@ -7,9 +7,17 @@ from typing import Optional
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.time import make_random_time_vectors
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from nowcasting_dataloader.data_sources import GSPML, NWPML, PVML, SatelliteML, SunML, TopographicML
+from nowcasting_dataloader.data_sources import (
+    GSPML,
+    NWPML,
+    PVML,
+    MetadataML,
+    SatelliteML,
+    SunML,
+    TopographicML,
+)
 from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
     register_xr_data_set_to_tensor,
@@ -60,12 +68,7 @@ class BatchML(Example):
 
     """
 
-    batch_size: int = Field(
-        ...,
-        g=0,
-        description="The size of this batch. If the batch size is 0, "
-        "then this item stores one data item",
-    )
+    metadata: MetadataML
 
     @staticmethod
     def fake(configuration: Configuration = Configuration()):
@@ -130,6 +133,7 @@ class BatchML(Example):
                 number_nwp_channels=len(input_data.nwp.nwp_channels),
                 time_60=time_vectors["time_60"],
             ),
+            metadata=MetadataML.fake(process.batch_size),
         )
 
     @staticmethod
@@ -150,7 +154,8 @@ class BatchML(Example):
                     # Add in the channels being used
                     # Only need it from the first example
                     data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
-        data_sources_dict["batch_size"] = data_sources_dict["satellite"].batch_size
+
+        data_sources_dict["metadata"] = batch.metadata.dict()
 
         return BatchML(**data_sources_dict)
 
