@@ -256,12 +256,12 @@ class SatFlowDataset(NetCDFDataset):
         # Need to partition out past and future sat images here, along with the rest of the data
         if len(batch["satellite"].get("data", [])) > 0:
             past_satellite_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
-            x["satellite"] = past_satellite_data.float()
+            x["satellite"] = past_satellite_data
         if len(batch["hrvsatellite"].get("data", [])) > 0:
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, : self.current_timestep_index
             ]
-            x["hrvsatellite"] = past_hrv_satellite_data.float()
+            x["hrvsatellite"] = past_hrv_satellite_data
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
             past_pv_data = torch.unsqueeze(
                 batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
@@ -270,7 +270,7 @@ class SatFlowDataset(NetCDFDataset):
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if len(batch["nwp"].get("data", [])) > 0:
             # We can give future NWP too, as that will be available
-            x[NWP_DATA] = batch["nwp"]["data"].float()
+            x[NWP_DATA] = batch["nwp"]["data"]
         if len(batch["topographic"].get(TOPOGRAPHIC_DATA, [])) > 0:
             # Need to expand dims to get a single channel one
             # Results in topographic maps with [Batch, Channel, H, W]
@@ -282,15 +282,15 @@ class SatFlowDataset(NetCDFDataset):
         x[GSP_ID] = batch["gsp"][GSP_ID]
 
         # Now creating the target data, only want the first GSP as the target
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0].float()
+        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
         target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
-            target[SATELLITE_DATA] = future_sat_data.float()
+            target[SATELLITE_DATA] = future_sat_data
         if self.add_hrv_satellite_target:
             future_hrv_sat_data = batch["hrvsatellite"]["data"][:, :, self.current_timestep_index :]
-            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data.float()
+            target["hrv_" + SATELLITE_DATA] = future_hrv_sat_data
 
         # Add position encodings
         if self.add_position_encoding:
@@ -317,13 +317,13 @@ class SatFlowDataset(NetCDFDataset):
             if len(x.get(NWP_DATA, [])) > 0:
                 x[NWP_DATA] = torch.cat(
                     [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
-                ).float()
+                )
             if len(x.get(PV_YIELD, [])) > 0:
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
                 :, :, self.current_timestep_index_30 :
-            ].float()
+            ]
 
         # Rename to match other ones better
         x[SATELLITE_DATA] = x.pop("satellite")
@@ -364,10 +364,10 @@ class SatFlowDataset(NetCDFDataset):
 
         if key + "_position_encoding" in batch:
             past_encoding = batch[key + "_position_encoding"][:, :, :current_timestep_index]
-            x[key] = torch.cat([x[key], past_encoding], dim=1).float()
+            x[key] = torch.cat([x[key], past_encoding], dim=1)
             if add_future_encodings:
                 future_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index:]
-                x[key + "_query"] = future_encoding.float()
+                x[key + "_query"] = future_encoding
         return x
 
     def zero_out_nan_pv_systems(self, x: dict) -> dict:
