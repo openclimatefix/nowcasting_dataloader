@@ -82,6 +82,63 @@ def test_netcdf_dataset_local_using_configuration():
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
+def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
+    """Test netcdf locally"""
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.process.batch_size = 4
+    c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
+    c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
+    configuration = c
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+
+        f = Batch.fake(configuration=c)
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
+
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
+
+        train_dataset = NetCDFDataset(
+            1,
+            DATA_PATH,
+            TEMP_PATH,
+            cloud="local",
+            history_minutes=30,
+            forecast_minutes=60,
+            configuration=configuration,
+            normalize=False,
+            data_source_names = ["pv", "gsp", "hrvsatellite"]
+            )
+
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+            )
+
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+
+        train_dataset.per_worker_init(1)
+        t = iter(train_dataset)
+        data = next(t)
+
+        batch_ml = BatchML(**data)
+
+        assert batch_ml.nwp.data is None
+        assert batch_ml.topographic.topo_data is None
+        assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
+        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)
+        assert batch_ml.sun.sun_elevation_angle.shape == (4, 19)
+
+        # Make sure file isn't deleted!
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 @pytest.mark.skip("CD does not have access to GCS")
 def test_get_dataloaders_gcp(configuration: Configuration):
