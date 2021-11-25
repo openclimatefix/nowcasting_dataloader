@@ -211,10 +211,13 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
             assert type(x[k]) == torch.Tensor
             assert x[k].dtype == torch.float32
 
+        assert x["pv_yield"].shape == (4, 94, 3, 128)
+
         for k in ["gsp_yield", "gsp_id", "hrv_sat_data"]:
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
             assert y[k].dtype == torch.float32
+
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
