@@ -225,7 +225,7 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(train_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(train_dataset, shuffle=True, **self.dataloader_config)
 
     def val_dataloader(self):
         """Get the validation dataloader"""
@@ -240,7 +240,7 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(val_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
 
     def test_dataloader(self):
         """Get the test dataloader"""
@@ -255,4 +255,4 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(test_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(test_dataset, shuffle=False, **self.dataloader_config)
