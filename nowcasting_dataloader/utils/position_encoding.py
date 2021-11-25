@@ -328,6 +328,7 @@ def normalize_geospatial_coordinates(
 def encode_year(
     datetimes: List[List[datetime.datetime]],
     time_range: Tuple[datetime.datetime, datetime.datetime],
+    num_bands: int = 4
 ) -> torch.Tensor:
     """
     Encode the year of each example in the batch, normalizing between the start and end date
@@ -337,6 +338,7 @@ def encode_year(
             dateimes[batch_idx][timestep_idx]
         time_range: List of start_year, end_year datetimes to normalize against,
             time_range[0].year must be less than time_range[1].year
+        num_bands: Number of bands to include in the Fourier encoding
 
     Returns:
         Tensor containing the encoding for the year of the first timestep in each example
@@ -357,20 +359,21 @@ def encode_year(
         encoding *= 2
         encoding -= 1
         # Compute Fourier Features
-        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=99, num_bands=12)
+        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=99, num_bands=num_bands)
         year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
 
 
 def create_datetime_features(
-    datetimes: List[List[datetime.datetime]],
+    datetimes: List[List[datetime.datetime]], num_bands: int = 4
 ) -> List[torch.Tensor]:
     """
     Converts a list of datetimes to day of year, hour of day sin and cos representation
 
     Args:
         datetimes: List of list of datetimes for the examples in a batch
+        num_bands: Number of bands to include in the Fourier encoding
 
     Returns:
         Tuple of torch Tensors containing the hour of day sin,cos, and day of year sin,cos
@@ -391,8 +394,8 @@ def create_datetime_features(
     hour_of_day = torch.as_tensor(hour_of_day)
     day_of_year = torch.as_tensor(day_of_year)
     # Compute Fourier Features
-    hour_of_day = fourier_encode(hour_of_day, max_freq=49, num_bands=6)
-    day_of_year = fourier_encode(day_of_year, max_freq=733, num_bands=6)
+    hour_of_day = fourier_encode(hour_of_day, max_freq=49, num_bands=num_bands)
+    day_of_year = fourier_encode(day_of_year, max_freq=733, num_bands=num_bands)
     outputs.append(hour_of_day)
     outputs.append(day_of_year)
 
@@ -421,7 +424,7 @@ def fourier_encode(
     device, dtype, orig_x = x.device, x.dtype, x
 
     scales = torch.linspace(
-        1.0,
+        16.0,
         max_freq / 2,
         num_bands,
         device=device,
