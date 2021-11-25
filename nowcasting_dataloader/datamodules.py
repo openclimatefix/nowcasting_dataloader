@@ -109,7 +109,7 @@ class SatFlowDataModule(LightningDataModule):
             add_position_encoding=self.add_position_encoding,
             add_satellite_target=self.add_satellite_target,
             add_hrv_satellite_target=self.add_hrv_satellite_target,
-            data_sources_names = self.data_sources_names
+            data_sources_names=self.data_sources_names,
         )
 
         return torch.utils.data.DataLoader(train_dataset, shuffle=True, **self.dataloader_config)
@@ -129,7 +129,7 @@ class SatFlowDataModule(LightningDataModule):
             add_position_encoding=self.add_position_encoding,
             add_satellite_target=self.add_satellite_target,
             add_hrv_satellite_target=self.add_hrv_satellite_target,
-            data_sources_names = self.data_sources_names
+            data_sources_names=self.data_sources_names,
         )
 
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
@@ -149,7 +149,7 @@ class SatFlowDataModule(LightningDataModule):
             add_position_encoding=self.add_position_encoding,
             add_satellite_target=self.add_satellite_target,
             add_hrv_satellite_target=self.add_hrv_satellite_target,
-            data_sources_names = self.data_sources_names
+            data_sources_names=self.data_sources_names,
         )
 
         return torch.utils.data.DataLoader(test_dataset, shuffle=False, **self.dataloader_config)
