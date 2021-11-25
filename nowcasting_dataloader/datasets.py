@@ -18,7 +18,7 @@ from nowcasting_dataset.consts import (
     SATELLITE_DATA,
     TOPOGRAPHIC_DATA,
 )
-from nowcasting_dataset.dataset.batch import Batch
+from nowcasting_dataset.dataset.batch import Batch, Example
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 
@@ -80,6 +80,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+        if data_sources_names is None:
+            data_sources_names = list(Example.__fields__.keys())
         self.data_sources_names = data_sources_names
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
