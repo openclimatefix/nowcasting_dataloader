@@ -263,7 +263,9 @@ class SatFlowDataset(NetCDFDataset):
             ]
             x["hrvsatellite"] = past_hrv_satellite_data.float()
         if len(batch["pv"].get(PV_YIELD, [])) > 0:
-            past_pv_data = torch.unsqueeze(batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1)
+            past_pv_data = torch.unsqueeze(
+                batch["pv"][PV_YIELD][:, :, : self.current_timestep_index], dim=1
+            )
             x[PV_YIELD] = past_pv_data
             x[PV_SYSTEM_ID] = batch["pv"][PV_SYSTEM_ID]
         if len(batch["nwp"].get("data", [])) > 0:
