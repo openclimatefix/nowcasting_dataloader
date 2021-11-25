@@ -60,6 +60,7 @@ class SatFlowDataModule(LightningDataModule):
             add_position_encoding: Whether to add position encoding
             add_satellite_target: Whether to add satellite imagery to the targets
             add_hrv_satellite_target: Whether to add HRV satellite target
+            data_sources_names: Names of data sources to load. Leave as None to load all.
             pin_memory: Whether to pin memory in the dataloader
             num_workers: Number of workers for each dataloader
         """
