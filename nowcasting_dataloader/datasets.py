@@ -48,6 +48,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         forecast_minutes: Optional[int] = None,
         normalize: bool = True,
         add_position_encoding: bool = False,
+            data_source_names: Optional[list[str]] = None
     ):
         """
         Netcdf Dataset
@@ -68,6 +69,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
+            data_source_names: Names of data sources to load, if not using all of them
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -78,6 +80,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+        self.data_source_names = data_source_names
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -150,7 +153,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         else:
             local_netcdf_folder = self.src_path
 
-        batch: Batch = Batch.load_netcdf(local_netcdf_folder, batch_idx=batch_idx)
+        batch: Batch = Batch.load_netcdf(local_netcdf_folder, batch_idx=batch_idx, data_sources_names = self.data_source_names)
 
         if self.select_subset_data:
             batch = subselect_data(
@@ -196,6 +199,7 @@ class SatFlowDataset(NetCDFDataset):
         add_position_encoding: bool = False,
         add_satellite_target: bool = False,
         add_hrv_satellite_target: bool = False,
+            data_source_names: Optional[list[str]] = None
     ):
         """
         Netcdf Dataset
@@ -218,6 +222,7 @@ class SatFlowDataset(NetCDFDataset):
             add_position_encoding: Whether to add position encoding or not
             add_satellite_target: Whether to add future satellite imagery to the target or not
             add_hrv_satellite_target: Whether to add future HRV satellite imagery to the target
+            data_source_names: Names of data sources to load, if not using all of them
         """
         super().__init__(
             n_batches=n_batches,
@@ -230,6 +235,7 @@ class SatFlowDataset(NetCDFDataset):
             forecast_minutes=forecast_minutes,
             normalize=normalize,
             add_position_encoding=add_position_encoding,
+            data_source_names = data_source_names
         )
 
         self.add_satellite_target = add_satellite_target
@@ -326,8 +332,10 @@ class SatFlowDataset(NetCDFDataset):
             ]
 
         # Rename to match other ones better
-        x[SATELLITE_DATA] = x.pop("satellite")
-        x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
+        if len(x.get("satellite", [])) > 0:
+            x[SATELLITE_DATA] = x.pop("satellite")
+        if len(x.get("hrvsatellite", [])) > 0:
+            x["hrv_" + SATELLITE_DATA] = x.pop("hrvsatellite")
 
         # Zero out NaN PV and GSP Yield
         x = self.zero_out_nan_pv_systems(x)
