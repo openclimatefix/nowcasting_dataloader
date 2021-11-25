@@ -94,7 +94,7 @@ def test_datetime_feature_creation():
     datetime_features = create_datetime_features(datetimes)
     assert len(datetime_features) == 2
     for feature in datetime_features:
-        assert feature.size() == (12, 73, 13)
+        assert feature.size() == (12, 73, 9)
         assert torch.min(feature) >= -1.0
         assert torch.max(feature) <= 1.0
 
@@ -114,7 +114,7 @@ def test_encode_year_fourier():
             datetime.datetime(year=2022, month=12, day=31),
         ),
     )
-    assert year_encoding.size() == (7, 1, 25)
+    assert year_encoding.size() == (7, 1, 9)
     assert torch.min(year_encoding) >= -1.0
     assert torch.max(year_encoding) <= 1.0
 
@@ -149,7 +149,7 @@ def test_encode_absolute_position():
         ),
         num_bands=32,
     )
-    assert absolute_position_encoding.size() == (12, 181, 13, 64, 64)
+    assert absolute_position_encoding.size() == (12, 157, 13, 64, 64)
     assert torch.min(absolute_position_encoding) >= -1.0
     assert torch.max(absolute_position_encoding) <= 1.0
 
@@ -188,11 +188,11 @@ def test_encode_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 181, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 157, 13, 64, 64)
     combined = torch.cat(
         [encoded_position["NWP"], encoded_position["NWP_position_encoding"]], dim=1
     )
-    assert combined.size() == (12, 191, 13, 64, 64)
+    assert combined.size() == (12, 167, 13, 64, 64)
 
 
 def test_encode_multiple_modalities():
@@ -225,13 +225,13 @@ def test_encode_multiple_modalities():
     )
     assert "NWP" in encoded_position.keys()
     assert "NWP_position_encoding" in encoded_position.keys()
-    assert encoded_position["NWP_position_encoding"].size() == (12, 181, 13, 64, 64)
+    assert encoded_position["NWP_position_encoding"].size() == (12, 157, 13, 64, 64)
     assert "Sat" in encoded_position.keys()
     assert "Sat_position_encoding" in encoded_position.keys()
-    assert encoded_position["Sat_position_encoding"].size() == (12, 181, 3, 64, 64)
+    assert encoded_position["Sat_position_encoding"].size() == (12, 157, 3, 64, 64)
     assert "PV" in encoded_position.keys()
     assert "PV_position_encoding" in encoded_position.keys()
-    assert encoded_position["PV_position_encoding"].size() == (12, 181, 5, 1, 1)
+    assert encoded_position["PV_position_encoding"].size() == (12, 157, 5, 1, 1)
 
     # Check that time and space features match for NWP and Sat when the times line up
     assert np.all(
