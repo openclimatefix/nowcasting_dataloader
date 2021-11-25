@@ -317,13 +317,13 @@ class SatFlowDataset(NetCDFDataset):
             if len(x.get(NWP_DATA, [])) > 0:
                 x[NWP_DATA] = torch.cat(
                     [x[NWP_DATA], batch[NWP_DATA + "_position_encoding"]], dim=1
-                )
+                ).float()
             if len(x.get(PV_YIELD, [])) > 0:
                 x = self.add_encodings(x, PV_YIELD, batch, self.current_timestep_index, False)
             # Add the future GSP position encoding for querying
             x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
                 :, :, self.current_timestep_index_30 :
-            ]
+            ].float()
 
         # Rename to match other ones better
         x[SATELLITE_DATA] = x.pop("satellite")
@@ -359,10 +359,10 @@ class SatFlowDataset(NetCDFDataset):
 
         if key + "_position_encoding" in batch:
             past_encoding = batch[key + "_position_encoding"][:, :, :current_timestep_index]
-            x[key] = torch.cat([x[key], past_encoding], dim=1)
+            x[key] = torch.cat([x[key], past_encoding], dim=1).float()
             if add_future_encodings:
                 future_encoding = batch[key + "_position_encoding"][:, :, current_timestep_index:]
-                x[key + "_query"] = future_encoding
+                x[key + "_query"] = future_encoding.float()
         return x
 
     def zero_out_nan_pv_systems(self, x: dict) -> dict:
