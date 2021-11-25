@@ -68,6 +68,7 @@ def test_satflow_dataset_local_using_configuration():
         ]:
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
+            assert x[k].dtype == torch.float32
 
         for k in [
             "gsp_yield",
@@ -75,6 +76,7 @@ def test_satflow_dataset_local_using_configuration():
         ]:
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
+            assert y[k].dtype == torch.float32
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
@@ -140,10 +142,12 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
         ]:
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
+            assert x[k].dtype == torch.float32
 
         for k in ["gsp_yield", "gsp_id", "sat_data", "hrv_sat_data"]:
             assert k in y.keys()
             assert type(y[k]) == torch.Tensor
+            assert y[k].dtype == torch.float32
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
@@ -161,8 +165,8 @@ def test_zero_pv_systems():
     x["pv"]["pv_yield"][2, :, 64:] = float("nan")
     x["gsp"]["gsp_yield"][0, :, 30:] = float("nan")
     x["gsp"]["gsp_yield"][3, :, 15:] = float("nan")
-    x["pv_yield"] = x["pv"]["pv_yield"]
-    x["gsp_yield"] = x["gsp"]["gsp_yield"]
+    x["pv_yield"] = torch.unsqueeze(x["pv"]["pv_yield"], dim=1)
+    x["gsp_yield"] = torch.unsqueeze(x["gsp"]["gsp_yield"], dim=1)
     dset = SatFlowDataset(
         1,
         ".",
@@ -178,5 +182,5 @@ def test_zero_pv_systems():
     cleaned = dset.zero_out_nan_pv_systems(x)
     assert torch.isnan(cleaned["pv_yield"]).sum() == 0
     assert torch.isnan(cleaned["gsp_yield"]).sum() == 0
-    assert torch.isclose(torch.sum(cleaned["gsp_yield"][0, :, 30:]), torch.zeros(1))
-    assert not torch.isclose(torch.sum(cleaned["gsp_yield"][1, :, 30:]), torch.zeros(1))
+    assert torch.isclose(torch.sum(cleaned["gsp_yield"][0, :, :, 30:]), torch.zeros(1))
+    assert not torch.isclose(torch.sum(cleaned["gsp_yield"][1, :, :, 30:]), torch.zeros(1))
