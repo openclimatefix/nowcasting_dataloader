@@ -7,7 +7,7 @@ from typing import Optional
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataset.time import make_random_time_vectors
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from nowcasting_dataloader.data_sources import (
     GSPML,
