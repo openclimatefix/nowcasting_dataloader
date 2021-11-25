@@ -267,7 +267,10 @@ class SatFlowDataset(NetCDFDataset):
         if "satellite" in self.data_sources_names and len(batch["satellite"].get("data", [])) > 0:
             past_satellite_data = batch["satellite"]["data"][:, :, : self.current_timestep_index]
             x["satellite"] = past_satellite_data
-        if len(batch["hrvsatellite"].get("data", [])) > 0:
+        if (
+            "hrvsatellite" in self.data_sources_names
+            and len(batch["hrvsatellite"].get("data", [])) > 0
+        ):
             past_hrv_satellite_data = batch["hrvsatellite"]["data"][
                 :, :, : self.current_timestep_index
             ]
@@ -291,12 +294,13 @@ class SatFlowDataset(NetCDFDataset):
                 torch.unsqueeze(batch["topographic"][TOPOGRAPHIC_DATA], dim=1), dim=1
             )
 
-        # Only GSP information we give to the model to train on is the IDs and physical locations
-        x[GSP_ID] = torch.nan_to_num(batch["gsp"][GSP_ID])
+        if "gsp" in self.data_sources_names:
+            # Only GSP information we give to the model to train on is the IDs & physical locations
+            x[GSP_ID] = torch.nan_to_num(batch["gsp"][GSP_ID])
 
-        # Now creating the target data, only want the first GSP as the target
-        target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
-        target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
+            # Now creating the target data, only want the first GSP as the target
+            target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
+            target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
@@ -334,10 +338,12 @@ class SatFlowDataset(NetCDFDataset):
             if len(x.get(PV_YIELD, [])) > 0:
                 past_encoding = batch["pv_position_encoding"][:, :, : self.current_timestep_index]
                 x[PV_YIELD] = torch.cat([x[PV_YIELD], past_encoding], dim=1)
-            # Add the future GSP position encoding for querying
-            x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
-                :, :, self.current_timestep_index_30 :
-            ]
+
+            if "gsp" in self.data_sources_names:
+                # Add the future GSP position encoding for querying
+                x[GSP_YIELD + "_query"] = batch["gsp_position_encoding"][
+                    :, :, self.current_timestep_index_30 :
+                ]
 
         # Rename to match other ones better
         if len(x.get("satellite", [])) > 0:
