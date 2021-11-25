@@ -182,6 +182,7 @@ class NetCDFDataModule(LightningDataModule):
         pin_memory: bool = True,
         data_path="prepared_ML_training_data/v4/",
         fake_data: bool = False,
+        shuffle_train: bool = False,
     ):
         """
         fake_data: random data is created and used instead. This is useful for testing
@@ -196,6 +197,7 @@ class NetCDFDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.fake_data = fake_data
+        self.shuffle_train = shuffle_train
 
         filename = os.path.join(data_path, "configuration.yaml")
         _LOG.debug(f"Will be loading the configuration file {filename}")
@@ -225,7 +227,9 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(train_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(
+            train_dataset, shuffle=self.shuffle_train, **self.dataloader_config
+        )
 
     def val_dataloader(self):
         """Get the validation dataloader"""
@@ -240,7 +244,7 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(val_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
 
     def test_dataloader(self):
         """Get the test dataloader"""
@@ -255,4 +259,4 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
             )
 
-        return torch.utils.data.DataLoader(test_dataset, **self.dataloader_config)
+        return torch.utils.data.DataLoader(test_dataset, shuffle=False, **self.dataloader_config)
