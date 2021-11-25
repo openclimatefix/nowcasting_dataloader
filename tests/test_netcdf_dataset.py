@@ -138,7 +138,7 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
         assert batch_ml.sun is None
         assert batch_ml.satellite is None
         assert batch_ml.hrvsatellite is not None
-        assert batch_ml.hrvsatellite.data.shape == (4, 5, 64, 64)
+        assert batch_ml.hrvsatellite.data.shape == (4, 1, 19, 192, 192)
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
