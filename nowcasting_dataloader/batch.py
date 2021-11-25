@@ -164,4 +164,5 @@ class BatchML(Example):
 
         # loop over all data sources and normalize
         for data_sources in self.data_sources:
-            data_sources.normalize()
+            if data_sources is not None:
+                data_sources.normalize()
