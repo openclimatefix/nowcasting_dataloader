@@ -179,8 +179,8 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
             add_position_encoding=True,
             add_hrv_satellite_target=True,
             add_satellite_target=False,
-            data_sources_names = ["gsp", "pv", "hrvsatellite"]
-            )
+            data_sources_names=["gsp", "pv", "hrvsatellite"],
+        )
 
         dataloader_config = dict(
             pin_memory=True,
@@ -191,7 +191,7 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
             # Disable automatic batching because dataset
             # returns complete batches.
             batch_size=None,
-            )
+        )
 
         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
 
@@ -206,7 +206,7 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
             "hrv_sat_data_query",
             "gsp_yield_query",
             "hrv_sat_data",
-            ]:
+        ]:
             assert k in x.keys()
             assert type(x[k]) == torch.Tensor
             assert x[k].dtype == torch.float32
@@ -217,6 +217,7 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
             assert y[k].dtype == torch.float32
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+
 
 def test_zero_pv_systems():
     c = Configuration()
