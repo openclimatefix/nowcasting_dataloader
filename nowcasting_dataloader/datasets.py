@@ -10,6 +10,7 @@ import torch
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     DEFAULT_REQUIRED_KEYS,
+    GSP_DATETIME_INDEX,
     GSP_ID,
     GSP_YIELD,
     NWP_DATA,
@@ -306,6 +307,10 @@ class SatFlowDataset(NetCDFDataset):
             # Now creating the target data, only want the first GSP as the target
             target[GSP_YIELD] = batch["gsp"][GSP_YIELD][:, self.current_timestep_index_30 :, 0]
             target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
+            # Add timestep, so we can compare results better
+            target[GSP_DATETIME_INDEX] = batch["gsp"][GSP_DATETIME_INDEX][
+                :, self.current_timestep_index_30 :
+            ]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
