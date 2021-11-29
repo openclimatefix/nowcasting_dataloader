@@ -309,7 +309,7 @@ class SatFlowDataset(NetCDFDataset):
             target[GSP_ID] = batch["gsp"][GSP_ID][:, 0]
             # Add timestep, so we can compare results better
             target[GSP_DATETIME_INDEX] = batch["gsp"][GSP_DATETIME_INDEX][
-                :, self.current_timestep_index_30 :
+                :, self.current_timestep_index_30 - 1 :
             ]
 
         if self.add_satellite_target:
