@@ -312,6 +312,9 @@ class SatFlowDataset(NetCDFDataset):
                 :, self.current_timestep_index_30 :
             ]
 
+        # Add more metadata for plotting later
+        target["t0_datetime_UTC"] = batch["metadata"]["t0_datetime_UTC"]
+
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
             target[SATELLITE_DATA] = future_sat_data
