@@ -311,6 +311,9 @@ class SatFlowDataset(NetCDFDataset):
             target[GSP_DATETIME_INDEX] = batch["gsp"][GSP_DATETIME_INDEX][
                 :, self.current_timestep_index_30 - 1 :
             ]
+            target["gsp_capacity"] = batch["gsp"]["gsp_capacity"][
+                :, self.current_timestep_index_30 :, 0
+            ]
 
         if self.add_satellite_target:
             future_sat_data = batch["satellite"]["data"][:, :, self.current_timestep_index :]
