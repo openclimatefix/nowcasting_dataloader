@@ -120,8 +120,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         assert cloud in ["gcp", "aws", "local"]
 
-        worker_id = torch.utils.data.get_worker_info().id
-        self.tmp_path = f'{self.tmp_path}/{worker_id}'
+        worker_info = torch.utils.data.get_worker_info()
+        if worker_info is not None:
+            self.tmp_path = f'{self.tmp_path}/{worker_info.id}'
 
         if not os.path.isdir(self.tmp_path):
             os.mkdir(self.tmp_path)
