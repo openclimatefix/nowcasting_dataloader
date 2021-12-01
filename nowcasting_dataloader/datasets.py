@@ -22,6 +22,7 @@ from nowcasting_dataset.consts import (
 from nowcasting_dataset.dataset.batch import Batch, Example
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess
+from nowcasting_dataset.utils import get_netcdf_filename
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
@@ -151,10 +152,11 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         if self.cloud in ["gcp", "aws"]:
             # TODO check this works for multiple files
-            download_to_local(
-                remote_filename=self.src_path,
-                local_filename=self.tmp_path,
-            )
+            for data_source in self.data_sources_names:
+                download_to_local(
+                    remote_filename=f'{self.src_path}/{data_source}/{get_netcdf_filename(batch_idx)}',
+                    local_filename=f'{self.tmp_path}/{data_source}/{get_netcdf_filename(batch_idx)}',
+                )
             local_netcdf_folder = self.tmp_path
         else:
             local_netcdf_folder = self.src_path
