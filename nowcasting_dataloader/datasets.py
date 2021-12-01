@@ -131,7 +131,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             self.s3_resource = boto3.resource("s3")
 
         # adjust temp path for each worker
-        self.tmp_path = f'{self.tmp_path}/{worker_id}'
+        self.tmp_path = f"{self.tmp_path}/{worker_id}"
 
     def __len__(self):
         """Length of dataset"""
@@ -159,15 +159,18 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
             # download all data files
             for data_source in self.data_sources_names:
+                data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
                 download_to_local(
-                    remote_filename=f'{self.src_path}/{data_source}/{get_netcdf_filename(batch_idx)}',
-                    local_filename=f'{self.tmp_path}/{data_source}/{get_netcdf_filename(batch_idx)}',
+                    remote_filename=f"{self.src_path}/{data_source_and_filename}",
+                    local_filename=f"{self.tmp_path}/{data_source_and_filename}",
                 )
 
             # download locations file
             download_to_local(
-                remote_filename=f'{self.src_path}/{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}',
-                local_filename=f'{self.tmp_path}/{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}',
+                remote_filename=f"{self.src_path}/"
+                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
+                local_filename=f"{self.tmp_path}/"
+                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
             )
 
             local_netcdf_folder = self.tmp_path
