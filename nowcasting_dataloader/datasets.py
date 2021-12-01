@@ -162,7 +162,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 )
 
             # download locations file
-            print(f'{self.src_path}/{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}')
             download_to_local(
                 remote_filename=f'{self.src_path}/{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}',
                 local_filename=f'{self.tmp_path}/{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}',
