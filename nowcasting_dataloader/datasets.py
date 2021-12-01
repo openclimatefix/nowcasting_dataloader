@@ -120,10 +120,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         assert cloud in ["gcp", "aws", "local"]
 
-        worker_info = torch.utils.data.get_worker_info()
-        if worker_info is not None:
-            self.tmp_path = f'{self.tmp_path}/{worker_info.id}'
-
         if not os.path.isdir(self.tmp_path):
             os.mkdir(self.tmp_path)
 
@@ -133,6 +129,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
             self.gcs = gcsfs.GCSFileSystem()
         elif self.cloud == "aws":
             self.s3_resource = boto3.resource("s3")
+
+        # adjust temp path for each worker
+        self.tmp_path = f'{self.tmp_path}/{worker_id}'
 
     def __len__(self):
         """Length of dataset"""
