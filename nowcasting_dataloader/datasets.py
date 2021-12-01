@@ -17,13 +17,12 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_ID,
     PV_YIELD,
     SATELLITE_DATA,
+    SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME,
     TOPOGRAPHIC_DATA,
 )
 from nowcasting_dataset.dataset.batch import Batch, Example
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
-from nowcasting_dataset.utils import set_fsspec_for_multiprocess
-from nowcasting_dataset.utils import get_netcdf_filename
-from nowcasting_dataset.consts import SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME
+from nowcasting_dataset.utils import get_netcdf_filename, set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
