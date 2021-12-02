@@ -6,4 +6,7 @@ jobs:
     uses: openclimatefix/.github/.github/workflows/python-test.yml@main
     with:
       # 0 means don't use pytest-xdist
-      pytest_numcpus: "0"
+      pytest_numcpus: "2"
+      # pytest-cov looks at this folder
+      pytest_cov_dir: "nowcasting_dataloader"
+
