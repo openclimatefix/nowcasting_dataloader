@@ -9,4 +9,3 @@ jobs:
       pytest_numcpus: "2"
       # pytest-cov looks at this folder
       pytest_cov_dir: "nowcasting_dataloader"
-
