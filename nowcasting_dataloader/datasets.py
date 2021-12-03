@@ -17,11 +17,12 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_ID,
     PV_YIELD,
     SATELLITE_DATA,
+    SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME,
     TOPOGRAPHIC_DATA,
 )
 from nowcasting_dataset.dataset.batch import Batch, Example
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
-from nowcasting_dataset.utils import set_fsspec_for_multiprocess
+from nowcasting_dataset.utils import get_netcdf_filename, set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
@@ -128,6 +129,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         elif self.cloud == "aws":
             self.s3_resource = boto3.resource("s3")
 
+        # adjust temp path for each worker
+        self.tmp_path = f"{self.tmp_path}/{worker_id}"
+
     def __len__(self):
         """Length of dataset"""
         return self.n_batches
@@ -150,11 +154,22 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
 
         if self.cloud in ["gcp", "aws"]:
-            # TODO check this works for multiple files
+            # download all data files
+            for data_source in self.data_sources_names:
+                data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
+                download_to_local(
+                    remote_filename=f"{self.src_path}/{data_source_and_filename}",
+                    local_filename=f"{self.tmp_path}/{data_source_and_filename}",
+                )
+
+            # download locations file
             download_to_local(
-                remote_filename=self.src_path,
-                local_filename=self.tmp_path,
+                remote_filename=f"{self.src_path}/"
+                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
+                local_filename=f"{self.tmp_path}/"
+                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
             )
+
             local_netcdf_folder = self.tmp_path
         else:
             local_netcdf_folder = self.src_path
@@ -179,7 +194,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         if self.cloud != "local":
             # remove files in a folder, but not the folder itself
-            delete_all_files_in_temp_path(self.src_path)
+            delete_all_files_in_temp_path(self.tmp_path)
 
         # normalize the data
         if self.normalize:
