@@ -154,8 +154,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
 
         if self.cloud in ["gcp", "aws"]:
-            # TODO check this works for multiple files
-
             # download all data files
             for data_source in self.data_sources_names:
                 data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
