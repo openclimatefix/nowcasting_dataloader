@@ -14,10 +14,10 @@ from nowcasting_dataloader.data_sources import (
     NWPML,
     PVML,
     MetadataML,
+    OpticalFlowML,
     SatelliteML,
     SunML,
     TopographicML,
-    OpticalFlowML,
 )
 from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
