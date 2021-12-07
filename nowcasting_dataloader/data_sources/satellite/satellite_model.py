@@ -6,7 +6,6 @@ from typing import Optional
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -90,7 +89,7 @@ class SatelliteML(DataSourceOutputML):
     #         time_5 = make_random_time_vectors(
     #             batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
     #         )["time_5"]
-    # 
+    #
     #     s = SatelliteML(
     #         batch_size=batch_size,
     #         data=np.random.randn(
@@ -107,7 +106,7 @@ class SatelliteML(DataSourceOutputML):
     #         time=time_5,
     #         channels=np.array([list(range(number_sat_channels)) for _ in range(batch_size)]),
     #     )
-    # 
+    #
     #     return s
 
     def get_datetime_index(self) -> Array:

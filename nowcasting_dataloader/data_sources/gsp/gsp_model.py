@@ -1,7 +1,6 @@
 """ Model for output of GSP data """
 import logging
 
-import numpy as np
 from nowcasting_dataset.consts import (
     GSP_DATETIME_INDEX,
     GSP_ID,
@@ -9,7 +8,6 @@ from nowcasting_dataset.consts import (
     GSP_Y_COORDS,
     GSP_YIELD,
 )
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -95,7 +93,7 @@ class GSPML(DataSourceOutputML):
     #         time_30 = make_random_time_vectors(
     #             batch_size=batch_size, seq_length_5_minutes=0, seq_length_30_minutes=seq_length_30
     #         )["time_30"]
-    # 
+    #
     #     return GSPML(
     #         batch_size=batch_size,
     #         gsp_yield=np.random.randn(

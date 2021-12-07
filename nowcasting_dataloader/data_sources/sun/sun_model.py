@@ -1,9 +1,7 @@
 """ Model for Sun features """
 import logging
 
-import numpy as np
 from nowcasting_dataset.consts import SUN_AZIMUTH_ANGLE, SUN_ELEVATION_ANGLE
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -53,7 +51,7 @@ class SunML(DataSourceOutputML):
     #         time_5 = make_random_time_vectors(
     #             batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
     #         )["time_5"]
-    # 
+    #
     #     return SunML(
     #         batch_size=batch_size,
     #         sun_azimuth_angle=np.random.randn(

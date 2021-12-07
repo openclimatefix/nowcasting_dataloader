@@ -10,7 +10,6 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_Y_COORDS,
     PV_YIELD,
 )
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -89,7 +88,7 @@ class PVML(DataSourceOutputML):
     #         time_5 = make_random_time_vectors(
     #             batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
     #         )["time_5"]
-    # 
+    #
     #     return PVML(
     #         batch_size=batch_size,
     #         pv_yield=np.random.randn(
@@ -101,7 +100,8 @@ class PVML(DataSourceOutputML):
     #             batch_size,
     #             n_pv_systems_per_batch,
     #         ).astype(np.float32),
-    #         pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
+    #         pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size,
+    #         n_pv_systems_per_batch))),
     #         pv_system_row_number=np.sort(
     #             np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
     #         ),

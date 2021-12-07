@@ -1,7 +1,6 @@
 """ Model for Topogrpahic features """
 import logging
 
-import numpy as np
 from nowcasting_dataset.consts import TOPOGRAPHIC_DATA
 from pydantic import Field, validator
 

@@ -6,7 +6,6 @@ from typing import Optional
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -89,7 +88,7 @@ class NWPML(DataSourceOutputML):
     #         time_60 = make_random_time_vectors(
     #             batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes=seq_length_60
     #         )["time_60"]
-    # 
+    #
     #     s = NWPML(
     #         batch_size=batch_size,
     #         data=np.random.randn(
@@ -109,7 +108,7 @@ class NWPML(DataSourceOutputML):
     #         init_time=time_60[0],
     #         channels=np.array([list(range(number_nwp_channels)) for _ in range(batch_size)]),
     #     )
-    # 
+    #
     #     return s
 
     def get_datetime_index(self) -> Array:

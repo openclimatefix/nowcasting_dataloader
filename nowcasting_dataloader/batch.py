@@ -6,7 +6,6 @@ from typing import Optional
 
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import BaseModel
 
 from nowcasting_dataloader.data_sources import (
@@ -76,7 +75,7 @@ class BatchML(Example):
 
         batch: Batch = Batch.fake(configuration=configuration)
         batch: BatchML = BatchML.from_batch(batch=batch)
-        
+
         return batch
 
     @staticmethod
