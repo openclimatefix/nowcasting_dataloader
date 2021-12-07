@@ -52,7 +52,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         add_position_encoding: bool = False,
         data_sources_names: Optional[list[str]] = None,
         num_bands: int = 4,
-
     ):
         """
         Netcdf Dataset
@@ -197,7 +196,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
-
         # netcdf_batch = xr.load_dataset(local_netcdf_filename)
 
         if self.cloud != "local":
