@@ -1,7 +1,6 @@
 """ Model for output of GSP data """
 import logging
 
-from nowcasting_dataset.data_sources.fake import metadata_fake
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -33,10 +32,3 @@ class MetadataML(DataSourceOutputML):
         ...,
         description="The y centers of each example in OSGB coordinates",
     )
-
-    @staticmethod
-    def fake(batch_size):
-        """Make a fake GSP object"""
-        metadata = metadata_fake(batch_size=batch_size)
-
-        return MetadataML(**metadata.dict())
