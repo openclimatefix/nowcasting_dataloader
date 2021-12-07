@@ -26,7 +26,6 @@ from nowcasting_dataset.utils import get_netcdf_filename, set_fsspec_for_multipr
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
-from nowcasting_dataloader.utils.optical_flow import compute_optical_flow_for_batch
 from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 logger = logging.getLogger(__name__)
@@ -51,8 +50,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         forecast_minutes: Optional[int] = None,
         normalize: bool = True,
         add_position_encoding: bool = False,
-        add_optical_flow: bool = False,
-        flow_image_size_pixels: int = 64,
         data_sources_names: Optional[list[str]] = None,
         num_bands: int = 4,
 
@@ -91,14 +88,11 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
-        self.add_optical_flow = add_optical_flow
-        self.flow_image_size_pixels = flow_image_size_pixels
 
         self.num_bands = num_bands
         if data_sources_names is None:
             data_sources_names = list(Example.__fields__.keys())
         self.data_sources_names = data_sources_names
-
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -201,18 +195,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 batch, num_bands=self.num_bands
             )
 
-        if self.add_optical_flow:
-            optical_flow: torch.Tensor = compute_optical_flow_for_batch(
-                batch, final_image_size_pixels=self.flow_image_size_pixels)
-
-
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
-
-
-        if self.add_optical_flow:
-            # Add optical flow data source
-            batch.optical_flow = optical_flow
 
         # netcdf_batch = xr.load_dataset(local_netcdf_filename)
 
