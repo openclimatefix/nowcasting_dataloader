@@ -26,6 +26,7 @@ def test_netcdf_dataset_local_using_configuration():
     c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
     configuration = c
+    
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -73,10 +74,10 @@ def test_netcdf_dataset_local_using_configuration():
         assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
 
         assert len(batch_ml.metadata.t0_datetime_utc) == 4
-        assert batch_ml.pv.pv_yield.shape == (4, 5, 128)
-        assert batch_ml.gsp.gsp_yield.shape == (4, 1, 32)
-        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 5)
-        assert batch_ml.sun.sun_elevation_angle.shape == (4, 5)
+        assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
+        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)
+        assert batch_ml.sun.sun_elevation_angle.shape == (4, 19)
 
         assert type(batch_ml.nwp.data) == torch.Tensor
         assert batch_ml.nwp.data[0, 0, 0, 0, 0].dtype == torch.float32
