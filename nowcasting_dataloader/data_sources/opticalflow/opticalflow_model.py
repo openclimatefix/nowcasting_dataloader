@@ -6,7 +6,6 @@ from typing import Optional
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -76,39 +75,6 @@ class OpticalFlowML(DataSourceOutputML):
     channels: Optional[Array] = Field(
         list(OPTICALFLOW_MEAN.keys()), description="List of the optical flow channels"
     )
-
-    @staticmethod
-    def fake(
-        batch_size=32,
-        seq_length_5=19,
-        opticalflow_image_size_pixels=64,
-        number_sat_channels=7,
-        time_5=None,
-    ):
-        """Create fake data"""
-        if time_5 is None:
-            time_5 = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )["time_5"]
-
-        s = OpticalFlowML(
-            batch_size=batch_size,
-            data=np.random.randn(
-                batch_size,
-                number_sat_channels,
-                seq_length_5,
-                opticalflow_image_size_pixels,
-                opticalflow_image_size_pixels,
-            ).astype(np.float32),
-            x=np.sort(np.random.randn(batch_size, opticalflow_image_size_pixels)),
-            y=np.sort(np.random.randn(batch_size, opticalflow_image_size_pixels))[:, ::-1].copy()
-            # copy is needed as torch doesnt not support negative strides
-            ,
-            time=time_5,
-            channels=np.array([list(range(number_sat_channels)) for _ in range(batch_size)]),
-        )
-
-        return s
 
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""

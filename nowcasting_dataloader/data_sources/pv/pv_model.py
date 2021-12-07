@@ -10,7 +10,6 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_Y_COORDS,
     PV_YIELD,
 )
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field, validator
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -81,40 +80,6 @@ class PVML(DataSourceOutputML):
         """Validate 'pv_system_y_coords'"""
         assert v.shape[-1] == values["pv_yield"].shape[-1]
         return v
-
-    @staticmethod
-    def fake(batch_size, seq_length_5, n_pv_systems_per_batch, time_5=None):
-        """Create fake data"""
-        if time_5 is None:
-            time_5 = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )["time_5"]
-
-        return PVML(
-            batch_size=batch_size,
-            pv_yield=np.random.randn(
-                batch_size,
-                seq_length_5,
-                n_pv_systems_per_batch,
-            ).astype(np.float32),
-            pv_capacity=np.random.randn(
-                batch_size,
-                n_pv_systems_per_batch,
-            ).astype(np.float32),
-            pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
-            pv_system_row_number=np.sort(
-                np.random.randint(0, 1000, (batch_size, n_pv_systems_per_batch))
-            ),
-            pv_datetime_index=time_5,
-            pv_system_x_coords=np.sort(
-                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
-            ),
-            pv_system_y_coords=np.sort(
-                np.random.randn(batch_size, n_pv_systems_per_batch).astype(np.float32)
-            )[
-                :, ::-1
-            ].copy(),  # copy is needed as torch doesnt not support negative strides
-        )
 
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""

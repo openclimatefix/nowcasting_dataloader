@@ -6,7 +6,6 @@ from typing import Optional
 
 import numpy as np
 import xarray as xr
-from nowcasting_dataset.time import make_random_time_vectors
 from pydantic import Field
 
 from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
@@ -75,42 +74,6 @@ class NWPML(DataSourceOutputML):
     init_time: Array = Field(..., description="The time when the nwp forecast was made")
 
     channels: Optional[Array] = Field(None, description="List of the nwp channels")
-
-    @staticmethod
-    def fake(
-        batch_size=32,
-        seq_length_60=2,
-        image_size_pixels=64,
-        number_nwp_channels=7,
-        time_60=None,
-    ):
-        """Create fake data"""
-        if time_60 is None:
-            time_60 = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes=seq_length_60
-            )["time_60"]
-
-        s = NWPML(
-            batch_size=batch_size,
-            data=np.random.randn(
-                batch_size,
-                number_nwp_channels,
-                seq_length_60,
-                image_size_pixels,
-                image_size_pixels,
-            ).astype(np.float32),
-            x=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32)),
-            y=np.sort(np.random.randn(batch_size, image_size_pixels).astype(np.float32))[
-                :, ::-1
-            ].copy()
-            # copy is needed as torch doesnt not support negative strides
-            ,
-            time=time_60,
-            init_time=time_60[0],
-            channels=np.array([list(range(number_nwp_channels)) for _ in range(batch_size)]),
-        )
-
-        return s
 
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""
