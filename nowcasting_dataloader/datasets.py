@@ -55,7 +55,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         flow_image_size_pixels: int = 64,
         data_sources_names: Optional[list[str]] = None,
         num_bands: int = 4,
-
     ):
         """
         Netcdf Dataset
@@ -98,7 +97,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if data_sources_names is None:
             data_sources_names = list(Example.__fields__.keys())
         self.data_sources_names = data_sources_names
-
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -203,12 +201,11 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         if self.add_optical_flow:
             optical_flow: torch.Tensor = compute_optical_flow_for_batch(
-                batch, final_image_size_pixels=self.flow_image_size_pixels)
-
+                batch, final_image_size_pixels=self.flow_image_size_pixels
+            )
 
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
-
 
         if self.add_optical_flow:
             # Add optical flow data source
