@@ -73,68 +73,11 @@ class BatchML(Example):
     @staticmethod
     def fake(configuration: Configuration = Configuration()):
         """Create fake batch"""
-        process = configuration.process
-        input_data = configuration.input_data
 
-        seq_length_30 = int(
-            (input_data.default_history_minutes + input_data.default_forecast_minutes) / 30 + 1
-        )
-
-        seq_length_60 = int(
-            (input_data.default_history_minutes + input_data.default_forecast_minutes) / 60 + 1
-        )
-
-        time_vectors = make_random_time_vectors(
-            batch_size=process.batch_size,
-            seq_length_5_minutes=input_data.default_seq_length_5_minutes,
-            seq_length_30_minutes=seq_length_30,
-            seq_length_60_minutes=seq_length_60,
-        )
-
-        return BatchML(
-            batch_size=process.batch_size,
-            satellite=SatelliteML.fake(
-                process.batch_size,
-                input_data.default_seq_length_5_minutes,
-                input_data.satellite.satellite_image_size_pixels,
-                len(input_data.satellite.satellite_channels),
-                time_5=time_vectors["time_5"],
-            ),
-            hrvsatellite=SatelliteML.fake(
-                process.batch_size,
-                input_data.default_seq_length_5_minutes,
-                input_data.satellite.satellite_image_size_pixels,
-                len(input_data.satellite.satellite_channels),
-                time_5=time_vectors["time_5"],
-            ),
-            topographic=TopographicML.fake(
-                batch_size=process.batch_size,
-                image_size_pixels=input_data.satellite.satellite_image_size_pixels,
-            ),
-            pv=PVML.fake(
-                batch_size=process.batch_size,
-                seq_length_5=input_data.default_seq_length_5_minutes,
-                n_pv_systems_per_batch=128,
-                time_5=time_vectors["time_5"],
-            ),
-            gsp=GSPML.fake(
-                process.batch_size,
-                seq_length_30=seq_length_30,
-                n_gsp_per_batch=32,
-                time_30=time_vectors["time_30"],
-            ),
-            sun=SunML.fake(
-                batch_size=process.batch_size, seq_length_5=input_data.default_seq_length_5_minutes
-            ),
-            nwp=NWPML.fake(
-                batch_size=process.batch_size,
-                seq_length_60=seq_length_60,
-                image_size_pixels=input_data.nwp.nwp_image_size_pixels,
-                number_nwp_channels=len(input_data.nwp.nwp_channels),
-                time_60=time_vectors["time_60"],
-            ),
-            metadata=MetadataML.fake(process.batch_size),
-        )
+        batch: Batch = Batch.fake(configuration=configuration)
+        batch: BatchML = BatchML.from_batch(batch=batch)
+        
+        return batch
 
     @staticmethod
     def from_batch(batch: Batch) -> BatchML:

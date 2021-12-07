@@ -46,26 +46,26 @@ class SunML(DataSourceOutputML):
         assert v.shape[-1] == values["sun_azimuth_angle"].shape[-1]
         return v
 
-    @staticmethod
-    def fake(batch_size, seq_length_5, time_5=None):
-        """Create fake data"""
-        if time_5 is None:
-            time_5 = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )["time_5"]
-
-        return SunML(
-            batch_size=batch_size,
-            sun_azimuth_angle=np.random.randn(
-                batch_size,
-                seq_length_5,
-            ).astype(np.float32),
-            sun_elevation_angle=np.random.randn(
-                batch_size,
-                seq_length_5,
-            ).astype(np.float32),
-            sun_datetime_index=time_5,
-        )
+    # @staticmethod
+    # def fake(batch_size, seq_length_5, time_5=None):
+    #     """Create fake data"""
+    #     if time_5 is None:
+    #         time_5 = make_random_time_vectors(
+    #             batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
+    #         )["time_5"]
+    # 
+    #     return SunML(
+    #         batch_size=batch_size,
+    #         sun_azimuth_angle=np.random.randn(
+    #             batch_size,
+    #             seq_length_5,
+    #         ).astype(np.float32),
+    #         sun_elevation_angle=np.random.randn(
+    #             batch_size,
+    #             seq_length_5,
+    #         ).astype(np.float32),
+    #         sun_datetime_index=time_5,
+    #     )
 
     def get_datetime_index(self):
         """Get the datetime index of this data"""

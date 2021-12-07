@@ -34,9 +34,9 @@ class MetadataML(DataSourceOutputML):
         description="The y centers of each example in OSGB coordinates",
     )
 
-    @staticmethod
-    def fake(batch_size):
-        """Make a fake GSP object"""
-        metadata = metadata_fake(batch_size=batch_size)
-
-        return MetadataML(**metadata.dict())
+    # @staticmethod
+    # def fake(batch_size):
+    #     """Make a fake GSP object"""
+    #     metadata = metadata_fake(batch_size=batch_size)
+    # 
+    #     return MetadataML(**metadata.dict())

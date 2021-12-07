@@ -59,24 +59,24 @@ class TopographicML(DataSourceOutputML):
         assert v.shape[-1] == values["topo_data"].shape[-1]
         return v
 
-    @staticmethod
-    def fake(batch_size, image_size_pixels):
-        """Create fake data"""
-        return TopographicML(
-            batch_size=batch_size,
-            topo_data=np.random.randn(
-                batch_size,
-                image_size_pixels,
-                image_size_pixels,
-            ).astype(np.float32),
-            topo_x_coords=np.sort(
-                np.random.randn(batch_size, image_size_pixels).astype(np.float32)
-            ),
-            topo_y_coords=np.sort(
-                np.random.randn(batch_size, image_size_pixels).astype(np.float32)
-            )[:, ::-1].copy(),
-            # copy is needed as torch doesnt not support negative strides
-        )
+    # @staticmethod
+    # def fake(batch_size, image_size_pixels):
+    #     """Create fake data"""
+    #     return TopographicML(
+    #         batch_size=batch_size,
+    #         topo_data=np.random.randn(
+    #             batch_size,
+    #             image_size_pixels,
+    #             image_size_pixels,
+    #         ).astype(np.float32),
+    #         topo_x_coords=np.sort(
+    #             np.random.randn(batch_size, image_size_pixels).astype(np.float32)
+    #         ),
+    #         topo_y_coords=np.sort(
+    #             np.random.randn(batch_size, image_size_pixels).astype(np.float32)
+    #         )[:, ::-1].copy(),
+    #         # copy is needed as torch doesnt not support negative strides
+    #     )
 
     @staticmethod
     def from_xr_dataset(xr_dataset):
