@@ -86,35 +86,6 @@ class GSPML(DataSourceOutputML):
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         return v
 
-    # @staticmethod
-    # def fake(batch_size, seq_length_30, n_gsp_per_batch, time_30=None):
-    #     """Make a fake GSP object"""
-    #     if time_30 is None:
-    #         time_30 = make_random_time_vectors(
-    #             batch_size=batch_size, seq_length_5_minutes=0, seq_length_30_minutes=seq_length_30
-    #         )["time_30"]
-    #
-    #     return GSPML(
-    #         batch_size=batch_size,
-    #         gsp_yield=np.random.randn(
-    #             batch_size,
-    #             seq_length_30,
-    #             n_gsp_per_batch,
-    #         ).astype(np.float32),
-    #         gsp_capacity=np.random.randn(
-    #             batch_size,
-    #             seq_length_30,
-    #             n_gsp_per_batch,
-    #         ).astype(np.float32),
-    #         gsp_id=np.sort(np.random.randint(0, 340, (batch_size, n_gsp_per_batch))),
-    #         gsp_datetime_index=time_30,
-    #         gsp_x_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32)),
-    #         gsp_y_coords=np.sort(np.random.randn(batch_size, n_gsp_per_batch).astype(np.float32))[
-    #             :, ::-1
-    #         ].copy(),
-    #     )
-    #     # copy is needed as torch doesnt not support negative strides
-
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""
         return self.gsp_datetime_index

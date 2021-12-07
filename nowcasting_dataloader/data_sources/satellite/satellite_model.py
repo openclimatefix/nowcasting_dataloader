@@ -76,39 +76,6 @@ class SatelliteML(DataSourceOutputML):
         list(SAT_MEAN.keys()), description="List of the satellite channels"
     )
 
-    # @staticmethod
-    # def fake(
-    #     batch_size=32,
-    #     seq_length_5=19,
-    #     satellite_image_size_pixels=64,
-    #     number_sat_channels=7,
-    #     time_5=None,
-    # ):
-    #     """Create fake data"""
-    #     if time_5 is None:
-    #         time_5 = make_random_time_vectors(
-    #             batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-    #         )["time_5"]
-    #
-    #     s = SatelliteML(
-    #         batch_size=batch_size,
-    #         data=np.random.randn(
-    #             batch_size,
-    #             number_sat_channels,
-    #             seq_length_5,
-    #             satellite_image_size_pixels,
-    #             satellite_image_size_pixels,
-    #         ).astype(np.float32),
-    #         x=np.sort(np.random.randn(batch_size, satellite_image_size_pixels)),
-    #         y=np.sort(np.random.randn(batch_size, satellite_image_size_pixels))[:, ::-1].copy()
-    #         # copy is needed as torch doesnt not support negative strides
-    #         ,
-    #         time=time_5,
-    #         channels=np.array([list(range(number_sat_channels)) for _ in range(batch_size)]),
-    #     )
-    #
-    #     return s
-
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""
         return self.time
