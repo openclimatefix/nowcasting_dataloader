@@ -17,6 +17,7 @@ from nowcasting_dataloader.data_sources import (
     SatelliteML,
     SunML,
     TopographicML,
+    OpticalFlowML,
 )
 from nowcasting_dataloader.xr_utils import (
     register_xr_data_array_to_tensor,
@@ -39,7 +40,7 @@ class Example(BaseModel):
     satellite: Optional[SatelliteML]
     hrvsatellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
-    optical_flow: Optional[SatelliteML]
+    optical_flow: Optional[OpticalFlowML]
     pv: Optional[PVML]
     sun: Optional[SunML]
     gsp: Optional[GSPML]
