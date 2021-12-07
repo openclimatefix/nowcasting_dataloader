@@ -26,7 +26,6 @@ def test_netcdf_dataset_local_using_configuration():
     c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
     configuration = c
-    
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
