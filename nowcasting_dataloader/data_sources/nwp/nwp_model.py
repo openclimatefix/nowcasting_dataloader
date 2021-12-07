@@ -14,36 +14,34 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 
 logger = logging.getLogger(__name__)
 
-# Means computed with
-# nwp_ds = NWPDataSource(...)
-# nwp_ds.open()
-# mean = nwp_ds.data.isel(init_time=slice(0, 10)).mean(
-#     dim=['step', 'x', 'init_time', 'y']).compute()
-NWP_MEAN = [
-    2.8041010e02,
-    1.6854691e01,
-    6.7529683e-05,
-    8.1832832e01,
-    7.1233767e-03,
-    8.8566933e00,
-    4.3474598e04,
-    4.9820110e01,
-    4.8095409e01,
-    4.2833260e01,
-]
+# Means and std computed with
+# nowcasting_dataset/scripts/compute_stats_from_batches.py
+# using v15 training batches on 2021-11-24.
+NWP_MEAN = {
+    "t": 285.7799539185846,
+    "dswrf": 294.6696933986283,
+    "prate": 3.6078121378638696e-05,
+    "r": 75.57106712435926,
+    "sde": 0.0024915961594965614,
+    "si10": 4.931356852411006,
+    "vis": 22321.762918384553,
+    "lcc": 47.90454236572895,
+    "mcc": 44.22781694449808,
+    "hcc": 32.87577371914454,
+}
 
-NWP_STD = [
-    2.5812180e00,
-    4.1278820e01,
-    2.7507244e-04,
-    9.0967312e00,
-    1.4110464e-01,
-    4.3616886e00,
-    2.3853148e04,
-    3.8900299e01,
-    4.2830105e01,
-    4.2778091e01,
-]
+NWP_STD = {
+    "t": 5.017000766747606,
+    "dswrf": 233.1834250473355,
+    "prate": 0.00021690701537950742,
+    "r": 15.705370079694358,
+    "sde": 0.07560040052148084,
+    "si10": 2.664583614352396,
+    "vis": 12963.802514945439,
+    "lcc": 40.06675870700349,
+    "mcc": 41.927221148316384,
+    "hcc": 39.05157559763763,
+}
 
 
 class NWPML(DataSourceOutputML):
@@ -81,23 +79,23 @@ class NWPML(DataSourceOutputML):
     @staticmethod
     def fake(
         batch_size=32,
-        seq_length_5=19,
+        seq_length_60=2,
         image_size_pixels=64,
         number_nwp_channels=7,
-        time_5=None,
+        time_60=None,
     ):
         """Create fake data"""
-        if time_5 is None:
-            _, time_5, _ = make_random_time_vectors(
-                batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )
+        if time_60 is None:
+            time_60 = make_random_time_vectors(
+                batch_size=batch_size, seq_length_5_minutes=0, seq_length_60_minutes=seq_length_60
+            )["time_60"]
 
         s = NWPML(
             batch_size=batch_size,
             data=np.random.randn(
                 batch_size,
                 number_nwp_channels,
-                seq_length_5,
+                seq_length_60,
                 image_size_pixels,
                 image_size_pixels,
             ).astype(np.float32),
@@ -107,8 +105,8 @@ class NWPML(DataSourceOutputML):
             ].copy()
             # copy is needed as torch doesnt not support negative strides
             ,
-            time=time_5,
-            init_time=time_5[0],
+            time=time_60,
+            init_time=time_60[0],
             channels=np.array([list(range(number_nwp_channels)) for _ in range(batch_size)]),
         )
 
@@ -134,6 +132,12 @@ class NWPML(DataSourceOutputML):
     def normalize(self):
         """Normalize the nwp data"""
         if not self.normalized:
-            self.data = self.data - NWP_MEAN
-            self.data = self.data / NWP_STD
+            # Only take the channels that are used
+            mean = np.array([NWP_MEAN[b] for b in self.channels])
+            std = np.array([NWP_STD[b] for b in self.channels])
+            # Expand for normaliation
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
+            self.data = self.data - mean
+            self.data = self.data / std
             self.normalized = True

@@ -14,35 +14,36 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 
 logger = logging.getLogger(__name__)
 
-SAT_MEAN = [
-    93.23458,
-    131.71373,
-    843.7779,
-    736.6148,
-    771.1189,
-    589.66034,
-    862.29816,
-    927.69586,
-    90.70885,
-    107.58985,
-    618.4583,
-    532.47394,
-]
 
-SAT_STD = [
-    115.34247,
-    139.92636,
-    36.99538,
-    57.366386,
-    30.346825,
-    149.68007,
-    51.70631,
-    35.872967,
-    115.77212,
-    120.997154,
-    98.57828,
-    99.76469,
-]
+SAT_MEAN = {
+    "HRV": 236.13257536395903,
+    "IR_016": 291.61620182554185,
+    "IR_039": 858.8040610176552,
+    "IR_087": 738.3103442750336,
+    "IR_097": 773.0910794778366,
+    "IR_108": 607.5318145165666,
+    "IR_120": 860.6716261423857,
+    "IR_134": 925.0477987594331,
+    "VIS006": 228.02134593063957,
+    "VIS008": 257.56333202381205,
+    "WV_062": 633.5975770915588,
+    "WV_073": 543.4963868823854,
+}
+
+SAT_STD = {
+    "HRV": 935.9717382401759,
+    "IR_016": 172.01044433112992,
+    "IR_039": 96.53756504807913,
+    "IR_087": 96.21369354283686,
+    "IR_097": 86.72892737648276,
+    "IR_108": 156.20651744208888,
+    "IR_120": 104.35287930753246,
+    "IR_134": 104.36462050405994,
+    "VIS006": 150.2399269307514,
+    "VIS008": 152.16086321818398,
+    "WV_062": 111.8514878214775,
+    "WV_073": 106.8855172848904,
+}
 
 
 class SatelliteML(DataSourceOutputML):
@@ -72,7 +73,9 @@ class SatelliteML(DataSourceOutputML):
         "passed into the ML model.",
     )
 
-    channels: Optional[Array] = Field(None, description="List of the satellite channels")
+    channels: Optional[Array] = Field(
+        list(SAT_MEAN.keys()), description="List of the satellite channels"
+    )
 
     @staticmethod
     def fake(
@@ -84,9 +87,9 @@ class SatelliteML(DataSourceOutputML):
     ):
         """Create fake data"""
         if time_5 is None:
-            _, time_5, _ = make_random_time_vectors(
+            time_5 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )
+            )["time_5"]
 
         s = SatelliteML(
             batch_size=batch_size,
@@ -121,12 +124,17 @@ class SatelliteML(DataSourceOutputML):
         # convert to torch dictionary
         satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y"])
 
-        # move to Modle
+        # move to Model
         return SatelliteML(**satellite_batch_ml)
 
     def normalize(self):
         """Normalize the satellite data"""
         if not self.normalized:
-            self.data = self.data - SAT_MEAN
-            self.data = self.data / SAT_STD
+            mean = np.array([SAT_MEAN[b] for b in self.channels])
+            std = np.array([SAT_STD[b] for b in self.channels])
+            # Need to get to the same shape, so add 3 1-dimensions
+            mean = np.expand_dims(mean, axis=[1, 2, 3])
+            std = np.expand_dims(std, axis=[1, 2, 3])
+            self.data = self.data - mean
+            self.data = self.data / std
             self.normalized = True

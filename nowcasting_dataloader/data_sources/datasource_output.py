@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-Array = Union[xr.DataArray, np.ndarray, torch.Tensor]
+Array = Union[xr.DataArray, np.ndarray, torch.Tensor, list]
 
 
 class DataSourceOutputML(BaseModel):

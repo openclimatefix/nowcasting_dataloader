@@ -21,12 +21,21 @@ logger = logging.getLogger(__name__)
 class PVML(DataSourceOutputML):
     """Model for output of PV data"""
 
-    # Shape: [batch_size,] seq_length, width, height, channel
+    # Shape: [batch_size,] seq_length, n_pv_systems_per_example
     pv_yield: Array = Field(
         ...,
         description=" PV yield from all PV systems in the region of interest (ROI). \
     : Includes central PV system, which will always be the first entry. \
     : shape = [batch_size, ] seq_length, n_pv_systems_per_example",
+    )
+
+    # Shape: [batch_size,], n_pv_systems_per_example
+    pv_capacity: Array = Field(
+        ...,
+        description=" PV capacity from all PV systems in the region of interest (ROI). \
+        : Includes central PV system, which will always be the first entry. "
+        "PV capacity is assume constant: \
+        : shape = [batch_size, ], n_pv_systems_per_example",
     )
 
     #: PV identification.
@@ -77,15 +86,19 @@ class PVML(DataSourceOutputML):
     def fake(batch_size, seq_length_5, n_pv_systems_per_batch, time_5=None):
         """Create fake data"""
         if time_5 is None:
-            _, time_5, _ = make_random_time_vectors(
+            time_5 = make_random_time_vectors(
                 batch_size=batch_size, seq_length_5_minutes=seq_length_5, seq_length_30_minutes=0
-            )
+            )["time_5"]
 
         return PVML(
             batch_size=batch_size,
             pv_yield=np.random.randn(
                 batch_size,
                 seq_length_5,
+                n_pv_systems_per_batch,
+            ).astype(np.float32),
+            pv_capacity=np.random.randn(
+                batch_size,
                 n_pv_systems_per_batch,
             ).astype(np.float32),
             pv_system_id=np.sort(np.random.randint(0, 10000, (batch_size, n_pv_systems_per_batch))),
@@ -111,9 +124,12 @@ class PVML(DataSourceOutputML):
     def from_xr_dataset(xr_dataset):
         """Change xr dataset to model. If data does not exist, then return None"""
 
-        pv_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_coords", "y_coords", "id"])
+        pv_batch_ml = xr_dataset.torch.to_tensor(
+            ["power_mw", "capacity_mwp", "time", "x_coords", "y_coords", "id"]
+        )
 
-        pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("data")
+        pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("power_mw")
+        pv_batch_ml["pv_capacity"] = pv_batch_ml.pop("capacity_mwp")
         pv_batch_ml[PV_SYSTEM_ID] = pv_batch_ml["id"]
         pv_batch_ml[PV_SYSTEM_ROW_NUMBER] = pv_batch_ml.pop("id")
         pv_batch_ml[PV_DATETIME_INDEX] = pv_batch_ml.pop("time")
@@ -121,3 +137,11 @@ class PVML(DataSourceOutputML):
         pv_batch_ml[PV_SYSTEM_Y_COORDS] = pv_batch_ml.pop("y_coords")
 
         return PVML(**pv_batch_ml)
+
+    def normalize(self):
+        """Normalize the gsp data"""
+        if not self.normalized:
+            # Expand capacity to the same timesteps for broadcasting
+            capacity = np.expand_dims(self.pv_capacity, axis=1)
+            self.pv_yield = self.pv_yield / capacity
+            self.normalized = True

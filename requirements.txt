@@ -3,3 +3,4 @@ torch
 pytorch-lightning
 einops
 opencv-contrib-python-headless
+boto3

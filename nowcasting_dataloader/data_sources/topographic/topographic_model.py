@@ -9,8 +9,10 @@ from nowcasting_dataloader.data_sources.datasource_output import Array, DataSour
 
 logger = logging.getLogger(__name__)
 
-TOPO_MEAN = 365.486887
-TOPO_STD = 478.841369
+# Computed using nowcasting_dataset/notebooks/computs_stats_from_batches.ipynb
+# on 2021-11-24 using the training batch of v15 of the dataset.
+TOPO_MEAN = 135.88652096070271
+TOPO_STD = 145.65013699767726867
 
 
 class TopographicML(DataSourceOutputML):

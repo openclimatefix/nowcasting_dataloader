@@ -82,6 +82,7 @@ def generate_position_encodings_for_batch(
         if k in [
             "nwp",
             "satellite",
+            "hrvsatellite",
             "topographic",
             "gsp",
             "pv",
@@ -195,7 +196,7 @@ def encode_absolute_position(
     geospatial_bounds: Dict[str, float],
     datetimes: Optional[List[datetime.datetime]] = None,
     time_range: Optional[Tuple[datetime.datetime, datetime.datetime]] = None,
-    **kwargs,
+    num_bands: int = 4,
 ) -> torch.Tensor:
     """
     Encodes the absolute position of the pixels/voxels in time and space
@@ -211,14 +212,17 @@ def encode_absolute_position(
             the coordinates of the area covered by the SEVIRI RSS image
         time_range: List of start_year, end_year datetimes to normalize against,
             time_range[0].year must be less than time_range[1].year
-        **kwargs:
+        num_bands: Number of bands to pass to Fourier encoding
 
     Returns:
         The absolute position encoding for the given shape
     """
     # Fourier Features of absolute position
     encoded_geo_position = normalize_geospatial_coordinates(
-        geospatial_coordinates, geospatial_bounds, **kwargs
+        geospatial_coordinates,
+        geospatial_bounds,
+        max_freq=(2 * len(geospatial_coordinates) + 1),
+        num_bands=num_bands,
     )
     absolute_position_encoding = einops.repeat(
         encoded_geo_position, "b h w c -> b c t h w", t=shape[TIME_DIM]
@@ -235,13 +239,12 @@ def encode_absolute_position(
             year_features = encode_year(datetimes, time_range)
             # Repeat
             year_features = einops.repeat(
-                year_features, "b t -> b (repeat t)", repeat=shape[TIME_DIM]
+                year_features, "b t c -> b (repeat t) c", repeat=shape[TIME_DIM]
             )
             datetime_features.append(year_features)
         absolute_position_encoding = combine_space_and_time_features(
             absolute_position_encoding, datetime_features=datetime_features, shape=shape
         )
-
     return absolute_position_encoding
 
 
@@ -264,10 +267,10 @@ def combine_space_and_time_features(
     for date_feature in datetime_features:
         if len(shape) == 5:
             date_feature = einops.repeat(
-                date_feature, "b t -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM], c=1
+                date_feature, "b t c -> b c t h w", h=shape[HEIGHT_DIM], w=shape[WIDTH_DIM]
             )
         else:
-            date_feature = einops.repeat(date_feature, "b t -> b c t id", id=shape[ID_DIM], c=1)
+            date_feature = einops.repeat(date_feature, "b t c -> b c t id", id=shape[ID_DIM])
         to_concat.append(date_feature)
     space_and_time_encoding = torch.cat(to_concat, dim=1)
     return space_and_time_encoding
@@ -305,7 +308,7 @@ def normalize_geospatial_coordinates(
     geospatial_coordinates[1] = geospatial_coordinates[1] * 2 - 1
     # Now create a grid of the coordinates
     # Have to do it for each individual example in the batch, and zip together x and y for it
-    to_concat = []
+    solid_tensor = None
     for idx in range(len(geospatial_coordinates[0])):
         x = torch.from_numpy(geospatial_coordinates[0][idx])
         y = torch.from_numpy(geospatial_coordinates[1][idx])
@@ -313,15 +316,19 @@ def normalize_geospatial_coordinates(
         pos = torch.stack(grid, dim=-1)
         encoded_position = fourier_encode(pos, **kwargs)
         encoded_position = einops.rearrange(encoded_position, "... n d -> ... (n d)")
-        to_concat.append(encoded_position)
+        if solid_tensor is None:
+            solid_tensor = torch.zeros(
+                len(geospatial_coordinates[0]), *encoded_position.size(), dtype=x.dtype
+            )
+        solid_tensor[idx] = encoded_position
 
-    encoded_position = torch.stack(to_concat, dim=0)
-    return encoded_position
+    return solid_tensor
 
 
 def encode_year(
     datetimes: List[List[datetime.datetime]],
     time_range: Tuple[datetime.datetime, datetime.datetime],
+    num_bands: int = 4,
 ) -> torch.Tensor:
     """
     Encode the year of each example in the batch, normalizing between the start and end date
@@ -331,6 +338,7 @@ def encode_year(
             dateimes[batch_idx][timestep_idx]
         time_range: List of start_year, end_year datetimes to normalize against,
             time_range[0].year must be less than time_range[1].year
+        num_bands: Number of bands to include in the Fourier encoding
 
     Returns:
         Tensor containing the encoding for the year of the first timestep in each example
@@ -350,19 +358,22 @@ def encode_year(
         # Rescale between -1 and 1
         encoding *= 2
         encoding -= 1
-        year_encoding.append(torch.as_tensor([encoding]))
+        # Compute Fourier Features
+        encoding = fourier_encode(torch.as_tensor([encoding]), max_freq=99, num_bands=num_bands)
+        year_encoding.append(encoding)
     year_encoding = torch.stack(year_encoding, dim=0)
     return year_encoding
 
 
 def create_datetime_features(
-    datetimes: List[List[datetime.datetime]],
+    datetimes: List[List[datetime.datetime]], num_bands: int = 4
 ) -> List[torch.Tensor]:
     """
     Converts a list of datetimes to day of year, hour of day sin and cos representation
 
     Args:
         datetimes: List of list of datetimes for the examples in a batch
+        num_bands: Number of bands to include in the Fourier encoding
 
     Returns:
         Tuple of torch Tensors containing the hour of day sin,cos, and day of year sin,cos
@@ -374,19 +385,19 @@ def create_datetime_features(
         days = []
         for index in datetimes[batch_idx]:
             time_index = pd.Timestamp(index)
-            hours.append((time_index.hour + (time_index.minute / 60) / 24))
-            days.append((time_index.timetuple().tm_yday / 366))  # To take care of leap years
+            hours.append((((time_index.hour + (time_index.minute / 60)) / 24) * 2) - 1)
+            days.append(((time_index.timetuple().tm_yday / 366) * 2) - 1)
         hour_of_day.append(hours)
         day_of_year.append(days)
 
     outputs = []
-    for index in [hour_of_day, day_of_year]:
-        index = torch.as_tensor(index)
-        radians = index * 2 * np.pi
-        index_sin = torch.sin(radians)
-        index_cos = torch.cos(radians)
-        outputs.append(index_sin)
-        outputs.append(index_cos)
+    hour_of_day = torch.as_tensor(hour_of_day)
+    day_of_year = torch.as_tensor(day_of_year)
+    # Compute Fourier Features
+    hour_of_day = fourier_encode(hour_of_day, max_freq=49, num_bands=num_bands)
+    day_of_year = fourier_encode(day_of_year, max_freq=733, num_bands=num_bands)
+    outputs.append(hour_of_day)
+    outputs.append(day_of_year)
 
     return outputs
 
@@ -413,7 +424,7 @@ def fourier_encode(
     device, dtype, orig_x = x.device, x.dtype, x
 
     scales = torch.linspace(
-        1.0,
+        16.0,
         max_freq / 2,
         num_bands,
         device=device,
@@ -422,6 +433,8 @@ def fourier_encode(
     scales = scales[(*((None,) * (len(x.shape) - 1)), Ellipsis)]
 
     x = x * scales * pi
-    x = x.sin() if sine_only else torch.cat([x.sin(), x.cos()], dim=-1)
-    x = torch.cat((x, orig_x), dim=-1)
+    if sine_only:
+        x = torch.cat((x.sin(), orig_x), dim=-1)
+    else:
+        x = torch.cat((x.sin(), x.cos(), orig_x), dim=-1)
     return x

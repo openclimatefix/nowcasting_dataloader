@@ -43,6 +43,10 @@ def subselect_data(
     else:
         if batch.satellite is not None:
             t0_dt_of_first_example = batch.satellite.time[0, current_timestep_index].values
+        elif batch.hrvsatellite is not None:
+            t0_dt_of_first_example = batch.hrvsatellite.time[0, current_timestep_index].values
+        elif batch.pv is not None:
+            t0_dt_of_first_example = batch.pv.time[0, current_timestep_index].values
         else:
             t0_dt_of_first_example = batch.nwp.time[0, current_timestep_index].values
 
