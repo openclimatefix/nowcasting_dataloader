@@ -68,8 +68,8 @@ def test_netcdf_dataset_local_using_configuration():
         sat_data = batch_ml.satellite.data
         # TODO
         # Sat is in 5min increments, so should have 2 history + current + 2 future
-        assert sat_data.shape == (4, 1, 19, 64, 64)
-        assert batch_ml.nwp.data.shape == (4, 1, 2, 64, 64)
+        assert sat_data.shape == (4, 1, 19, 21, 21)
+        assert batch_ml.nwp.data.shape == (4, 1, 3, 64, 64)
         assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
         assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
         assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
