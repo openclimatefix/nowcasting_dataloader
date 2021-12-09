@@ -16,5 +16,5 @@ def test_satellite_normalization():
     sat = satellite_fake()
 
     batch = SatelliteML.from_xr_dataset(sat)
-    batch.channels = SAT_VARIABLE_NAMES[1:7]
+    batch.channels = SAT_VARIABLE_NAMES[1:11]
     batch.normalize()
