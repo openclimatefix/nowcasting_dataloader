@@ -238,8 +238,8 @@ class NetCDFDataModule(LightningDataModule):
         else:
             val_dataset = NetCDFDataset(
                 self.n_val_data,
-                os.path.join(self.data_path, "test"),
-                os.path.join(self.temp_path, "test"),
+                os.path.join(self.data_path, "validation"),
+                os.path.join(self.temp_path, "validation"),
                 cloud=self.cloud,
                 configuration=self.configuration,
             )
