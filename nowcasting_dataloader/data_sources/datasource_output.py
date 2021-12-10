@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 Array = Union[xr.DataArray, np.ndarray, torch.Tensor, list]
 
+OSGB_X_MAX = 654665
+OSGB_Y_MAX = 1151577
+
 
 class DataSourceOutputML(BaseModel):
     """General Data Source output pydantic class.
