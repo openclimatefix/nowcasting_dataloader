@@ -10,7 +10,12 @@ from nowcasting_dataset.consts import (
 )
 from pydantic import Field, validator
 
-from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML, OSGB_X_MAX, OSGB_Y_MAX
+from nowcasting_dataloader.data_sources.datasource_output import (
+    OSGB_X_MAX,
+    OSGB_Y_MAX,
+    Array,
+    DataSourceOutputML,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,11 +85,15 @@ class GSPML(DataSourceOutputML):
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         if values["normalized"]:
             if v.max() > 1:
-                raise Exception(f'GSP data is normalized, '
-                                f'but GSP X coordinates maximum value is above 1, {v.max()}')
-            if v.min() <0:
-                raise Exception(f'GSP data is normalized, '
-                                f'but GSP X coordinates minimum value is below 0, {v.min()}')
+                raise Exception(
+                    f"GSP data is normalized, "
+                    f"but GSP X coordinates maximum value is above 1, {v.max()}"
+                )
+            if v.min() < 0:
+                raise Exception(
+                    f"GSP data is normalized, "
+                    f"but GSP X coordinates minimum value is below 0, {v.min()}"
+                )
         return v
 
     @validator("gsp_y_coords")
@@ -93,13 +102,16 @@ class GSPML(DataSourceOutputML):
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         if values["normalized"]:
             if v.max() > 1:
-                raise Exception(f'GSP data is normalized, '
-                                f'but GSP Y coordinates maximum value is above 1, {v.max()}')
-            if v.min() <0:
-                raise Exception(f'GSP data is normalized, '
-                                f'but GSP Y coordinates minimum value is below 0, {v.min()}')
+                raise Exception(
+                    f"GSP data is normalized, "
+                    f"but GSP Y coordinates maximum value is above 1, {v.max()}"
+                )
+            if v.min() < 0:
+                raise Exception(
+                    f"GSP data is normalized, "
+                    f"but GSP Y coordinates minimum value is below 0, {v.min()}"
+                )
         return v
-
 
     def get_datetime_index(self) -> Array:
         """Get the datetime index of this data"""
@@ -127,8 +139,8 @@ class GSPML(DataSourceOutputML):
         """Normalize the gsp data"""
         if not self.normalized:
             self.gsp_yield = self.gsp_yield / self.gsp_capacity
-            
+
             self.gsp_x_coords = self.gsp_x_coords / OSGB_X_MAX
             self.gsp_y_coords = self.gsp_y_coords / OSGB_Y_MAX
-            
+
             self.normalized = True

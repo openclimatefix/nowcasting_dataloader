@@ -2,12 +2,10 @@
 import io
 
 import fsspec
-import xarray as xr
 import pandas as pd
-
-from nowcasting_dataset.geospatial import lat_lon_to_osgb
+import xarray as xr
 from nowcasting_dataset.data_sources.gsp.eso import get_gsp_metadata_from_eso
-
+from nowcasting_dataset.geospatial import lat_lon_to_osgb
 
 PV_file = "gs://solar-pv-nowcasting-data/PV/Passive/ocf_formatted/v0/system_metadata.csv"
 
@@ -48,5 +46,3 @@ print(f"{x_max=}")
 print(f"{x_min=}")
 print(f"{y_max=}")
 print(f"{y_min=}")
-
-
