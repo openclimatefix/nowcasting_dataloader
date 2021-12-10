@@ -93,7 +93,9 @@ class BatchML(Example):
                 try:
                     data_sources_dict[data_source_name] = data_source.from_xr_dataset(xr_dataset)
                 except Exception as e:
-                    _LOG.error(f'Could not change xr dataset to pydantic model for {data_source_name}')
+                    _LOG.error(
+                        f"Could not change xr dataset to " f"pydantic model for {data_source_name}"
+                    )
                     raise e
 
                 if "satellite" in data_source_name or "nwp" in data_source_name:
