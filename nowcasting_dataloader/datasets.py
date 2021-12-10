@@ -193,8 +193,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         try:
             batch: BatchML = BatchML.from_batch(batch=batch)
         except Exception as e:
-            logger.error(f'Could not change Batch to BatchML '
-                         f'for batch index {batch_idx}, {batch}')
+            logger.error(
+                f"Could not change Batch to BatchML " f"for batch index {batch_idx}, {batch}"
+            )
             raise e
 
         if self.cloud != "local":

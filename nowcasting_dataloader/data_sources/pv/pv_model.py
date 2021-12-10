@@ -12,7 +12,12 @@ from nowcasting_dataset.consts import (
 )
 from pydantic import Field, validator
 
-from nowcasting_dataloader.data_sources.datasource_output import Array, DataSourceOutputML
+from nowcasting_dataloader.data_sources.datasource_output import (
+    OSGB_X_MAX,
+    OSGB_Y_MAX,
+    Array,
+    DataSourceOutputML,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +78,38 @@ class PVML(DataSourceOutputML):
     def x_coordinates_shape(cls, v, values):
         """Validate 'pv_system_x_coords'"""
         assert v.shape[-1] == values["pv_yield"].shape[-1]
+
+        if values["normalized"]:
+            if v.max() > 1:
+                raise Exception(
+                    f"PV data is normalized, "
+                    f"but PV X coordinates maximum value is above 1, {v.max()}"
+                )
+            if v.min() < 0:
+                raise Exception(
+                    f"PV data is normalized, "
+                    f"but PV X coordinates minimum value is below 0, {v.min()}"
+                )
+
         return v
 
     @validator("pv_system_y_coords")
-    def y_coordinates_shape(cls, v, values):
+    def y_coordinates(cls, v, values):
         """Validate 'pv_system_y_coords'"""
         assert v.shape[-1] == values["pv_yield"].shape[-1]
+
+        if values["normalized"]:
+            if v.max() > 1:
+                raise Exception(
+                    f"PV data is normalized, "
+                    f"but PV Y coordinates maximum value is above 1, {v.max()}"
+                )
+            if v.min() < 0:
+                raise Exception(
+                    f"PV data is normalized, "
+                    f"but PV Y coordinates minimum value is below 0, {v.min()}"
+                )
+
         return v
 
     def get_datetime_index(self) -> Array:
@@ -109,4 +140,8 @@ class PVML(DataSourceOutputML):
             # Expand capacity to the same timesteps for broadcasting
             capacity = np.expand_dims(self.pv_capacity, axis=1)
             self.pv_yield = self.pv_yield / capacity
+
+            self.pv_system_x_coords = self.pv_system_x_coords / OSGB_X_MAX
+            self.pv_system_y_coords = self.pv_system_y_coords / OSGB_Y_MAX
+
             self.normalized = True
