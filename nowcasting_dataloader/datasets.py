@@ -204,7 +204,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
             raise e
 
-
         if self.cloud != "local":
             # remove files in a folder, but not the folder itself
             delete_all_files_in_temp_path(self.tmp_path)
