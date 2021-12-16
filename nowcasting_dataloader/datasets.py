@@ -196,7 +196,14 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         # change batch into ML learning batch ready for training
         batch: BatchML = BatchML.from_batch(batch=batch)
-        # netcdf_batch = xr.load_dataset(local_netcdf_filename)
+        try:
+            batch: BatchML = BatchML.from_batch(batch=batch)
+        except Exception as e:
+            logger.error(
+                f"Could not change Batch to BatchML " f"for batch index {batch_idx}, {batch}"
+            )
+            raise e
+
 
         if self.cloud != "local":
             # remove files in a folder, but not the folder itself

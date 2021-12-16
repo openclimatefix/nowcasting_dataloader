@@ -70,19 +70,19 @@ def register_xr_data_set_to_tensor():
             def __init__(self, xdataset_obj: xr.Dataset):
                 self._obj = xdataset_obj
 
-            def to_tensor(self, dims: List[str]) -> dict:
+            def to_tensor(self, data_vars: List[str]) -> dict:
                 """Convert this Dataset to dictionary of torch tensors"""
                 torch_dict = {}
 
-                for dim in dims:
-                    v = getattr(self._obj, dim)
+                for data_var in data_vars:
+                    v = getattr(self._obj, data_var)
 
-                    if dim.find("time") != -1:
+                    if data_var.find("time") != -1:
                         time_int = v.data.astype(int)
-                        torch_dict[dim] = torch.tensor(time_int, dtype=torch.float64)
+                        torch_dict[data_var] = torch.tensor(time_int, dtype=torch.float64)
 
                     else:
-                        torch_dict[dim] = v.torch.to_tensor()
+                        torch_dict[data_var] = v.torch.to_tensor()
 
                 return torch_dict
 

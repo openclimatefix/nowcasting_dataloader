@@ -177,6 +177,7 @@ class NetCDFDataModule(LightningDataModule):
         temp_path: str = ".",
         n_train_data: int = 24900,
         n_val_data: int = 1000,
+        n_test_data: int = 1000,
         cloud: str = "aws",
         num_workers: int = 8,
         pin_memory: bool = True,
@@ -194,6 +195,7 @@ class NetCDFDataModule(LightningDataModule):
         self.cloud = cloud
         self.n_train_data = n_train_data
         self.n_val_data = n_val_data
+        self.n_test_data = n_test_data
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.fake_data = fake_data
@@ -238,8 +240,8 @@ class NetCDFDataModule(LightningDataModule):
         else:
             val_dataset = NetCDFDataset(
                 self.n_val_data,
-                os.path.join(self.data_path, "test"),
-                os.path.join(self.temp_path, "test"),
+                os.path.join(self.data_path, "validation"),
+                os.path.join(self.temp_path, "validation"),
                 cloud=self.cloud,
                 configuration=self.configuration,
             )
@@ -252,7 +254,7 @@ class NetCDFDataModule(LightningDataModule):
             test_dataset = FakeDataset(configuration=self.configuration)
         else:
             test_dataset = NetCDFDataset(
-                self.n_val_data,
+                self.n_test_data,
                 os.path.join(self.data_path, "test"),
                 os.path.join(self.temp_path, "test"),
                 cloud=self.cloud,

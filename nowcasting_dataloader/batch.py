@@ -94,8 +94,14 @@ class BatchML(Example):
                 continue
             xr_dataset = getattr(batch, data_source_name)
             if xr_dataset is not None:
+                try:
+                    data_sources_dict[data_source_name] = data_source.from_xr_dataset(xr_dataset)
+                except Exception as e:
+                    _LOG.error(
+                        f"Could not change xr dataset to " f"pydantic model for {data_source_name}"
+                    )
+                    raise e
 
-                data_sources_dict[data_source_name] = data_source.from_xr_dataset(xr_dataset)
                 if "satellite" in data_source_name or "nwp" in data_source_name:
                     # Add in the channels being used
                     # Only need it from the first example

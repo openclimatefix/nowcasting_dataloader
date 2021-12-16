@@ -26,7 +26,7 @@ def test_subselect_date(test_data_folder, configuration):
         forecast_minutes=60,
     )
 
-    assert batch.satellite.data.shape == (4, 19, 64, 64, 10)
+    assert batch.satellite.data.shape == (4, 19, 21, 21, 10)
     assert batch.nwp.data.shape == (4, 2, 64, 64, 10)
     assert batch.pv.x_coords.shape == (4, 128)
 
