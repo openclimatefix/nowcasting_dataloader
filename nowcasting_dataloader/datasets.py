@@ -195,7 +195,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
 
         # change batch into ML learning batch ready for training
-        batch: BatchML = BatchML.from_batch(batch=batch)
         try:
             batch: BatchML = BatchML.from_batch(batch=batch)
         except Exception as e:
