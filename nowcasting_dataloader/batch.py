@@ -39,7 +39,7 @@ class Example(BaseModel):
     satellite: Optional[SatelliteML]
     hrvsatellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
-    optical_flow: Optional[OpticalFlowML]
+    opticalflow: Optional[OpticalFlowML]
     pv: Optional[PVML]
     sun: Optional[SunML]
     gsp: Optional[GSPML]
@@ -52,7 +52,7 @@ class Example(BaseModel):
             self.satellite,
             self.hrvsatellite,
             self.topographic,
-            self.optical_flow,
+            self.opticalflow,
             self.pv,
             self.sun,
             self.gsp,
