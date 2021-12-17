@@ -72,8 +72,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
             cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
-            add_optical_flow: Whether to add optical flow predictions for satellite data
-            flow_image_size_pixels: The size of the flow images in pixels
             data_sources_names: Names of data sources to load, if not using all of them
             num_bands: Number of bands for the Fourier features for the position encoding
 
