@@ -74,6 +74,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             add_position_encoding: Whether to add position encoding or not
             data_sources_names: Names of data sources to load, if not using all of them
             num_bands: Number of bands for the Fourier features for the position encoding
+
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -84,6 +85,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+
         self.num_bands = num_bands
         if data_sources_names is None:
             data_sources_names = list(Example.__fields__.keys())
@@ -189,6 +191,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             position_encodings = generate_position_encodings_for_batch(
                 batch, num_bands=self.num_bands
             )
+
         # change batch into ML learning batch ready for training
         try:
             batch: BatchML = BatchML.from_batch(batch=batch)

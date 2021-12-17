@@ -71,6 +71,15 @@ def test_netcdf_dataset_local_using_configuration():
         assert sat_data.shape == (4, 1, 19, 21, 21)
         assert batch_ml.nwp.data.shape == (4, 1, 3, 64, 64)
         assert batch_ml.topographic.topo_data.shape == (4, 64, 64)
+
+        assert len(batch_ml.metadata.t0_datetime_utc) == 4
+        assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
+        assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)
+        assert batch_ml.sun.sun_elevation_angle.shape == (4, 19)
+
+        assert type(batch_ml.nwp.data) == torch.Tensor
+        assert batch_ml.nwp.data[0, 0, 0, 0, 0].dtype == torch.float32
         assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
         assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
         assert batch_ml.sun.sun_azimuth_angle.shape == (4, 19)

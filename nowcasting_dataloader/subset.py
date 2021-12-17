@@ -94,8 +94,6 @@ def subselect_data(
             t0_dt_of_first_example=t0_dt_of_first_example,
         )
 
-    # DATETIME TODO
-
     return batch
 
 

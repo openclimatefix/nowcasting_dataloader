@@ -13,6 +13,7 @@ from nowcasting_dataloader.data_sources import (
     NWPML,
     PVML,
     MetadataML,
+    OpticalFlowML,
     SatelliteML,
     SunML,
     TopographicML,
@@ -38,6 +39,7 @@ class Example(BaseModel):
     satellite: Optional[SatelliteML]
     hrvsatellite: Optional[SatelliteML]
     topographic: Optional[TopographicML]
+    opticalflow: Optional[OpticalFlowML]
     pv: Optional[PVML]
     sun: Optional[SunML]
     gsp: Optional[GSPML]
@@ -50,6 +52,7 @@ class Example(BaseModel):
             self.satellite,
             self.hrvsatellite,
             self.topographic,
+            self.opticalflow,
             self.pv,
             self.sun,
             self.gsp,
@@ -87,7 +90,8 @@ class BatchML(Example):
         for data_source_name in data_sources_names:
 
             data_source = BatchML.__fields__[data_source_name].type_
-
+            if not hasattr(batch, data_source_name):
+                continue
             xr_dataset = getattr(batch, data_source_name)
             if xr_dataset is not None:
                 try:
@@ -98,7 +102,11 @@ class BatchML(Example):
                     )
                     raise e
 
-                if "satellite" in data_source_name or "nwp" in data_source_name:
+                if (
+                    "satellite" in data_source_name
+                    or "nwp" in data_source_name
+                    or "opticalflow" in data_source_name
+                ):
                     # Add in the channels being used
                     # Only need it from the first example
                     data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
