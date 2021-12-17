@@ -102,7 +102,11 @@ class BatchML(Example):
                     )
                     raise e
 
-                if "satellite" in data_source_name or "nwp" in data_source_name or "opticalflow" in data_source_name:
+                if (
+                    "satellite" in data_source_name
+                    or "nwp" in data_source_name
+                    or "opticalflow" in data_source_name
+                ):
                     # Add in the channels being used
                     # Only need it from the first example
                     data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
