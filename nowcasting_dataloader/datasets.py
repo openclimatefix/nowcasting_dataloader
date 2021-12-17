@@ -120,6 +120,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # adjust temp path for each worker
         if self.src_path != self.tmp_path:
             self.tmp_path = f"{self.tmp_path}/{worker_id}"
+            os.mkdir(f'{self.tmp_path}')
 
     def __len__(self):
         """Length of dataset"""
@@ -141,8 +142,13 @@ class NetCDFDataset(torch.utils.data.Dataset):
             raise IndexError(
                 "batch_idx must be in the range" f" [0, {self.n_batches}), not {batch_idx}!"
             )
-
+        
         if self.src_path != self.tmp_path:
+            # make folders, only on first batch
+            if batch_idx == 0:
+                for data_source in self.data_sources_names:
+                    os.mkdir(f'{self.tmp_path}/{data_source}')
+
             # download all data files
             for data_source in self.data_sources_names:
                 data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
