@@ -118,7 +118,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         """Function called by a worker"""
 
         # adjust temp path for each worker
-        self.tmp_path = f"{self.tmp_path}/{worker_id}"
+        if self.src_path != self.tmp_path:
+            self.tmp_path = f"{self.tmp_path}/{worker_id}"
 
     def __len__(self):
         """Length of dataset"""
