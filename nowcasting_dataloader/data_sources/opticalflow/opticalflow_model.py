@@ -88,9 +88,9 @@ class OpticalFlowML(DataSourceOutputML):
 
         # convert to torch dictionary
         opticalflow_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y"])
-        
+
         # set channels, just take the first example
-        opticalflow_batch_ml['channels'] = xr_dataset.channels[0].values
+        opticalflow_batch_ml["channels"] = xr_dataset.channels[0].values
 
         # move to Model
         return OpticalFlowML(**opticalflow_batch_ml)
