@@ -3,9 +3,7 @@ import logging
 import os
 from typing import List, Optional, Tuple, Union
 
-import boto3
 import einops
-import gcsfs
 import torch
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
@@ -44,7 +42,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         src_path: str,
         tmp_path: str,
         configuration: Configuration,
-        cloud: str = "gcp",
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
@@ -62,14 +59,12 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 Google Cloud storage.
             tmp_path: The full path to the local temporary directory
                 (on a local filesystem).
-            cloud:
             required_keys: Tuple or list of keys required in the example for
                 it to be considered usable
             history_minutes: How many past minutes of data to use, if subsetting the batch
             forecast_minutes: How many future minutes of data to use, if reducing the amount
                 of forecast time
             configuration: configuration object
-            cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
             data_sources_names: Names of data sources to load, if not using all of them
@@ -79,7 +74,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.n_batches = n_batches
         self.src_path = src_path
         self.tmp_path = tmp_path
-        self.cloud = cloud
         self.history_minutes = history_minutes
         self.forecast_minutes = forecast_minutes
         self.configuration = configuration
@@ -115,24 +109,16 @@ class NetCDFDataset(torch.utils.data.Dataset):
             required_keys = DEFAULT_REQUIRED_KEYS
         self.required_keys = list(required_keys)
 
-        # setup cloud connections as None
-        self.gcs = None
-        self.s3_resource = None
-
-        assert cloud in ["gcp", "aws", "local"]
-
         if not os.path.isdir(self.tmp_path):
             os.mkdir(self.tmp_path)
 
     def per_worker_init(self, worker_id: int):
         """Function called by a worker"""
-        if self.cloud == "gcp":
-            self.gcs = gcsfs.GCSFileSystem()
-        elif self.cloud == "aws":
-            self.s3_resource = boto3.resource("s3")
 
         # adjust temp path for each worker
-        self.tmp_path = f"{self.tmp_path}/{worker_id}"
+        if self.src_path != self.tmp_path:
+            self.tmp_path = f"{self.tmp_path}/{worker_id}"
+            os.mkdir(f"{self.tmp_path}")
 
     def __len__(self):
         """Length of dataset"""
@@ -155,7 +141,12 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 "batch_idx must be in the range" f" [0, {self.n_batches}), not {batch_idx}!"
             )
 
-        if self.cloud in ["gcp", "aws"]:
+        if self.src_path != self.tmp_path:
+            # make folders, only on first batch
+            if batch_idx == 0:
+                for data_source in self.data_sources_names:
+                    os.mkdir(f"{self.tmp_path}/{data_source}")
+
             # download all data files
             for data_source in self.data_sources_names:
                 data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
@@ -201,7 +192,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             )
             raise e
 
-        if self.cloud != "local":
+        if self.src_path != self.tmp_path:
             # remove files in a folder, but not the folder itself
             delete_all_files_in_temp_path(self.tmp_path)
 
@@ -225,7 +216,6 @@ class SatFlowDataset(NetCDFDataset):
         src_path: str,
         tmp_path: str,
         configuration: Configuration,
-        cloud: str = "gcp",
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
@@ -244,14 +234,12 @@ class SatFlowDataset(NetCDFDataset):
                 Google Cloud storage.
             tmp_path: The full path to the local temporary directory
                 (on a local filesystem).
-            cloud:
             required_keys: Tuple or list of keys required in the example for
                 it to be considered usable
             history_minutes: How many past minutes of data to use, if subsetting the batch
             forecast_minutes: How many future minutes of data to use, if reducing the amount
                 of forecast time
             configuration: configuration object
-            cloud: which cloud is used, can be "gcp", "aws" or "local".
             normalize: normalize the batch data
             add_position_encoding: Whether to add position encoding or not
             add_satellite_target: Whether to add future satellite imagery to the target or not
@@ -263,7 +251,6 @@ class SatFlowDataset(NetCDFDataset):
             src_path=src_path,
             tmp_path=tmp_path,
             configuration=configuration,
-            cloud=cloud,
             required_keys=required_keys,
             history_minutes=history_minutes,
             forecast_minutes=forecast_minutes,
