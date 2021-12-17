@@ -13,7 +13,6 @@ from nowcasting_dataloader.xr_utils import re_order_dims
 
 logger = logging.getLogger(__name__)
 
-# TODO update
 OPTICALFLOW_MEAN = {
     "HRV": 236.13257536395903,
     "IR_016": 291.61620182554185,
@@ -89,6 +88,9 @@ class OpticalFlowML(DataSourceOutputML):
 
         # convert to torch dictionary
         opticalflow_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x", "y"])
+        
+        # set channels, just take the first example
+        opticalflow_batch_ml['channels'] = xr_dataset.channels[0].values
 
         # move to Model
         return OpticalFlowML(**opticalflow_batch_ml)
