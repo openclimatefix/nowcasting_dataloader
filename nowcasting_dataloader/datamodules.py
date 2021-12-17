@@ -34,7 +34,6 @@ class SatFlowDataModule(LightningDataModule):
         self,
         temp_path: str,
         configuration: Union[Configuration, str],
-        cloud: str = "local",
         required_keys: Union[Tuple[str], List[str]] = None,
         history_minutes: Optional[int] = None,
         forecast_minutes: Optional[int] = None,
@@ -52,7 +51,6 @@ class SatFlowDataModule(LightningDataModule):
         Args:
             temp_path: temp path of data
             configuration: Configuration to use, or path to configuration file
-            cloud: What cloud to use, defaults to local
             required_keys: Required keys for the dataset
             history_minutes: Number of history minutes to use
             forecast_minutes: Number of forecast minutes to use
@@ -69,7 +67,6 @@ class SatFlowDataModule(LightningDataModule):
         if type(configuration) == str:
             configuration = load_yaml_configuration(configuration)
         self.configuration: Configuration = configuration
-        self.cloud = cloud
         self.n_train_data = self.configuration.process.n_train_batches
         self.n_val_data = self.configuration.process.n_validation_batches
         self.n_test_data = self.configuration.process.n_test_batches
@@ -102,7 +99,6 @@ class SatFlowDataModule(LightningDataModule):
             os.path.join(self.configuration.output_data.filepath, "train"),
             os.path.join(self.temp_path, "train"),
             configuration=self.configuration,
-            cloud=self.cloud,
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
@@ -122,7 +118,6 @@ class SatFlowDataModule(LightningDataModule):
             os.path.join(self.configuration.output_data.filepath, "validation"),
             os.path.join(self.temp_path, "validation"),
             configuration=self.configuration,
-            cloud=self.cloud,
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
@@ -142,7 +137,6 @@ class SatFlowDataModule(LightningDataModule):
             os.path.join(self.configuration.output_data.filepath, "test"),
             os.path.join(self.temp_path, "test"),
             configuration=self.configuration,
-            cloud=self.cloud,
             required_keys=self.required_keys,
             history_minutes=self.history_minutes,
             forecast_minutes=self.forecast_minutes,
@@ -178,7 +172,6 @@ class NetCDFDataModule(LightningDataModule):
         n_train_data: int = 24900,
         n_val_data: int = 1000,
         n_test_data: int = 1000,
-        cloud: str = "aws",
         num_workers: int = 8,
         pin_memory: bool = True,
         data_path="prepared_ML_training_data/v4/",
@@ -192,7 +185,6 @@ class NetCDFDataModule(LightningDataModule):
 
         self.temp_path = temp_path
         self.data_path = data_path
-        self.cloud = cloud
         self.n_train_data = n_train_data
         self.n_val_data = n_val_data
         self.n_test_data = n_test_data
@@ -225,7 +217,6 @@ class NetCDFDataModule(LightningDataModule):
                 self.n_train_data,
                 os.path.join(self.data_path, "train"),
                 os.path.join(self.temp_path, "train"),
-                cloud=self.cloud,
                 configuration=self.configuration,
             )
 
@@ -242,7 +233,6 @@ class NetCDFDataModule(LightningDataModule):
                 self.n_val_data,
                 os.path.join(self.data_path, "validation"),
                 os.path.join(self.temp_path, "validation"),
-                cloud=self.cloud,
                 configuration=self.configuration,
             )
 
@@ -257,7 +247,6 @@ class NetCDFDataModule(LightningDataModule):
                 self.n_test_data,
                 os.path.join(self.data_path, "test"),
                 os.path.join(self.temp_path, "test"),
-                cloud=self.cloud,
                 configuration=self.configuration,
             )
 

@@ -34,7 +34,6 @@ def test_satflow_datamodule_init():
         datamodule = SatFlowDataModule(
             temp_path=TEMP_PATH,
             configuration=configuration,
-            cloud="local",
             add_position_encoding=True,
             add_satellite_target=True,
             add_hrv_satellite_target=True,
@@ -86,7 +85,7 @@ def test_netcdf_datamodule_init():
         configuration.output_data.filepath = tmpdirname
         save_yaml_configuration(c, filename=f"{tmpdirname}/configuration.yaml")
 
-        datamodule = NetCDFDataModule(temp_path=tmpdirname, cloud="local", data_path=tmpdirname)
+        datamodule = NetCDFDataModule(temp_path=tmpdirname, data_path=tmpdirname)
 
         t = iter(datamodule.train_dataloader())
         x = next(t)
