@@ -3,6 +3,8 @@ import logging
 import os
 from typing import List, Optional, Tuple, Union
 
+import numpy as np
+import xarray as xr
 import einops
 import torch
 from nowcasting_dataset.config.model import Configuration
@@ -18,7 +20,7 @@ from nowcasting_dataset.consts import (
     SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME,
     TOPOGRAPHIC_DATA,
 )
-from nowcasting_dataset.dataset.batch import Batch, Example
+from nowcasting_dataset.dataset.batch import Batch, Example, join_two_batches
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
 from nowcasting_dataset.utils import get_netcdf_filename, set_fsspec_for_multiprocess
 
@@ -49,6 +51,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         add_position_encoding: bool = False,
         data_sources_names: Optional[list[str]] = None,
         num_bands: int = 4,
+        mix_two_batches: bool = True,
+        seed: bool = 234,
     ):
         """
         Netcdf Dataset
@@ -69,7 +73,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
             add_position_encoding: Whether to add position encoding or not
             data_sources_names: Names of data sources to load, if not using all of them
             num_bands: Number of bands for the Fourier features for the position encoding
-
+            mix_two_batches: option to mix tow batches together
+            seed: random seed for peaking second batch when mixing two batches
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -79,6 +84,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.configuration = configuration
         self.normalize = normalize
         self.add_position_encoding = add_position_encoding
+        self.seed = seed
+        self.mix_two_batches = mix_two_batches
 
         self.num_bands = num_bands
         if data_sources_names is None:
@@ -112,6 +119,13 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if not os.path.isdir(self.tmp_path):
             os.mkdir(self.tmp_path)
 
+        # set seed
+        np.random.seed(seed)
+
+        if len(self) == 1:
+            logger.warning("Wanted to mix batches but there is only one")
+            self.mix_two_batches = False
+
     def per_worker_init(self, worker_id: int):
         """Function called by a worker"""
 
@@ -141,35 +155,34 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 "batch_idx must be in the range" f" [0, {self.n_batches}), not {batch_idx}!"
             )
 
-        if self.src_path != self.tmp_path:
-            # make folders, only on first batch
-            if batch_idx == 0:
-                for data_source in self.data_sources_names:
-                    os.mkdir(f"{self.tmp_path}/{data_source}")
+        # get batches indexes
+        batch_indexes = [batch_idx]
+        if self.mix_two_batches:
+            second_batch_idx = np.random.randint(0,len(self)-1)
+            batch_indexes.append(second_batch_idx)
 
-            # download all data files
-            for data_source in self.data_sources_names:
-                data_source_and_filename = f"{data_source}/{get_netcdf_filename(batch_idx)}"
-                download_to_local(
-                    remote_filename=f"{self.src_path}/{data_source_and_filename}",
-                    local_filename=f"{self.tmp_path}/{data_source_and_filename}",
+        # download batches
+        batches = []
+        for batch_idx in batch_indexes:
+
+            if self.src_path != self.tmp_path:
+
+                batch = Batch.download_batch_and_load_batch(
+                    batch_idx=batch_idx,
+                    data_sources_names=self.data_sources_names,
+                    tmp_path=tmp_path,
+                    src_path=src_path,
                 )
+            else:
+                batch: Batch = Batch.load_netcdf(
+                    self.src_path,
+                    batch_idx=batch_idx,
+                    data_sources_names=self.data_sources_names,
+                )
+            batches.append(batch)
 
-            # download locations file
-            download_to_local(
-                remote_filename=f"{self.src_path}/"
-                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
-                local_filename=f"{self.tmp_path}/"
-                f"{SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME}",
-            )
-
-            local_netcdf_folder = self.tmp_path
-        else:
-            local_netcdf_folder = self.src_path
-
-        batch: Batch = Batch.load_netcdf(
-            local_netcdf_folder, batch_idx=batch_idx, data_sources_names=self.data_sources_names
-        )
+        # join batches
+        batch = join_two_batches(batches=batches, data_sources_names=self.data_sources_names)
 
         if self.select_subset_data:
             batch = subselect_data(
