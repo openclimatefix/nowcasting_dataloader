@@ -52,4 +52,3 @@ class DataSourceOutputML(BaseModel):
     def normalize(self):
         """Normalize the data"""
         pass
-
