@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import torch
