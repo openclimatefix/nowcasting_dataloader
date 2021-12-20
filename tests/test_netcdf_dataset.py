@@ -168,113 +168,113 @@ def test_netcdf_dataset_local_using_configuration():
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
-# 
-# def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
-#     """Test netcdf locally"""
-#     c = Configuration()
-#     c.input_data = InputData.set_all_to_defaults()
-#     c.process.batch_size = 4
-#     c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
-#     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
-#     configuration = c
-# 
-#     with tempfile.TemporaryDirectory() as tmpdirname:
-# 
-#         f = Batch.fake(configuration=c)
-#         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
-# 
-#         DATA_PATH = tmpdirname
-#         TEMP_PATH = tmpdirname
-# 
-#         train_dataset = NetCDFDataset(
-#             1,
-#             DATA_PATH,
-#             TEMP_PATH,
-#             history_minutes=30,
-#             forecast_minutes=60,
-#             configuration=configuration,
-#             normalize=False,
-#             data_sources_names=["pv", "gsp", "hrvsatellite"],
-#         )
-# 
-#         dataloader_config = dict(
-#             pin_memory=True,
-#             num_workers=1,
-#             prefetch_factor=1,
-#             worker_init_fn=worker_init_fn,
-#             persistent_workers=True,
-#             # Disable automatic batching because dataset
-#             # returns complete batches.
-#             batch_size=None,
-#         )
-# 
-#         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
-# 
-#         train_dataset.per_worker_init(1)
-#         t = iter(train_dataset)
-#         data = next(t)
-# 
-#         batch_ml = BatchML(**data)
-# 
-#         assert batch_ml.nwp is None
-#         assert batch_ml.topographic is None
-#         assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
-#         assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
-#         assert batch_ml.sun is None
-#         assert batch_ml.satellite is None
-#         assert batch_ml.hrvsatellite is not None
-#         assert batch_ml.hrvsatellite.data.shape == (4, 1, 19, 192, 192)
-# 
-#         # Make sure file isn't deleted!
-#         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
-# 
-# 
-# def test_netcdf_dataset_copy_from_data_path():
-#     """Test netcdf locally"""
-#     c = Configuration()
-#     c.input_data = InputData.set_all_to_defaults()
-#     c.process.batch_size = 4
-#     c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
-#     c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
-#     configuration = c
-# 
-#     with tempfile.TemporaryDirectory() as tmpdirname, tempfile.TemporaryDirectory() as data_path:
-# 
-#         f = Batch.fake(configuration=c)
-#         f.save_netcdf(batch_i=0, path=Path(data_path))
-#         assert os.path.exists(os.path.join(data_path, "satellite/000000.nc"))
-# 
-#         DATA_PATH = data_path
-#         TEMP_PATH = tmpdirname
-# 
-#         train_dataset = NetCDFDataset(
-#             1,
-#             DATA_PATH,
-#             TEMP_PATH,
-#             history_minutes=30,
-#             forecast_minutes=60,
-#             configuration=configuration,
-#             normalize=False,
-#         )
-# 
-#         dataloader_config = dict(
-#             pin_memory=True,
-#             num_workers=1,
-#             prefetch_factor=1,
-#             worker_init_fn=worker_init_fn,
-#             persistent_workers=True,
-#             # Disable automatic batching because dataset
-#             # returns complete batches.
-#             batch_size=None,
-#         )
-# 
-#         _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
-# 
-#         train_dataset.per_worker_init(1)
-# 
-#         t = iter(train_dataset)
-#         assert os.path.exists(os.path.join(data_path, "satellite/000000.nc"))
-#         _ = next(t)
-# 
-#         # Make sure file isn't deleted!
-#         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+
+def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
+    """Test netcdf locally"""
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.process.batch_size = 4
+    c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
+    c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
+    configuration = c
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+
+        f = Batch.fake(configuration=c)
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
+
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
+
+        train_dataset = NetCDFDataset(
+            1,
+            DATA_PATH,
+            TEMP_PATH,
+            history_minutes=30,
+            forecast_minutes=60,
+            configuration=configuration,
+            normalize=False,
+            data_sources_names=["pv", "gsp", "hrvsatellite"],
+        )
+
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+        )
+
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+
+        train_dataset.per_worker_init(1)
+        t = iter(train_dataset)
+        data = next(t)
+
+        batch_ml = BatchML(**data)
+
+        assert batch_ml.nwp is None
+        assert batch_ml.topographic is None
+        assert batch_ml.pv.pv_yield.shape == (4, 19, 128)
+        assert batch_ml.gsp.gsp_yield.shape == (4, 4, 32)
+        assert batch_ml.sun is None
+        assert batch_ml.satellite is None
+        assert batch_ml.hrvsatellite is not None
+        assert batch_ml.hrvsatellite.data.shape == (4, 1, 19, 192, 192)
+
+        # Make sure file isn't deleted!
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+
+
+def test_netcdf_dataset_copy_from_data_path():
+    """Test netcdf locally"""
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.process.batch_size = 4
+    c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
+    c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
+    configuration = c
+
+    with tempfile.TemporaryDirectory() as tmpdirname, tempfile.TemporaryDirectory() as data_path:
+
+        f = Batch.fake(configuration=c)
+        f.save_netcdf(batch_i=0, path=Path(data_path))
+        assert os.path.exists(os.path.join(data_path, "satellite/000000.nc"))
+
+        DATA_PATH = data_path
+        TEMP_PATH = tmpdirname
+
+        train_dataset = NetCDFDataset(
+            1,
+            DATA_PATH,
+            TEMP_PATH,
+            history_minutes=30,
+            forecast_minutes=60,
+            configuration=configuration,
+            normalize=False,
+        )
+
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+        )
+
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+
+        train_dataset.per_worker_init(1)
+
+        t = iter(train_dataset)
+        assert os.path.exists(os.path.join(data_path, "satellite/000000.nc"))
+        _ = next(t)
+
+        # Make sure file isn't deleted!
+        assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
