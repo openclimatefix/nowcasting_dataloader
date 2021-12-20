@@ -43,7 +43,7 @@ def test_netcdf_dataset_local_using_configuration_on_batch():
             forecast_minutes=60,
             configuration=configuration,
             normalize=False,
-            mix_two_batches = False
+            mix_two_batches=False,
         )
 
         dataloader_config = dict(
@@ -92,7 +92,6 @@ def test_netcdf_dataset_local_using_configuration_on_batch():
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-
 def test_netcdf_dataset_local_using_configuration():
     """Test netcdf locally"""
     c = Configuration()
@@ -106,7 +105,7 @@ def test_netcdf_dataset_local_using_configuration():
 
         f = Batch.fake(configuration=c)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
-        
+
         f = Batch.fake(configuration=c)
         f.save_netcdf(batch_i=1, path=Path(tmpdirname))
 
@@ -167,7 +166,6 @@ def test_netcdf_dataset_local_using_configuration():
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
-
 
 def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
     """Test netcdf locally"""
