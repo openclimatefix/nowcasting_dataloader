@@ -87,7 +87,11 @@ class NWPML(DataSourceOutputML):
         xr_dataset = re_order_dims(xr_dataset)
 
         # convert to torch dict
-        nwp_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "init_time", "x", "y"])
+        nwp_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "init_time", "x_osgb", "y_osgb"])
+
+        # rename x and y channel
+        nwp_batch_ml["x"] = nwp_batch_ml.pop("x_osgb")
+        nwp_batch_ml["y"] = nwp_batch_ml.pop("y_osgb")
 
         # make into Model
         return NWPML(**nwp_batch_ml)

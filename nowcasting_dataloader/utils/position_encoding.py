@@ -95,7 +95,7 @@ def generate_position_encodings_for_batch(
                 geospatial_coordinates = (
                     [xr_dataset.x.values, xr_dataset.y.values]
                     if "x_index" in xr_dataset.sizes
-                    else [xr_dataset.x_coords.values, xr_dataset.y_coords.values]
+                    else [xr_dataset.x_osgb.values, xr_dataset.y_osgb.values]
                 )
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     shape=determine_shape_of_encoding(xr_dataset),
@@ -128,9 +128,9 @@ def determine_shape_of_encoding(xr_dataset: xr.Dataset) -> List[int]:
     shape.append(xr_dataset.sizes.get("time_index", 1))  # If no time dimension, just a single one)
 
     # Now for the main issue, either 4 or 5D here
-    if "x_index" in xr_dataset.sizes:
-        shape.append(xr_dataset.sizes["x_index"])
-        shape.append(xr_dataset.sizes["y_index"])
+    if "x_osgb_index" in xr_dataset.sizes:
+        shape.append(xr_dataset.sizes["x_osgb_index"])
+        shape.append(xr_dataset.sizes["y_osgb_index"])
     else:
         # No spatial extant i.e. GSP, or PV
         # Then the output should be for each ID, so would then be the same as the channels ID

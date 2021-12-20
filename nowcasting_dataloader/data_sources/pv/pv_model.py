@@ -121,7 +121,7 @@ class PVML(DataSourceOutputML):
         """Change xr dataset to model. If data does not exist, then return None"""
 
         pv_batch_ml = xr_dataset.torch.to_tensor(
-            ["power_mw", "capacity_mwp", "time", "x_coords", "y_coords", "id"]
+            ["power_mw", "capacity_mwp", "time", "x_osgb", "y_osgb", "id"]
         )
 
         pv_batch_ml[PV_YIELD] = pv_batch_ml.pop("power_mw")
@@ -129,8 +129,8 @@ class PVML(DataSourceOutputML):
         pv_batch_ml[PV_SYSTEM_ID] = pv_batch_ml["id"]
         pv_batch_ml[PV_SYSTEM_ROW_NUMBER] = pv_batch_ml.pop("id")
         pv_batch_ml[PV_DATETIME_INDEX] = pv_batch_ml.pop("time")
-        pv_batch_ml[PV_SYSTEM_X_COORDS] = pv_batch_ml.pop("x_coords")
-        pv_batch_ml[PV_SYSTEM_Y_COORDS] = pv_batch_ml.pop("y_coords")
+        pv_batch_ml[PV_SYSTEM_X_COORDS] = pv_batch_ml.pop("x_osgb")
+        pv_batch_ml[PV_SYSTEM_Y_COORDS] = pv_batch_ml.pop("y_osgb")
 
         return PVML(**pv_batch_ml)
 
