@@ -18,8 +18,8 @@ from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
 torch.set_default_dtype(torch.float32)
 
 
-def test_netcdf_dataset_local_using_configuration_on_batch():
-    """Test netcdf locally"""
+def test_netcdf_dataset_local_using_configuration_on_one_batch():
+    """Test netcdf locally, just loading one batch"""
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
     c.process.batch_size = 4
@@ -93,7 +93,7 @@ def test_netcdf_dataset_local_using_configuration_on_batch():
 
 
 def test_netcdf_dataset_local_using_configuration():
-    """Test netcdf locally"""
+    """Test netcdf locally, mix two batches"""
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
     c.process.batch_size = 4
