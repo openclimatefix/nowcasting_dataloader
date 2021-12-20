@@ -81,11 +81,12 @@ def test_netcdf_datamodule_init():
         f = Batch.fake(configuration=c)
         train_tmp = os.path.join(tmpdirname, "train")
         f.save_netcdf(batch_i=0, path=Path(train_tmp))
+        f.save_netcdf(batch_i=1, path=Path(train_tmp))
 
         configuration.output_data.filepath = tmpdirname
         save_yaml_configuration(c, filename=f"{tmpdirname}/configuration.yaml")
 
-        datamodule = NetCDFDataModule(temp_path=tmpdirname, data_path=tmpdirname)
+        datamodule = NetCDFDataModule(temp_path=tmpdirname, data_path=tmpdirname, n_train_data=2)
 
         t = iter(datamodule.train_dataloader())
         x = next(t)
