@@ -157,6 +157,11 @@ class NetCDFDataset(torch.utils.data.Dataset):
         batch_indexes = [batch_idx]
         if self.mix_two_batches:
             second_batch_idx = np.random.randint(0, len(self) - 1)
+
+            # make sure second index is not the same as the first one
+            if second_batch_idx == batch_idx:
+                second_batch_idx = (second_batch_idx + 1) % len(self)
+
             batch_indexes.append(second_batch_idx)
 
         # download batches
