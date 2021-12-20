@@ -167,6 +167,7 @@ def test_netcdf_dataset_local_using_configuration():
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
+
 def test_netcdf_dataset_local_using_configuration_subset_of_data_sources():
     """Test netcdf locally"""
     c = Configuration()
