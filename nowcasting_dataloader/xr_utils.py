@@ -99,7 +99,7 @@ def re_order_dims(xr_dataset: xr.Dataset):
         "example",
         "channels_index",
         "time_index",
-        "y_aosgb_index",
+        "y_osgb_index",
         "x_osgb_index",
     )
 
