@@ -3,10 +3,10 @@ import logging
 import os
 from typing import List, Optional, Tuple, Union
 
-import numpy as np
-import xarray as xr
 import einops
+import numpy as np
 import torch
+import xarray as xr
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     DEFAULT_REQUIRED_KEYS,
@@ -158,7 +158,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # get batches indexes
         batch_indexes = [batch_idx]
         if self.mix_two_batches:
-            second_batch_idx = np.random.randint(0,len(self)-1)
+            second_batch_idx = np.random.randint(0, len(self) - 1)
             batch_indexes.append(second_batch_idx)
 
         # download batches
