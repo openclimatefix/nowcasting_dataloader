@@ -6,7 +6,6 @@ from typing import List, Optional, Tuple, Union
 import einops
 import numpy as np
 import torch
-import xarray as xr
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     DEFAULT_REQUIRED_KEYS,
@@ -17,12 +16,11 @@ from nowcasting_dataset.consts import (
     PV_SYSTEM_ID,
     PV_YIELD,
     SATELLITE_DATA,
-    SPATIAL_AND_TEMPORAL_LOCATIONS_OF_EACH_EXAMPLE_FILENAME,
     TOPOGRAPHIC_DATA,
 )
 from nowcasting_dataset.dataset.batch import Batch, Example, join_two_batches
-from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path, download_to_local
-from nowcasting_dataset.utils import get_netcdf_filename, set_fsspec_for_multiprocess
+from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path
+from nowcasting_dataset.utils import set_fsspec_for_multiprocess
 
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.subset import subselect_data
@@ -170,8 +168,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 batch = Batch.download_batch_and_load_batch(
                     batch_idx=batch_idx,
                     data_sources_names=self.data_sources_names,
-                    tmp_path=tmp_path,
-                    src_path=src_path,
+                    tmp_path=self.tmp_path,
+                    src_path=self.src_path,
                 )
             else:
                 batch: Batch = Batch.load_netcdf(
