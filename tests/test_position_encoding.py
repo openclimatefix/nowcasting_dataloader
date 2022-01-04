@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.utils.position_encoding import (
@@ -19,15 +18,6 @@ from nowcasting_dataloader.utils.position_encoding import (
     generate_position_encodings_for_batch,
     normalize_geospatial_coordinates,
 )
-
-
-@pytest.fixture
-def configuration():
-    """Create configuration object"""
-    con = Configuration()
-    con.input_data = InputData.set_all_to_defaults()
-    con.process.batch_size = 4
-    return con
 
 
 @pytest.mark.parametrize(
