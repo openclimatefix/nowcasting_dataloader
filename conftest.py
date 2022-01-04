@@ -4,6 +4,7 @@ import os
 import nowcasting_dataset
 import pytest
 from nowcasting_dataset.config.load import load_yaml_configuration
+from nowcasting_dataset.config.model import Configuration, InputData
 
 import nowcasting_dataloader
 from nowcasting_dataloader.xr_utils import (
@@ -42,11 +43,13 @@ def use_cloud_data(request):
 
 @pytest.fixture
 def configuration():
-    """Get the GCP configuration and return it"""
-    filename = os.path.join(os.path.dirname(nowcasting_dataset.__file__), "config", "gcp.yaml")
-    configuration = load_yaml_configuration(filename)
+    
+    c = Configuration()
+    c.input_data = InputData.set_all_to_defaults()
+    c.input_data.pv.n_pv_systems_per_example = 128
+    c.process.batch_size = 4
 
-    return configuration
+    return c
 
 
 @pytest.fixture

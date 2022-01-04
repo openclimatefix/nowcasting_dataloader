@@ -13,18 +13,15 @@ from nowcasting_dataloader.datasets import SatFlowDataset, worker_init_fn
 torch.set_default_dtype(torch.float32)
 
 
-def test_satflow_dataset_local_using_configuration():
+def test_satflow_dataset_local_using_configuration(configuration):
     """Test satflow locally"""
-    c = Configuration()
-    c.input_data = InputData.set_all_to_defaults()
-    c.process.batch_size = 4
-    c.input_data.nwp.nwp_channels = c.input_data.nwp.nwp_channels[0:1]
-    c.input_data.satellite.satellite_channels = c.input_data.satellite.satellite_channels[0:2]
-    configuration = c
+
+    configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
+    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
-        f = Batch.fake(configuration=c)
+        f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
         DATA_PATH = tmpdirname
@@ -81,17 +78,14 @@ def test_satflow_dataset_local_using_configuration():
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-def test_satflow_dataset_local_using_configuration_with_position_encoding():
+def test_satflow_dataset_local_using_configuration_with_position_encoding(configuration):
     """Test satflow locally"""
-    c = Configuration()
-    c.input_data = InputData.set_all_to_defaults()
-    c.process.batch_size = 4
-    c.input_data.satellite.satellite_image_size_pixels = 24
-    configuration = c
+
+    configuration.input_data.satellite.satellite_image_size_pixels = 24
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
-        f = Batch.fake(configuration=c)
+        f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
         DATA_PATH = tmpdirname
@@ -150,17 +144,14 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding():
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-def test_satflow_dataset_local_using_configuration_with_position_encoding_subset_of_sources():
+def test_satflow_dataset_local_using_configuration_with_position_encoding_subset_of_sources(configuration):
     """Test satflow locally"""
-    c = Configuration()
-    c.input_data = InputData.set_all_to_defaults()
-    c.process.batch_size = 4
-    c.input_data.satellite.satellite_image_size_pixels = 24
-    configuration = c
+
+    configuration.input_data.satellite.satellite_image_size_pixels = 24
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
-        f = Batch.fake(configuration=c)
+        f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
         DATA_PATH = tmpdirname
@@ -219,13 +210,10 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-def test_zero_pv_systems():
-    c = Configuration()
-    c.input_data = InputData.set_all_to_defaults()
-    c.process.batch_size = 4
-    c.input_data.satellite.satellite_image_size_pixels = 24
-    configuration = c
-    batch = Batch.fake(configuration=c)
+def test_zero_pv_systems(configuration):
+    configuration.input_data.satellite.satellite_image_size_pixels = 24
+
+    batch = Batch.fake(configuration=configuration)
     x = BatchML.from_batch(batch)
     x = x.dict()
     x["pv"]["pv_yield"][0, :, 100:] = float("nan")
