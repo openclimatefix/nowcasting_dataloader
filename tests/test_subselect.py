@@ -5,7 +5,6 @@ from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.subset import subselect_data
 
-
 # @pytest.fixture
 # def configuration():
 #     """Create Configuration for test"""

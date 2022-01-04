@@ -7,7 +7,6 @@ from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.fake import FakeDataset
 
-
 # @pytest.fixture
 # def configuration():
 #     """Create Configuration object for tests"""

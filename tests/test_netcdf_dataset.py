@@ -21,7 +21,9 @@ torch.set_default_dtype(torch.float32)
 def test_netcdf_dataset_local_using_configuration_on_one_batch(configuration):
     """Test netcdf locally, just loading one batch"""
     configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
-    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -92,7 +94,9 @@ def test_netcdf_dataset_local_using_configuration(configuration):
     """Test netcdf locally, mix two batches"""
 
     configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
-    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -165,7 +169,9 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources(configu
     """Test netcdf locally"""
 
     configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
-    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -221,7 +227,9 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources(configu
 def test_netcdf_dataset_copy_from_data_path(configuration):
     """Test netcdf locally"""
     configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
-    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname, tempfile.TemporaryDirectory() as data_path:
 

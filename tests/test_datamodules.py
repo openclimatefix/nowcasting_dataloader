@@ -13,7 +13,7 @@ torch.set_default_dtype(torch.float32)
 
 
 def test_satflow_datamodule_init(configuration):
-    
+
     configuration.input_data.satellite.satellite_image_size_pixels = 24
     configuration.process.n_test_batches = 0
     configuration.process.n_validation_batches = 0

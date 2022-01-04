@@ -17,7 +17,9 @@ def test_satflow_dataset_local_using_configuration(configuration):
     """Test satflow locally"""
 
     configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
-    configuration.input_data.satellite.satellite_channels = configuration.input_data.satellite.satellite_channels[0:2]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -144,7 +146,9 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding(config
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
 
 
-def test_satflow_dataset_local_using_configuration_with_position_encoding_subset_of_sources(configuration):
+def test_satflow_dataset_local_using_configuration_with_position_encoding_subset_of_sources(
+    configuration,
+):
     """Test satflow locally"""
 
     configuration.input_data.satellite.satellite_image_size_pixels = 24

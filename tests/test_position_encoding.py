@@ -20,7 +20,6 @@ from nowcasting_dataloader.utils.position_encoding import (
     normalize_geospatial_coordinates,
 )
 
-
 # @pytest.fixture
 # def configuration():
 #     """Create configuration object"""
