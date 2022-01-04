@@ -19,6 +19,7 @@ from nowcasting_dataloader.utils.position_encoding import (
     normalize_geospatial_coordinates,
 )
 
+
 @pytest.mark.parametrize(
     ["key", "expected_shape"],
     [
