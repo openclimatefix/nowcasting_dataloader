@@ -6,6 +6,7 @@ from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.fake import FakeDataset
 
+
 def test_batch_to_batch_ml(configuration):
     """Test creating BatchML from Batch"""
     _ = BatchML.from_batch(batch=Batch.fake(configuration=configuration))
