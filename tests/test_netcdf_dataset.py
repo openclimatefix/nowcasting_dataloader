@@ -8,7 +8,6 @@ import plotly
 import plotly.graph_objects as go
 import pytest
 import torch
-from nowcasting_dataset.config.model import Configuration, InputData
 from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
 from nowcasting_dataset.dataset.batch import Batch
 

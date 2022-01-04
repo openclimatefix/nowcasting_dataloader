@@ -3,7 +3,6 @@ import os
 
 import nowcasting_dataset
 import pytest
-from nowcasting_dataset.config.load import load_yaml_configuration
 from nowcasting_dataset.config.model import Configuration, InputData
 
 import nowcasting_dataloader
