@@ -6,18 +6,6 @@ from nowcasting_dataset.dataset.batch import Batch
 from nowcasting_dataloader.batch import BatchML
 from nowcasting_dataloader.fake import FakeDataset
 
-<<<<<<< HEAD
-=======
-# @pytest.fixture
-# def configuration():
-#     """Create Configuration object for tests"""
-#     con = Configuration()
-#     con.input_data = InputData.set_all_to_defaults()
-#     con.process.batch_size = 4
-#     return con
-
->>>>>>> f7d22129bb9150c7d254bf5e96d638b25fc63d6e
-
 def test_batch_to_batch_ml(configuration):
     """Test creating BatchML from Batch"""
     _ = BatchML.from_batch(batch=Batch.fake(configuration=configuration))
