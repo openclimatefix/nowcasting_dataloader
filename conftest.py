@@ -42,7 +42,7 @@ def use_cloud_data(request):
 
 @pytest.fixture
 def configuration():
-    
+
     c = Configuration()
     c.input_data = InputData.set_all_to_defaults()
     c.input_data.pv.n_pv_systems_per_example = 128
