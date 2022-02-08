@@ -4,8 +4,6 @@ import tempfile
 from pathlib import Path
 
 import pandas as pd
-import plotly
-import plotly.graph_objects as go
 import pytest
 import torch
 from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
