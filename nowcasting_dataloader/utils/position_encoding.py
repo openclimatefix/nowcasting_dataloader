@@ -93,13 +93,15 @@ def generate_position_encodings_for_batch(
                 if hasattr(xr_dataset, "time"):
                     datetimes = xr_dataset.time.values
 
-                if "x_index" in xr_dataset.sizes:
+                if "x" in xr_dataset.data_vars:
                     geospatial_coordinates = [xr_dataset.x.values, xr_dataset.y.values]
-                elif "x_geostationary_index" in xr_dataset.sizes:
+                elif "x_geostationary" in xr_dataset.data_vars:
                     geospatial_coordinates = [xr_dataset.x_geostationary.values, xr_dataset.y_geostationary.values]
-                elif "x_osgb_index" in xr_dataset.sizes:
+                elif "x_osgb" in xr_dataset.data_vars:
                     geospatial_coordinates = [xr_dataset.x_osgb.values, xr_dataset.y_osgb.values]
-                
+                else:
+                    raise Exception(f"Could not find 'x', 'x_osgb' or 'x_geostationary' in {xr_dataset.data_vars}")
+
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     shape=determine_shape_of_encoding(xr_dataset),
                     geospatial_coordinates=geospatial_coordinates,
