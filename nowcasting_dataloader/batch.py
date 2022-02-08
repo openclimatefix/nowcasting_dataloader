@@ -111,7 +111,13 @@ class BatchML(Example):
                     # Only need it from the first example
                     data_sources_dict[data_source_name].channels = xr_dataset["channels"][0].values
 
-        data_sources_dict["metadata"] = batch.metadata.dict()
+        # metadata
+        metadata = batch.metadata.dict()
+        metadata["x_center_osgb"] = batch.metadata.x_centers_osgb
+        metadata["y_center_osgb"] = batch.metadata.y_centers_osgb
+        metadata["t0_datetime_utc"] = batch.metadata.t0_datetimes_utc
+
+        data_sources_dict["metadata"] = metadata
 
         return BatchML(**data_sources_dict)
 

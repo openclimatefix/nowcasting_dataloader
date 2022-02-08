@@ -24,7 +24,7 @@ from nowcasting_dataloader.utils.position_encoding import (
     ["key", "expected_shape"],
     [
         ("nwp", [4, 10, 3, 64, 64]),
-        ("satellite", [4, 10, 19, 21, 21]),
+        ("satellite", [4, 11, 19, 21, 21]),
         ("topographic", [4, 1, 1, 64, 64]),
         ("pv", [4, 128, 19, 128]),
         ("gsp", [4, 32, 4, 32]),
