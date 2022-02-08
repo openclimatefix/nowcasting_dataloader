@@ -85,12 +85,19 @@ class SatelliteML(DataSourceOutputML):
         """Change xr dataset to model."""
 
         # make sure the dims are in the correct order
-        xr_dataset = re_order_dims(xr_dataset)
+        expected_dims_order = (
+            "example",
+            "channels_index",
+            "time_index",
+            "y_geostationary_index",
+            "x_geostationary_index",
+        )
+        xr_dataset = re_order_dims(xr_dataset, expected_dims_order=expected_dims_order)
 
         # convert to torch dictionary
-        satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "x_osgb", "y_osgb"])
-        satellite_batch_ml["x"] = satellite_batch_ml.pop("x_osgb")
-        satellite_batch_ml["y"] = satellite_batch_ml.pop("y_osgb")
+        satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "y_geostationary", "x_geostationary"])
+        satellite_batch_ml["x"] = satellite_batch_ml.pop("x_geostationary")
+        satellite_batch_ml["y"] = satellite_batch_ml.pop("y_geostationary")
 
         # move to Model
         return SatelliteML(**satellite_batch_ml)

@@ -2,7 +2,7 @@
 
 1. xr array and xr dataset --> to torch functions
 """
-from typing import List
+from typing import Optional, List
 
 import numpy as np
 import torch
@@ -91,17 +91,18 @@ register_xr_data_array_to_tensor()
 register_xr_data_set_to_tensor()
 
 
-def re_order_dims(xr_dataset: xr.Dataset):
+def re_order_dims(xr_dataset: xr.Dataset, expected_dims_order: Optional = None):
     """
     Re order dims to B,C,T,H,W
     """
-    expected_dims_order = (
-        "example",
-        "channels_index",
-        "time_index",
-        "y_osgb_index",
-        "x_osgb_index",
-    )
+    if expected_dims_order is None:
+        expected_dims_order = (
+            "example",
+            "channels_index",
+            "time_index",
+            "y_osgb_index",
+            "x_osgb_index",
+        )
 
     if xr_dataset.data.dims != expected_dims_order:
         xr_dataset.__setitem__("data", xr_dataset.data.transpose(*expected_dims_order))
