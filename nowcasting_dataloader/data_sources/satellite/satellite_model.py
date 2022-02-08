@@ -95,7 +95,9 @@ class SatelliteML(DataSourceOutputML):
         xr_dataset = re_order_dims(xr_dataset, expected_dims_order=expected_dims_order)
 
         # convert to torch dictionary
-        satellite_batch_ml = xr_dataset.torch.to_tensor(["data", "time", "y_geostationary", "x_geostationary"])
+        satellite_batch_ml = xr_dataset.torch.to_tensor(
+            ["data", "time", "y_geostationary", "x_geostationary"]
+        )
         satellite_batch_ml["x"] = satellite_batch_ml.pop("x_geostationary")
         satellite_batch_ml["y"] = satellite_batch_ml.pop("y_geostationary")
 

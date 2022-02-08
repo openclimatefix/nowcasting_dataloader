@@ -136,7 +136,7 @@ def test_netcdf_dataset_local_using_configuration(configuration):
         batch_ml = BatchML(**data)
 
         sat_data = batch_ml.satellite.data
-        
+
         # TODO
         # Sat is in 5min increments, so should have 2 history + current + 2 future
         assert sat_data.shape == (4, 2, 19, 21, 21)
