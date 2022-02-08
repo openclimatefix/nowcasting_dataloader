@@ -92,11 +92,14 @@ def generate_position_encodings_for_batch(
                 datetimes = None
                 if hasattr(xr_dataset, "time"):
                     datetimes = xr_dataset.time.values
-                geospatial_coordinates = (
-                    [xr_dataset.x.values, xr_dataset.y.values]
-                    if "x_index" in xr_dataset.sizes
-                    else [xr_dataset.x_osgb.values, xr_dataset.y_osgb.values]
-                )
+
+                if "x_index" in xr_dataset.sizes:
+                    geospatial_coordinates = [xr_dataset.x.values, xr_dataset.y.values]
+                elif "x_geostationary_index" in xr_dataset.sizes:
+                    geospatial_coordinates = [xr_dataset.x_geostationary.values, xr_dataset.y_geostationary.values]
+                elif "x_osgb_index" in xr_dataset.sizes:
+                    geospatial_coordinates = [xr_dataset.x_osgb.values, xr_dataset.y_osgb.values]
+                
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
                     shape=determine_shape_of_encoding(xr_dataset),
                     geospatial_coordinates=geospatial_coordinates,
@@ -131,6 +134,9 @@ def determine_shape_of_encoding(xr_dataset: xr.Dataset) -> List[int]:
     if "x_osgb_index" in xr_dataset.sizes:
         shape.append(xr_dataset.sizes["x_osgb_index"])
         shape.append(xr_dataset.sizes["y_osgb_index"])
+    elif "x_geostationary_index" in xr_dataset.sizes:
+        shape.append(xr_dataset.sizes["x_geostationary_index"])
+        shape.append(xr_dataset.sizes["y_geostationary_index"])
     else:
         # No spatial extant i.e. GSP, or PV
         # Then the output should be for each ID, so would then be the same as the channels ID
