@@ -104,7 +104,8 @@ def generate_position_encodings_for_batch(
                     geospatial_coordinates = [xr_dataset.x_osgb.values, xr_dataset.y_osgb.values]
                 else:
                     raise Exception(
-                        f"Could not find 'x', 'x_osgb' or 'x_geostationary' in {xr_dataset.data_vars}"
+                        f"Could not find 'x', 'x_osgb' or 'x_geostationary' "
+                        f"in {xr_dataset.data_vars}"
                     )
 
                 position_encodings[k + "_position_encoding"] = encode_absolute_position(
