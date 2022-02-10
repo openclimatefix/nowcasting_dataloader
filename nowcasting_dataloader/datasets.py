@@ -88,6 +88,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.num_bands = num_bands
         if data_sources_names is None:
             data_sources_names = list(Example.__fields__.keys())
+            data_sources_names = [data_source_name for data_source_name in data_sources_names
+                                  if getattr(self.configuration.input_data,data_source_name) is not None]
         self.data_sources_names = data_sources_names
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
