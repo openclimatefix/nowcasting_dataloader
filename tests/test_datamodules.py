@@ -12,8 +12,8 @@ torch.set_default_dtype(torch.float32)
 
 
 def test_satflow_datamodule_init(configuration):
-
-    configuration.input_data.satellite.satellite_image_size_pixels = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_height = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_width = 24
     configuration.process.n_test_batches = 0
     configuration.process.n_validation_batches = 0
     configuration.process.n_train_batches = 1
@@ -64,7 +64,8 @@ def test_satflow_datamodule_init(configuration):
 
 def test_netcdf_datamodule_init(configuration):
 
-    configuration.input_data.satellite.satellite_image_size_pixels = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_height = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_width = 24
     configuration.process.n_test_batches = 0
     configuration.process.n_validation_batches = 0
     configuration.process.n_train_batches = 1

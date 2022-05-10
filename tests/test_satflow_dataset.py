@@ -82,7 +82,8 @@ def test_satflow_dataset_local_using_configuration(configuration):
 def test_satflow_dataset_local_using_configuration_with_position_encoding(configuration):
     """Test satflow locally"""
 
-    configuration.input_data.satellite.satellite_image_size_pixels = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_height = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_width = 24
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -150,7 +151,8 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
 ):
     """Test satflow locally"""
 
-    configuration.input_data.satellite.satellite_image_size_pixels = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_height = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_width = 24
 
     with tempfile.TemporaryDirectory() as tmpdirname:
 
@@ -214,7 +216,8 @@ def test_satflow_dataset_local_using_configuration_with_position_encoding_subset
 
 
 def test_zero_pv_systems(configuration):
-    configuration.input_data.satellite.satellite_image_size_pixels = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_height = 24
+    configuration.input_data.satellite.satellite_image_size_pixels_width = 24
 
     batch = Batch.fake(configuration=configuration)
     x = BatchML.from_batch(batch)
