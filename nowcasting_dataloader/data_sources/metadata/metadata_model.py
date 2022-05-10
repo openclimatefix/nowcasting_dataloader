@@ -32,3 +32,8 @@ class MetadataML(DataSourceOutputML):
         ...,
         description="The y centers of each example in OSGB coordinates",
     )
+
+    id: Array = Field(
+        ...,
+        description="The ids of each example, for example which GSP id they are",
+    )
