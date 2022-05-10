@@ -116,7 +116,7 @@ class BatchML(Example):
         metadata["x_center_osgb"] = batch.metadata.x_centers_osgb
         metadata["y_center_osgb"] = batch.metadata.y_centers_osgb
         metadata["t0_datetime_utc"] = batch.metadata.t0_datetimes_utc
-        metadata["id"] = batch.metadata.id
+        metadata["id"] = batch.metadata.ids
 
         data_sources_dict["metadata"] = metadata
 
