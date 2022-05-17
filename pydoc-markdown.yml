@@ -29,7 +29,7 @@ renderer:
             - title: Topographic
               contents: [data_sources.topographic, data_sources.topographic.*]
             - title: Optical Flow
-              contents: [ data_sources.opticalflow, data_sources.opticalflow.* ]
+              contents: [data_sources.opticalflow, data_sources.opticalflow.*]
         - title: Utils
           contents: [utils, utils.*, xr_utils]
         - title: Dataloaders
