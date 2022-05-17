@@ -229,7 +229,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.add_position_encoding:
             # Add position encodings
             batch.update(position_encodings)
-        if self.save_first_batch is not None and batch_idx == 1:
+
+        if self.save_first_batch is not None and batch_idx == 0:
             # Save out the dictionary to disk
             np.save("tmp.npy", batch)
             fs = fsspec.open(self.save_first_batch).fs

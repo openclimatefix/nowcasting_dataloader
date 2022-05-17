@@ -190,6 +190,7 @@ def test_netcdf_dataset_local_using_configuration_with_saving_locally(configurat
             forecast_minutes=60,
             configuration=configuration,
             normalize=False,
+            mix_two_batches=False,
             save_first_batch=os.path.join(tmpdirname, "saved_batch.npy"),
         )
 
