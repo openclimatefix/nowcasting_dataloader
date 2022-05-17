@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple, Union
 import einops
 import numpy as np
 import torch
+import fsspec
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     DEFAULT_REQUIRED_KEYS,
@@ -50,6 +51,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         data_sources_names: Optional[list[str]] = None,
         num_bands: int = 4,
         mix_two_batches: bool = True,
+        save_first_batch: Optional[str] = None,
         seed: bool = 234,
     ):
         """
@@ -72,6 +74,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             data_sources_names: Names of data sources to load, if not using all of them
             num_bands: Number of bands for the Fourier features for the position encoding
             mix_two_batches: option to mix tow batches together
+            save_first_batch: Option to save the first generated batch to disk
             seed: random seed for peaking second batch when mixing two batches
         """
         self.n_batches = n_batches
@@ -84,6 +87,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.add_position_encoding = add_position_encoding
         self.seed = seed
         self.mix_two_batches = mix_two_batches
+        self.save_first_batch = save_first_batch
 
         self.num_bands = num_bands
         if data_sources_names is None:
@@ -225,6 +229,12 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.add_position_encoding:
             # Add position encodings
             batch.update(position_encodings)
+
+        if self.save_first_batch is not None and batch_idx == 0:
+            # Save out the dictionary to disk
+            np.save("tmp.npy", batch)
+            fs = fsspec.open(self.save_first_batch).fs
+            fs.put("tmp.npy", self.save_first_batch)
         return batch
 
 
