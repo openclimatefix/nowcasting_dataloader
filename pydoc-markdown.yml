@@ -16,8 +16,6 @@ renderer:
           children:
             - title: Overview
               source: nowcasting_dataloader/data_sources/README.md
-            - title: Datetime
-              contents: [data_sources.datetime, data_sources.datetime.*]
             - title: Grid Supply Point (GSP)
               contents: [data_sources.gsp, data_sources.gsp.*]
             - title: Metadata
@@ -30,12 +28,14 @@ renderer:
               contents: [data_sources.sun, data_sources.sun.*]
             - title: Topographic
               contents: [data_sources.topographic, data_sources.topographic.*]
+            - title: Optical Flow
+              contents: [data_sources.opticalflow, data_sources.opticalflow.*]
         - title: Utils
-          contents: [utils, utils.*]
+          contents: [utils, utils.*, xr_utils]
         - title: Dataloaders
           children:
             - title: Dataloaders
-              contents: [dataloaders]
+              contents: [datamodules]
             - title: Subsetting Data
               contents: [subset]
             - title: Test Data
