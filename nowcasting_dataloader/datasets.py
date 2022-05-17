@@ -4,9 +4,9 @@ import os
 from typing import List, Optional, Tuple, Union
 
 import einops
+import fsspec
 import numpy as np
 import torch
-import fsspec
 from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.consts import (
     DEFAULT_REQUIRED_KEYS,
