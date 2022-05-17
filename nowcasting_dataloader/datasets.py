@@ -120,7 +120,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.required_keys = list(required_keys)
 
         if not os.path.isdir(self.tmp_path):
-            os.mkdir(self.tmp_path)
+            os.makedirs(self.tmp_path, exist_ok=True)
 
         # set seed
         np.random.seed(seed)
