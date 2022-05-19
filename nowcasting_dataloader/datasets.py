@@ -103,7 +103,6 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         self.nwp_channels = nwp_channels
 
-
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
         if self.forecast_minutes is None:
@@ -202,7 +201,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         batch = join_two_batches(batches=batches, data_sources_names=self.data_sources_names)
 
         if self.nwp_channels is not None:
-            batch.nwp = batch.nwp.sel(variable=list(self.nwp_channels))
+            batch.nwp = batch.nwp.sel(channels=list(self.nwp_channels))
             
         if self.select_subset_data:
             batch = subselect_data(
