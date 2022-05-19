@@ -39,7 +39,7 @@ def test_netcdf_dataset_local_using_configuration_on_one_batch(configuration):
             configuration=configuration,
             normalize=False,
             mix_two_batches=False,
-            nwp_channels=configuration.input_data.nwp.nwp_channels[0:1]
+            nwp_channels=configuration.input_data.nwp.nwp_channels[0:1],
         )
 
         dataloader_config = dict(
