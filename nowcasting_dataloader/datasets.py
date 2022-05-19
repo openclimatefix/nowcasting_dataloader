@@ -201,7 +201,15 @@ class NetCDFDataset(torch.utils.data.Dataset):
         batch = join_two_batches(batches=batches, data_sources_names=self.data_sources_names)
 
         if self.nwp_channels is not None:
-            batch.nwp = batch.nwp.sel(channels=list(self.nwp_channels))
+            # get the channel index we need
+            # assume the all examples have the same channel names
+            channels = batch.nwp.channels[0]
+            channels_index = [
+                i for i, channel in enumerate(channels) if channel in self.nwp_channels
+            ]
+
+            # reduce nwp data to only the channels we want
+            batch.nwp = batch.nwp.sel(channels_index=channels_index)
 
         if self.select_subset_data:
             batch = subselect_data(
