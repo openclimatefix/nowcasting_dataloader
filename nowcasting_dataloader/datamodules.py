@@ -223,7 +223,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.temp_path, "train"),
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
-                nwp_channels = nwp_channels,
+                nwp_channels=nwp_channels,
             )
 
         return torch.utils.data.DataLoader(
@@ -241,7 +241,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.temp_path, "validation"),
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
-                nwp_channels=nwp_channels
+                nwp_channels=nwp_channels,
             )
 
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
