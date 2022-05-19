@@ -49,6 +49,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         normalize: bool = True,
         add_position_encoding: bool = False,
         data_sources_names: Optional[list[str]] = None,
+        nwp_channels: Optional[list[str]] = None,
         num_bands: int = 4,
         mix_two_batches: bool = True,
         save_first_batch: Optional[str] = None,
@@ -76,6 +77,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             mix_two_batches: option to mix tow batches together
             save_first_batch: Option to save the first generated batch to disk
             seed: random seed for peaking second batch when mixing two batches
+            nwp_channels: Useful for training to be able to reduce the number of channels
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -98,6 +100,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
                 if getattr(self.configuration.input_data, data_source_name) is not None
             ]
         self.data_sources_names = data_sources_names
+
+        self.nwp_channels = nwp_channels
+
 
         logger.info(f"Setting up NetCDFDataset for {src_path}")
 
@@ -196,6 +201,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # join batches
         batch = join_two_batches(batches=batches, data_sources_names=self.data_sources_names)
 
+        if self.nwp_channels is not None:
+            batch.nwp = batch.nwp.sel(variable=list(self.nwp_channels))
+            
         if self.select_subset_data:
             batch = subselect_data(
                 batch=batch,
