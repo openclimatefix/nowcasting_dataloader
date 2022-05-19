@@ -202,7 +202,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         if self.nwp_channels is not None:
             batch.nwp = batch.nwp.sel(channels=list(self.nwp_channels))
-            
+
         if self.select_subset_data:
             batch = subselect_data(
                 batch=batch,
