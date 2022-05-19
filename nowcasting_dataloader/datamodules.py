@@ -178,6 +178,7 @@ class NetCDFDataModule(LightningDataModule):
         fake_data: bool = False,
         shuffle_train: bool = False,
         data_sources_names: Optional[list[str]] = None,
+        nwp_channels: Optional[list[str]] = None,
     ):
         """
         fake_data: random data is created and used instead. This is useful for testing
@@ -194,6 +195,7 @@ class NetCDFDataModule(LightningDataModule):
         self.fake_data = fake_data
         self.shuffle_train = shuffle_train
         self.data_sources_names = data_sources_names
+        self.nwp_channels = nwp_channels
 
         filename = os.path.join(data_path, "configuration.yaml")
         _LOG.debug(f"Will be loading the configuration file {filename}")
@@ -221,6 +223,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.temp_path, "train"),
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
+                nwp_channels=self.nwp_channels,
             )
 
         return torch.utils.data.DataLoader(
@@ -238,6 +241,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.temp_path, "validation"),
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
+                nwp_channels=self.nwp_channels,
             )
 
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)
@@ -253,6 +257,7 @@ class NetCDFDataModule(LightningDataModule):
                 os.path.join(self.temp_path, "test"),
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
+                nwp_channels=self.nwp_channels,
             )
 
         return torch.utils.data.DataLoader(test_dataset, shuffle=False, **self.dataloader_config)
