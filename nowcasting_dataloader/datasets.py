@@ -74,7 +74,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             add_position_encoding: Whether to add position encoding or not
             data_sources_names: Names of data sources to load, if not using all of them
             num_bands: Number of bands for the Fourier features for the position encoding
-            mix_two_batches: option to mix tow batches together
+            mix_two_batches: option to mix two batches together
             save_first_batch: Option to save the first generated batch to disk
             seed: random seed for peaking second batch when mixing two batches
             nwp_channels: Useful for training to be able to reduce the number of channels
