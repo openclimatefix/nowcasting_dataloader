@@ -10,7 +10,7 @@ install_requires = (this_directory / "requirements.txt").read_text().splitlines(
 
 setup(
     name="nowcasting_dataloader",
-    version="2.0.0",
+    version="2.0.1",
     license="MIT",
     description="Nowcasting Dataloader",
     author="Jack Kelly, Peter Dudfield, Jacob Bieker",
