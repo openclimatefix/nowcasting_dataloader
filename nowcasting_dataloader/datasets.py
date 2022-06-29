@@ -3,22 +3,11 @@ import logging
 import os
 from typing import List, Optional, Tuple, Union
 
-import einops
 import fsspec
 import numpy as np
 import torch
 from nowcasting_dataset.config.model import Configuration
-from nowcasting_dataset.consts import (
-    DEFAULT_REQUIRED_KEYS,
-    GSP_DATETIME_INDEX,
-    GSP_ID,
-    GSP_YIELD,
-    NWP_DATA,
-    PV_SYSTEM_ID,
-    PV_YIELD,
-    SATELLITE_DATA,
-    TOPOGRAPHIC_DATA,
-)
+from nowcasting_dataset.consts import DEFAULT_REQUIRED_KEYS
 from nowcasting_dataset.dataset.batch import Batch, Example, join_two_batches
 from nowcasting_dataset.filesystem.utils import delete_all_files_in_temp_path
 from nowcasting_dataset.utils import set_fsspec_for_multiprocess

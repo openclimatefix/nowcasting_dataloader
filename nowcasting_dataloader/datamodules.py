@@ -1,11 +1,10 @@
 """Datamodules to use for training"""
 import logging
 import os
-from typing import List, Optional, Tuple, Union
+from typing import Optional
 
 import torch
 from nowcasting_dataset.config import load_yaml_configuration
-from nowcasting_dataset.config.model import Configuration
 from pytorch_lightning import LightningDataModule
 
 from nowcasting_dataloader.datasets import NetCDFDataset, worker_init_fn
