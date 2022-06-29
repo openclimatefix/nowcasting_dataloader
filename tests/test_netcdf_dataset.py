@@ -3,10 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-import pandas as pd
-import pytest
 import torch
-from nowcasting_dataset.consts import GSP_DATETIME_INDEX, NWP_DATA, PV_YIELD, SATELLITE_DATA
 from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.batch import BatchML
@@ -298,7 +295,7 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources(configu
         assert batch_ml.sun is None
         assert batch_ml.satellite is None
         assert batch_ml.hrvsatellite is not None
-        assert batch_ml.hrvsatellite.data.shape == (4, 1, 19, 192, 192)
+        assert batch_ml.hrvsatellite.data.shape == (4, 1, 19, 64, 64)
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
