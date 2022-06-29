@@ -4,7 +4,6 @@ from nowcasting_dataset.config.model import Configuration
 from nowcasting_dataset.dataset.batch import Batch
 
 from nowcasting_dataloader.batch import BatchML
-from nowcasting_dataloader.utils.position_encoding import generate_position_encodings_for_batch
 
 
 class FakeDataset(torch.utils.data.Dataset):
@@ -47,13 +46,5 @@ class FakeDataset(torch.utils.data.Dataset):
         Returns: Dictionary of random data
 
         """
-        if self.add_position_encoding:
-            batch: Batch = Batch.fake(configuration=self.configuration)
-            position_encodings = generate_position_encodings_for_batch(batch, num_bands=12)
-            batch: BatchML = BatchML.from_batch(batch=batch)
-            batch: dict = batch.dict()
-            batch.update(position_encodings)
-            return batch
-        else:
-            x: BatchML = BatchML.fake(configuration=self.configuration)
-            return x.dict()
+        x: BatchML = BatchML.fake(configuration=self.configuration)
+        return x.dict()
