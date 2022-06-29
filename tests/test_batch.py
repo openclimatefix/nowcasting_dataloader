@@ -27,5 +27,3 @@ def test_fake_dataset(configuration):
     x = BatchML(**x)
     # IT WORKS
     assert type(x.satellite.data) == torch.Tensor
-
-
