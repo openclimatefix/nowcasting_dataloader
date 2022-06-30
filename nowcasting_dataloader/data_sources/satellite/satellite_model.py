@@ -55,15 +55,36 @@ class SatelliteML(DataSourceOutputML):
     )
     x: Array = Field(
         ...,
-        description="The x (OSGB geo-spatial) coordinates of the satellite images. "
-        "Shape: [batch_size,] width",
+        description="The x (geostationary) coordinates of the satellite images."
+        " Shape: ([batch_size,] width). THIS IS DEPRECATED AND WILL BE REMOVED!"
+        " PLEASE USE x_geostationary OR x_osgb INSTEAD!",
     )
     y: Array = Field(
         ...,
-        description="The y (OSGB geo-spatial) coordinates of the satellite images. "
-        "Shape: [batch_size,] height",
+        description="The y (geostationary) coordinates of the satellite images. "
+        " Shape: ([batch_size,] height). THIS IS DEPRECATED AND WILL BE REMOVED!"
+        " PLEASE USE y_geostationary OR y_osgb INSTEAD!",
     )
-
+    x_osgb: Array = Field(
+        ...,
+        description="The x OSGB coordinates for satellite images."
+        " Shape: ([batch_size,] height, width).",
+    )
+    y_osgb: Array = Field(
+        ...,
+        description="The y OSGB coordinates for satellite images."
+        " Shape: ([batch_size,] height, width).",
+    )
+    x_geostationary: Array = Field(
+        ...,
+        description="The x geostationary coordinates for satellite images."
+        " Shape: ([batch_size,] width).",
+    )
+    y_geostationary: Array = Field(
+        ...,
+        description="The y geostationary coordinates for satellite images."
+        " Shape: ([batch_size,] height).",
+    )
     time: Array = Field(
         ...,
         description="Time index of satellite data at 5 minutes past the hour {0, 5, ..., 55}. "
@@ -96,10 +117,12 @@ class SatelliteML(DataSourceOutputML):
 
         # convert to torch dictionary
         satellite_batch_ml = xr_dataset.torch.to_tensor(
-            ["data", "time", "y_geostationary", "x_geostationary"]
+            ["data", "time", "y_geostationary", "x_geostationary", "x_osgb", "y_osgb"]
         )
-        satellite_batch_ml["x"] = satellite_batch_ml.pop("x_geostationary")
-        satellite_batch_ml["y"] = satellite_batch_ml.pop("y_geostationary")
+
+        # Copy geostationary coords to the DEPRECATED `x` and `y` coords.
+        satellite_batch_ml["x"] = satellite_batch_ml["x_geostationary"]
+        satellite_batch_ml["y"] = satellite_batch_ml["y_geostationary"]
 
         # move to Model
         return SatelliteML(**satellite_batch_ml)
