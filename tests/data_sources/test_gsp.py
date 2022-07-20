@@ -32,8 +32,9 @@ def test_gsp_normalization():
     # check for max value
     gsp.gsp_x_coords[0, 0] = 0.5
     gsp.gsp_y_coords[0, 0] = 2
-    with pytest.raises(Exception):
-        validate_model(gsp.__class__, gsp.__dict__)
+    # Onl raises an warning now
+    # with pytest.raises(Exception):
+    #     validate_model(gsp.__class__, gsp.__dict__)
 
     gsp.gsp_x_coords[0, 0] = -1
     gsp.gsp_y_coords[0, 0] = 0.5
