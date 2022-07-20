@@ -102,10 +102,11 @@ class GSPML(DataSourceOutputML):
         assert v.shape[-1] == values["gsp_yield"].shape[-1]
         if values["normalized"]:
             if v.max() > 1:
-                raise Exception(
+                message = (
                     f"GSP data is normalized, "
                     f"but GSP Y coordinates maximum value is above 1, {v.max()}"
                 )
+                logger.warning(message)
             if v.min() < 0:
                 raise Exception(
                     f"GSP data is normalized, "
