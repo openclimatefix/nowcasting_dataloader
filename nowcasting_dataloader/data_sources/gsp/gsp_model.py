@@ -144,7 +144,6 @@ class GSPML(DataSourceOutputML):
             # make sure `ero capacity doesnt make nans or infs
             self.gsp_yield[self.gsp_capacity == 0] = 0.0
 
-
             self.gsp_x_coords = self.gsp_x_coords / OSGB_X_MAX
             self.gsp_y_coords = self.gsp_y_coords / OSGB_Y_MAX
 

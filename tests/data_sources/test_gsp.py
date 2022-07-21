@@ -48,19 +48,16 @@ def test_gsp_normalization():
 
 
 def test_gsp_normalization_zero_capacity():
-    
+    """Test gsp normalization for zero capacity"""
     gsp = gsp_fake()
 
     gsp = GSPML.from_xr_dataset(gsp)
 
-    gsp.gsp_capacity[0,:,0] = 0
+    gsp.gsp_capacity[0, :, 0] = 0
     gsp.gsp_yield[0, 0, 0] = 0
     gsp.gsp_yield[0, 1, 0] = 0
 
     gsp.normalize()
-    
+
     assert gsp.gsp_yield[0, 0, 0] == 0
     assert gsp.gsp_yield[0, 1, 0] == 0
-    
-    
-    
