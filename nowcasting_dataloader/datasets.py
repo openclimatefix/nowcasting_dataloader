@@ -124,7 +124,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         np.random.seed(seed)
 
         if configuration.input_data.gsp is not None:
-            self.gsp_historic_timesteps = int(configuration.input_data.gsp.historic_minutes // 30)
+            self.gsp_history_timesteps = int(configuration.input_data.gsp.history_minutes // 30)
 
         if len(self) == 1:
             logger.warning("Wanted to mix batches but there is only one")
@@ -233,7 +233,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # randomly set GSP historic data to zero
         if self.configuration.input_data.gsp is not None and self.prob_set_gsp_data_to_zero > 0:
             if np.random.uniform() < self.prob_set_gsp_data_to_zero:
-                batch.gsp.gsp_yield[:, : self.gsp_historic_timesteps, :] = 0
+                batch.gsp.gsp_yield[:, : self.gsp_history_timesteps, :] = 0
 
         batch: dict = batch.dict()
 
