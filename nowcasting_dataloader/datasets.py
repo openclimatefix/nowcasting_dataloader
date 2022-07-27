@@ -232,9 +232,12 @@ class NetCDFDataset(torch.utils.data.Dataset):
             batch.normalize()
 
         # randomly set GSP historic data to zero
-        if self.configuration.input_data.gsp is not None and self.prob_set_gsp_data_to_zero > 0:
-            if np.random.uniform() < self.prob_set_gsp_data_to_zero:
-                batch.gsp.gsp_yield[:, : self.gsp_history_timesteps, :] = 0
+        if (self.configuration.input_data.gsp is not None) and (self.prob_set_gsp_data_to_zero > 0):
+            idx = (
+                np.random.uniform(0, 1, self.configuration.process.batch_size)
+                < self.prob_set_gsp_data_to_zero
+            )
+            batch.gsp.gsp_yield[idx, : self.gsp_history_timesteps, :] = 0
 
         batch: dict = batch.dict()
 
