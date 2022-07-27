@@ -401,4 +401,4 @@ def test_netcdf_dataset_set_gsp_data_to_zero(configuration):
         batch_ml = BatchML(**data)
 
         # check that gsp data has been set to zero
-        assert batch_ml.gsp.gsp_yield[0, 0, 0] == 0
+        assert batch_ml.gsp.gsp_yield[:, 0, 0].sum() == 0
