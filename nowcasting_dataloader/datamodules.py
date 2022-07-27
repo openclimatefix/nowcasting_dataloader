@@ -42,6 +42,7 @@ class NetCDFDataModule(LightningDataModule):
         shuffle_train: bool = False,
         data_sources_names: Optional[list[str]] = None,
         nwp_channels: Optional[list[str]] = None,
+        prob_set_gsp_data_to_zero: Optional[float] = 0
     ):
         """
         fake_data: random data is created and used instead. This is useful for testing
@@ -59,6 +60,7 @@ class NetCDFDataModule(LightningDataModule):
         self.shuffle_train = shuffle_train
         self.data_sources_names = data_sources_names
         self.nwp_channels = nwp_channels
+        self.prob_set_gsp_data_to_zero = prob_set_gsp_data_to_zero
 
         filename = os.path.join(data_path, "configuration.yaml")
         _LOG.debug(f"Will be loading the configuration file {filename}")
@@ -87,6 +89,7 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
                 nwp_channels=self.nwp_channels,
+                prob_set_gsp_data_to_zero=self.prob_set_gsp_data_to_zero
             )
 
         return torch.utils.data.DataLoader(
@@ -105,6 +108,7 @@ class NetCDFDataModule(LightningDataModule):
                 configuration=self.configuration,
                 data_sources_names=self.data_sources_names,
                 nwp_channels=self.nwp_channels,
+                prob_set_gsp_data_to_zero=self.prob_set_gsp_data_to_zero
             )
 
         return torch.utils.data.DataLoader(val_dataset, shuffle=False, **self.dataloader_config)

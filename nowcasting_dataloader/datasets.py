@@ -41,6 +41,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         mix_two_batches: bool = True,
         save_first_batch: Optional[str] = None,
         seed: bool = 234,
+        prob_set_gsp_data_to_zero: Optional[float] = 0
     ):
         """
         Netcdf Dataset
@@ -65,6 +66,8 @@ class NetCDFDataset(torch.utils.data.Dataset):
             save_first_batch: Option to save the first generated batch to disk
             seed: random seed for peaking second batch when mixing two batches
             nwp_channels: Useful for training to be able to reduce the number of channels
+            prob_set_gsp_data_to_zero: Probability of setting GSP data to zero, to represent real GSP data.
+                This should be between 0 and 1, and is defaulted to zero.
         """
         self.n_batches = n_batches
         self.src_path = src_path
@@ -76,6 +79,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         self.seed = seed
         self.mix_two_batches = mix_two_batches
         self.save_first_batch = save_first_batch
+        self.prob_set_gsp_data_to_zero = prob_set_gsp_data_to_zero
 
         self.num_bands = num_bands
         if data_sources_names is None:
@@ -119,6 +123,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # set seed
         np.random.seed(seed)
 
+        if configuration.input_data.gsp is not None:
+            self.gsp_historic_timesteps = int(configuration.input_data.gsp.historic_minutes // 30)
+
         if len(self) == 1:
             logger.warning("Wanted to mix batches but there is only one")
             self.mix_two_batches = False
@@ -146,7 +153,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
             NamedDict where each value is a numpy array. The size of this
             array's first dimension is the batch size.
         """
-        logger.debug(f"Getting batch {batch_idx}")
+        logger.debug(f"Getting batch {batch_idx}. {self.tmp_path=} {self.src_path=}")
         if not 0 <= batch_idx < self.n_batches:
             raise IndexError(
                 "batch_idx must be in the range" f" [0, {self.n_batches}), not {batch_idx}!"
@@ -176,6 +183,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                     src_path=self.src_path,
                 )
             else:
+                logger.debug(f'Loading batch {self.src_path=}')
                 batch: Batch = Batch.load_netcdf(
                     self.src_path,
                     batch_idx=batch_idx,
@@ -222,10 +230,16 @@ class NetCDFDataset(torch.utils.data.Dataset):
         if self.normalize:
             batch.normalize()
 
+        # randomly set GSP historic data to zero
+        if configuration.input_data.gsp is not None and self.prob_set_gsp_data_to_zero > 0:
+            if np.random.uniform() < self.prob_set_gsp_data_to_zero:
+                batch.gsp.gsp_yield[:, :self.gsp_historic_timesteps,:] = 0
+
         batch: dict = batch.dict()
 
         if self.save_first_batch is not None and batch_idx == 0:
             # Save out the dictionary to disk
+            logger.debug(f'Saving first batch to {self.save_first_batch}')
             np.save("tmp.npy", batch)
             fs = fsspec.open(self.save_first_batch).fs
             fs.put("tmp.npy", self.save_first_batch)
