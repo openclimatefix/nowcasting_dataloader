@@ -66,8 +66,9 @@ class NetCDFDataset(torch.utils.data.Dataset):
             save_first_batch: Option to save the first generated batch to disk
             seed: random seed for peaking second batch when mixing two batches
             nwp_channels: Useful for training to be able to reduce the number of channels
-            prob_set_gsp_data_to_zero: Probability of setting GSP data to zero, to represent real GSP data.
-                This should be between 0 and 1, and is defaulted to zero.
+            prob_set_gsp_data_to_zero: Probability of setting GSP data to zero,
+                to represent real GSP data. This should be between 0 and 1,
+                and is defaulted to zero.
         """
         self.n_batches = n_batches
         self.src_path = src_path

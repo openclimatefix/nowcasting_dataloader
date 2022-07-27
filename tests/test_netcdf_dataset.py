@@ -379,7 +379,7 @@ def test_netcdf_dataset_set_gsp_data_to_zero(configuration):
             normalize=False,
             mix_two_batches=False,
             save_first_batch=os.path.join(tmpdirname, "saved_batch.npy"),
-            prob_set_gsp_data_to_zero=1, # set all gsp historic data to zero
+            prob_set_gsp_data_to_zero=1,  # set all gsp historic data to zero
         )
 
         dataloader_config = dict(
@@ -399,6 +399,6 @@ def test_netcdf_dataset_set_gsp_data_to_zero(configuration):
         t = iter(train_dataset)
         data = next(t)
         batch_ml = BatchML(**data)
-        
+
         # check that gsp data has been set to zero
-        assert batch_ml.gsp.gsp_yield[0,0] == 0
+        assert batch_ml.gsp.gsp_yield[0, 0, 0] == 0
