@@ -348,3 +348,57 @@ def test_netcdf_dataset_copy_from_data_path(configuration):
 
         # Make sure file isn't deleted!
         assert os.path.exists(os.path.join(DATA_PATH, "nwp/000000.nc"))
+
+
+def test_netcdf_dataset_set_gsp_data_to_zero(configuration):
+    """Test netcdf locally, mix two batches"""
+
+    configuration.input_data.nwp.nwp_channels = configuration.input_data.nwp.nwp_channels[0:1]
+    configuration.input_data.satellite.satellite_channels = (
+        configuration.input_data.satellite.satellite_channels[0:2]
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+
+        f = Batch.fake(configuration=configuration)
+        f.save_netcdf(batch_i=0, path=Path(tmpdirname))
+
+        f = Batch.fake(configuration=configuration)
+        f.save_netcdf(batch_i=1, path=Path(tmpdirname))
+
+        DATA_PATH = tmpdirname
+        TEMP_PATH = tmpdirname
+
+        train_dataset = NetCDFDataset(
+            2,
+            DATA_PATH,
+            TEMP_PATH,
+            history_minutes=30,
+            forecast_minutes=60,
+            configuration=configuration,
+            normalize=False,
+            mix_two_batches=False,
+            save_first_batch=os.path.join(tmpdirname, "saved_batch.npy"),
+            prob_set_gsp_data_to_zero=1, # set all gsp historic data to zero
+        )
+
+        dataloader_config = dict(
+            pin_memory=True,
+            num_workers=1,
+            prefetch_factor=1,
+            worker_init_fn=worker_init_fn,
+            persistent_workers=True,
+            # Disable automatic batching because dataset
+            # returns complete batches.
+            batch_size=None,
+        )
+
+        _ = torch.utils.data.DataLoader(train_dataset, **dataloader_config)
+
+        train_dataset.per_worker_init(1)
+        t = iter(train_dataset)
+        data = next(t)
+        batch_ml = BatchML(**data)
+        
+        # check that gsp data has been set to zero
+        assert batch_ml.gsp.gsp_yield[0,0] == 0
