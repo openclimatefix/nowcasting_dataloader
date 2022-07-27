@@ -41,7 +41,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         mix_two_batches: bool = True,
         save_first_batch: Optional[str] = None,
         seed: bool = 234,
-        prob_set_gsp_data_to_zero: Optional[float] = 0
+        prob_set_gsp_data_to_zero: Optional[float] = 0,
     ):
         """
         Netcdf Dataset
@@ -183,7 +183,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
                     src_path=self.src_path,
                 )
             else:
-                logger.debug(f'Loading batch {self.src_path=}')
+                logger.debug(f"Loading batch {self.src_path=}")
                 batch: Batch = Batch.load_netcdf(
                     self.src_path,
                     batch_idx=batch_idx,
@@ -231,15 +231,15 @@ class NetCDFDataset(torch.utils.data.Dataset):
             batch.normalize()
 
         # randomly set GSP historic data to zero
-        if configuration.input_data.gsp is not None and self.prob_set_gsp_data_to_zero > 0:
+        if self.configuration.input_data.gsp is not None and self.prob_set_gsp_data_to_zero > 0:
             if np.random.uniform() < self.prob_set_gsp_data_to_zero:
-                batch.gsp.gsp_yield[:, :self.gsp_historic_timesteps,:] = 0
+                batch.gsp.gsp_yield[:, : self.gsp_historic_timesteps, :] = 0
 
         batch: dict = batch.dict()
 
         if self.save_first_batch is not None and batch_idx == 0:
             # Save out the dictionary to disk
-            logger.debug(f'Saving first batch to {self.save_first_batch}')
+            logger.debug(f"Saving first batch to {self.save_first_batch}")
             np.save("tmp.npy", batch)
             fs = fsspec.open(self.save_first_batch).fs
             fs.put("tmp.npy", self.save_first_batch)
