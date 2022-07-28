@@ -233,11 +233,27 @@ class NetCDFDataset(torch.utils.data.Dataset):
 
         # randomly set GSP historic data to zero
         if (self.configuration.input_data.gsp is not None) and (self.prob_set_gsp_data_to_zero > 0):
-            idx = (
+
+            # create 1d mask
+            idx_batch = (
                 np.random.uniform(0, 1, self.configuration.process.batch_size)
                 < self.prob_set_gsp_data_to_zero
             )
-            batch.gsp.gsp_yield[idx, : self.gsp_history_timesteps, :] = 0
+            idx_gsp_system = (
+                    np.random.uniform(0, 1, self.configuration.input_data.gsp.n_gsp_per_example)
+                    < self.prob_set_gsp_data_to_zero
+            )
+            dx_gsp_system[0] = True
+            idx_time = np.array(range(0,batch.gsp.gsp_yield.shape[1])) < self.gsp_history_timesteps
+
+            # make 3d mask
+            batch_mask = idx_batch[:,np.newaxis, np.newaxis]
+            time_mask = idx_time[np.newaxis, :, np.newaxis]
+            gsp_mask = idx_gsp_system[np.newaxis, np.newaxis,:]
+            mask = batch_mask & time_mask & gsp_mask
+
+            # set values to zero
+            batch.gsp.gsp_yield[mask] = 0.0
 
         batch: dict = batch.dict()
 
