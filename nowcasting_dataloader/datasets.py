@@ -166,9 +166,7 @@ class NetCDFDataset(torch.utils.data.Dataset):
         # download batches
         batches = []
         for batch_idx in batch_indexes:
-
             if self.src_path != self.tmp_path:
-
                 batch = Batch.download_batch_and_load_batch(
                     batch_idx=batch_idx,
                     data_sources_names=self.data_sources_names,

@@ -1,9 +1,6 @@
 """ See issue https://github.com/openclimatefix/nowcasting_dataloader/issues/106 """
-import io
 
-import fsspec
 import pandas as pd
-import xarray as xr
 from nowcasting_dataset.data_sources.gsp.eso import get_gsp_metadata_from_eso
 from nowcasting_dataset.geospatial import lat_lon_to_osgb
 
