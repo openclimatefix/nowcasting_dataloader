@@ -20,7 +20,6 @@ def test_netcdf_dataset_local_using_configuration_on_one_batch(configuration):
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-
         f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
@@ -94,7 +93,6 @@ def test_netcdf_dataset_local_using_configuration(configuration):
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-
         f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
@@ -170,7 +168,6 @@ def test_netcdf_dataset_local_using_configuration_with_saving_locally(configurat
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-
         f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
@@ -251,7 +248,6 @@ def test_netcdf_dataset_local_using_configuration_subset_of_data_sources(configu
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-
         f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(tmpdirname))
 
@@ -309,7 +305,6 @@ def test_netcdf_dataset_copy_from_data_path(configuration):
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname, tempfile.TemporaryDirectory() as data_path:
-
         f = Batch.fake(configuration=configuration)
         f.save_netcdf(batch_i=0, path=Path(data_path))
         assert os.path.exists(os.path.join(data_path, "satellite/000000.nc"))

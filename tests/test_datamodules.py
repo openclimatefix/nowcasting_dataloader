@@ -12,7 +12,6 @@ torch.set_default_dtype(torch.float32)
 
 
 def test_netcdf_datamodule_init(configuration):
-
     configuration.input_data.satellite.satellite_image_size_pixels_height = 24
     configuration.input_data.satellite.satellite_image_size_pixels_width = 24
     configuration.process.n_test_batches = 0
@@ -20,7 +19,6 @@ def test_netcdf_datamodule_init(configuration):
     configuration.process.n_train_batches = 1
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-
         f = Batch.fake(configuration=configuration)
         train_tmp = os.path.join(tmpdirname, "train")
         f.save_netcdf(batch_i=0, path=Path(train_tmp))
